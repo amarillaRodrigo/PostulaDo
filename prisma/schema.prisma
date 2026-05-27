@@ -42,8 +42,8 @@ model Postulacion {
   id String @id @default(uuid())
   userId String
   url String
-
   title String?
+  description String?
   company String?
 
   status EstadoPostulacion @default(ENVIADO)
