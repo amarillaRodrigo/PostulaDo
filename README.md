@@ -85,6 +85,7 @@ npm run build
 npm run lint
 npm run test
 npm run test:e2e
+npm run test:cov
 ```
 
 ## Autenticacion
@@ -243,3 +244,7 @@ El flujo implementado en la API es el siguiente:
 ## Estado actual
 
 La API ya cubre autenticacion, gestion de usuarios y el flujo base de postulaciones con analisis de URL, creacion y consulta por usuario autenticado.
+
+## Documentaci\u00f3n de integraci\u00f3n
+
+El detalle del flujo de pruebas de integraci\u00f3n, la base de datos de test, Prisma y el runner automatizado est\u00e1 en [docs/testing-integration.md](docs/testing-integration.md).
