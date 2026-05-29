@@ -71,6 +71,7 @@ async function main() {
     run(`docker compose -f "${composeFile}" up -d`);
     await waitForPostgres();
 
+    run('npx prisma generate');
     run('npx prisma migrate deploy');
     run('npm run test:e2e -- --runInBand');
   } finally {
