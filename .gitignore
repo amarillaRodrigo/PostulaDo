@@ -59,3 +59,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Personal notes for local use only
 docs/personal-testing-ci-cd-notes.md
+docs/testing-integration-ci-cd.md
