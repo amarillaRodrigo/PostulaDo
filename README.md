@@ -86,7 +86,10 @@ npm run lint
 npm run test
 npm run test:e2e
 npm run test:cov
+npm run test:integration
 ```
+
+`npm run test:integration` levanta una instancia de PostgreSQL en Docker, aplica migraciones Prisma y ejecuta la suite e2e completa de forma aislada.
 
 ## Autenticacion
 
@@ -248,3 +251,28 @@ La API ya cubre autenticacion, gestion de usuarios y el flujo base de postulacio
 ## Documentaci\u00f3n de integraci\u00f3n
 
 El detalle del flujo de pruebas de integraci\u00f3n, la base de datos de test, Prisma y el runner automatizado est\u00e1 en [docs/testing-integration.md](docs/testing-integration.md).
+
+## Pruebas de integración
+
+La API incluye una suite e2e completa que valida la integración real entre Nest, Prisma y PostgreSQL sin mocks.
+
+Ejecución local:
+
+```bash
+npm run test:integration
+```
+
+Este comando:
+1. Levanta un contenedor PostgreSQL con Docker Compose.
+2. Aplica migraciones Prisma.
+3. Genera el cliente Prisma.
+4. Ejecuta todos los tests e2e en modo secuencial.
+5. Limpia la infraestructura al terminar.
+
+Los tests cubren autenticación, usuarios y postulaciones con casos de permisos y validaciones.
+
+## CI/CD
+
+GitHub Actions ejecuta el workflow de integración en cada `push` y `pull_request` hacia `main`. El workflow corre el mismo comando `npm run test:integration` para garantizar que los cambios no rompan la integración.
+
+El PR solo se puede mergear si el workflow pasa de forma completa.
