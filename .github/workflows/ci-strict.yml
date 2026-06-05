@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
     services:
       postgres:
         image: postgres:15
@@ -27,6 +29,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug: list workspace and check `postulado` folder
+        run: |
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          ls -la
+          echo "--- postulado ---"
+          ls -la postulado || echo "postulado folder missing"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
