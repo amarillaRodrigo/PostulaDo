@@ -12,6 +12,8 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { PublicUserDto } from './dto/public-user.dto';
 import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -50,6 +52,9 @@ export class UsuariosController {
   }
 
   @Get(':id')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get user by id' })
+  @ApiOkResponse({ description: 'User returned', type: PublicUserDto })
   @UseGuards(JwtAuthGuard, UserOwnerGuard)
   async getUserById(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -58,6 +63,11 @@ export class UsuariosController {
   }
 
   @Get()
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'List users (admin)' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ status: 200, description: 'List of users', type: PublicUserDto, isArray: true })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   async getUsers(
@@ -73,6 +83,8 @@ export class UsuariosController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiCreatedResponse({ status: 201, description: 'User created', type: PublicUserDto })
   async createUser(
     @Body() dto: CreateUsuarioDto,
   ): Promise<Omit<UserModel, 'password'>> {
@@ -80,6 +92,9 @@ export class UsuariosController {
   }
 
   @Put(':id')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update your user' })
+  @ApiOkResponse({ status: 200, description: 'User updated', type: PublicUserDto })
   @UseGuards(JwtAuthGuard, UserOwnerGuard)
   async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -91,6 +106,9 @@ export class UsuariosController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Delete a user (admin)' })
+  @ApiOkResponse({ status: 200, description: 'User deleted', type: PublicUserDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   async deleteUser(
