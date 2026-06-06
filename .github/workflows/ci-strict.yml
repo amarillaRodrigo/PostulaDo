@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Debug: list workspace and check `postulado` folder
+      - name: Debug: list workspace and check postulado folder
         run: |
           echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
           ls -la
@@ -70,7 +70,7 @@ jobs:
         run: npx prisma db push --schema prisma/schema.prisma --accept-data-loss
         working-directory: postulado
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public"
 
 
       - name: Lint
@@ -85,22 +85,22 @@ jobs:
         run: npm run test:e2e --silent
         working-directory: postulado
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public"
+          JWT_SECRET: "${{ secrets.JWT_SECRET }}"
 
       - name: Run integration tests
         run: npm run test:integration --silent
         working-directory: postulado
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public"
+          JWT_SECRET: "${{ secrets.JWT_SECRET }}"
 
       - name: Generate OpenAPI spec
         run: npm run generate:swagger
         working-directory: postulado
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public"
+          JWT_SECRET: "${{ secrets.JWT_SECRET }}"
 
       - name: Upload OpenAPI artifact
         uses: actions/upload-artifact@v4
