@@ -10,15 +10,12 @@ export class PrismaService
   constructor() {
     // Prefer using PrismaPg adapter when a Postgres URL is present.
     const url = process.env.DATABASE_URL || process.env.DIRECT_URL;
-    if (url && url.startsWith('postgres')) {
-      const adapter = new PrismaPg({ connectionString: url });
-      super({ adapter });
-    } else {
-      // Fallback for local development / SQLite-based config
-      super({
-        errorFormat: 'colorless',
-      });
-    }
+    const connectionString =
+      url && url.startsWith('postgres')
+        ? url
+        : 'postgresql://dummy:dummy@localhost:5432/dummy';
+    const adapter = new PrismaPg({ connectionString });
+    super({ adapter });
   }
 
   async onModuleInit() {
