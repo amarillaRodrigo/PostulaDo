@@ -12,12 +12,20 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiOkResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
 import { PublicUserDto } from './dto/public-user.dto';
 import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
-import { User as UserModel } from '@prisma/client';
+import type { User as UserModel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -67,7 +75,11 @@ export class UsuariosController {
   @ApiOperation({ summary: 'List users (admin)' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  @ApiOkResponse({ status: 200, description: 'List of users', type: PublicUserDto, isArray: true })
+  @ApiOkResponse({
+    description: 'List of users',
+    type: PublicUserDto,
+    isArray: true,
+  })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   async getUsers(
@@ -84,7 +96,7 @@ export class UsuariosController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new user' })
-  @ApiCreatedResponse({ status: 201, description: 'User created', type: PublicUserDto })
+  @ApiCreatedResponse({ description: 'User created', type: PublicUserDto })
   async createUser(
     @Body() dto: CreateUsuarioDto,
   ): Promise<Omit<UserModel, 'password'>> {
@@ -94,7 +106,7 @@ export class UsuariosController {
   @Put(':id')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Update your user' })
-  @ApiOkResponse({ status: 200, description: 'User updated', type: PublicUserDto })
+  @ApiOkResponse({ description: 'User updated', type: PublicUserDto })
   @UseGuards(JwtAuthGuard, UserOwnerGuard)
   async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -108,7 +120,7 @@ export class UsuariosController {
   @Delete(':id')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Delete a user (admin)' })
-  @ApiOkResponse({ status: 200, description: 'User deleted', type: PublicUserDto })
+  @ApiOkResponse({ description: 'User deleted', type: PublicUserDto })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   async deleteUser(

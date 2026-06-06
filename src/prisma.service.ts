@@ -1,22 +1,29 @@
-import {
-  Injectable,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor() {
-    const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL,
-    });
-
-    super({ adapter });
+    // Prefer using PrismaPg adapter when a Postgres URL is present.
+    const url = process.env.DATABASE_URL || process.env.DIRECT_URL;
+    if (url && url.startsWith('postgres')) {
+      const adapter = new PrismaPg({ connectionString: url });
+      super({ adapter });
+    } else {
+      throw new Error(
+        'PrismaService requires a Postgres DATABASE_URL at runtime. Set DATABASE_URL to a postgres://... URL (used by CI). For local SQLite-based generation use `npx prisma generate` only.',
+      );
+    }
   }
 
   async onModuleInit() {
+    if (process.env.SWAGGER_GEN === 'true') {
+      return;
+    }
     await this.$connect();
   }
 

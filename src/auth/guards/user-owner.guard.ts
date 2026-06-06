@@ -16,9 +16,15 @@ export class UserOwnerGuard implements CanActivate {
       | undefined;
 
     const authenticatedUserId =
-      authenticatedUser?.id ?? authenticatedUser?.sub ?? authenticatedUser?.userId;
+      authenticatedUser?.id ??
+      authenticatedUser?.sub ??
+      authenticatedUser?.userId;
 
-    if (!routeUserId || !authenticatedUserId || routeUserId !== authenticatedUserId) {
+    if (
+      !routeUserId ||
+      !authenticatedUserId ||
+      routeUserId !== authenticatedUserId
+    ) {
       throw new ForbiddenException('Solo puedes modificar tu propio usuario');
     }
 

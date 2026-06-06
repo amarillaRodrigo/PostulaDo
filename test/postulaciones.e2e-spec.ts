@@ -126,7 +126,9 @@ describe('Integracion postulaciones', () => {
     expect(Array.isArray(listResponse.body)).toBe(true);
     expect(listResponse.body).toHaveLength(2);
     expect(
-      listResponse.body.every((postulacion: any) => postulacion.userId === owner.user.id),
+      listResponse.body.every(
+        (postulacion: any) => postulacion.userId === owner.user.id,
+      ),
     ).toBe(true);
 
     const filteredResponse = await request(app.getHttpServer())

@@ -13,11 +13,12 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "generate:swagger": "ts-node -r tsconfig-paths/register scripts/generate-swagger.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "node -r dotenv/config ./node_modules/jest/bin/jest.js --runInBand --config ./test/jest-e2e.json",
     "test:integration": "node scripts/run-integration-tests.mjs"
   },
   "dependencies": {
@@ -84,5 +85,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "overrides": {
+    "@hono/node-server": "^1.19.13"
   }
 }

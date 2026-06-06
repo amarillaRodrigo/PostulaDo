@@ -10,7 +10,13 @@ import {
   ParseUUIDPipe,
   Req,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { PostulacionesService } from './postulaciones.service';
 import { AnalyzePostulacionDto } from './dto/analyze-postulacion.dto';
 import { CreatePostulacionDto } from './dto/create-postulacion.dto';
@@ -26,8 +32,10 @@ export class PostulacionesController {
   @Post('analizar')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Analyze a job posting URL and return preview metadata' })
-  @ApiResponse({ status: 200, description: 'Preview of the URL' })
+  @ApiOperation({
+    summary: 'Analyze a job posting URL and return preview metadata',
+  })
+  @ApiResponse({ description: 'Preview of the URL' })
   async analyze(@Body() dto: AnalyzePostulacionDto, @Req() req: any) {
     // user must be logged in; we return preview for frontend
     return this.service.analyze(dto.url);
@@ -36,8 +44,10 @@ export class PostulacionesController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Create a new postulacion for the authenticated user' })
-  @ApiResponse({ status: 201, description: 'Postulacion created' })
+  @ApiOperation({
+    summary: 'Create a new postulacion for the authenticated user',
+  })
+  @ApiResponse({ description: 'Postulacion created' })
   async create(@Body() dto: CreatePostulacionDto, @Req() req: any) {
     const userId = req.user?.sub ?? req.user?.id;
     return this.service.create(dto, userId);
@@ -49,7 +59,7 @@ export class PostulacionesController {
   @ApiOperation({ summary: 'List postulaciones for the authenticated user' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  @ApiResponse({ status: 200, description: 'List of postulaciones' })
+  @ApiResponse({ description: 'List of postulaciones' })
   async findAll(@Req() req: any, @Query() query: ListPostulacionesQueryDto) {
     const userId = req.user?.sub ?? req.user?.id;
     return this.service.findAll(userId, query);
@@ -59,7 +69,7 @@ export class PostulacionesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get postulacion by id' })
-  @ApiResponse({ status: 200, description: 'Postulacion returned' })
+  @ApiResponse({ description: 'Postulacion returned' })
   async findOne(@Req() req: any, @Param('id', new ParseUUIDPipe()) id: string) {
     const userId = req.user?.sub ?? req.user?.id;
     return this.service.findOne(userId, id);
@@ -69,7 +79,7 @@ export class PostulacionesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Update a postulacion' })
-  @ApiResponse({ status: 200, description: 'Postulacion updated' })
+  @ApiResponse({ description: 'Postulacion updated' })
   async update(
     @Req() req: any,
     @Param('id', new ParseUUIDPipe()) id: string,
