@@ -233,7 +233,8 @@ describe('Integracion postulaciones', () => {
       .send({
         url: 'https://example.com/jobs/extract',
         title: 'Full Stack Developer',
-        description: 'Buscamos desarrollador con conocimientos en React, NestJS, Docker y PostgreSQL.',
+        description:
+          'Buscamos desarrollador con conocimientos en React, NestJS, Docker y PostgreSQL.',
       })
       .expect(201);
 
@@ -336,7 +337,11 @@ describe('Integracion postulaciones', () => {
       .expect(200);
 
     expect(response.body.totalApplicationsAnalizadas).toBe(1);
-    expect(response.body.tecnologiasMasDemandadas.some((t: any) => t.name === 'Python')).toBe(false);
+    expect(
+      response.body.tecnologiasMasDemandadas.some(
+        (t: any) => t.name === 'Python',
+      ),
+    ).toBe(false);
   });
 
   it('retorna estructura vacía/sugerencia inicial si no hay postulaciones', async () => {
