@@ -16,7 +16,7 @@ export class PrismaService
     } else {
       // Fallback for local development / SQLite-based config
       super({
-        datasourceUrl: url || undefined,
+        errorFormat: 'colorless',
       });
     }
   }
