@@ -17,12 +17,10 @@ jobs:
           node-version: 20
       - name: Install
         run: npm ci
-        working-directory: postulado
       - name: Generate OpenAPI spec
         run: npm run generate:swagger
-        working-directory: postulado
       - name: Upload OpenAPI artifact
         uses: actions/upload-artifact@v4
         with:
           name: openapi-json
-          path: postulado/docs/openapi.json
+          path: docs/openapi.json
