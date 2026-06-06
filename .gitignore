@@ -61,3 +61,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 docs/personal-testing-ci-cd-notes.md
 docs/testing-integration-ci-cd.md
 docs/pr-profesional-ci-cd.md
+docs/manual-openapi-ci.md
