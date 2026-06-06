@@ -10,7 +10,13 @@ import {
   ParseUUIDPipe,
   Req,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { PostulacionesService } from './postulaciones.service';
 import { AnalyzePostulacionDto } from './dto/analyze-postulacion.dto';
 import { CreatePostulacionDto } from './dto/create-postulacion.dto';
@@ -26,7 +32,9 @@ export class PostulacionesController {
   @Post('analizar')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Analyze a job posting URL and return preview metadata' })
+  @ApiOperation({
+    summary: 'Analyze a job posting URL and return preview metadata',
+  })
   @ApiResponse({ description: 'Preview of the URL' })
   async analyze(@Body() dto: AnalyzePostulacionDto, @Req() req: any) {
     // user must be logged in; we return preview for frontend
@@ -36,7 +44,9 @@ export class PostulacionesController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Create a new postulacion for the authenticated user' })
+  @ApiOperation({
+    summary: 'Create a new postulacion for the authenticated user',
+  })
   @ApiResponse({ description: 'Postulacion created' })
   async create(@Body() dto: CreatePostulacionDto, @Req() req: any) {
     const userId = req.user?.sub ?? req.user?.id;

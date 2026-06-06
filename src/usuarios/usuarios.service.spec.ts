@@ -6,9 +6,19 @@ const mockPrisma = {
   user: {
     findUnique: jest.fn().mockResolvedValue(null),
     findMany: jest.fn().mockResolvedValue([]),
-    create: jest.fn().mockImplementation((args) => Promise.resolve({ id: 'id', ...args.data })),
-    update: jest.fn().mockImplementation((args) => Promise.resolve({ id: args.where.id, ...args.data })),
-    delete: jest.fn().mockImplementation((args) => Promise.resolve({ id: args.where.id })),
+    create: jest
+      .fn()
+      .mockImplementation((args) =>
+        Promise.resolve({ id: 'id', ...args.data }),
+      ),
+    update: jest
+      .fn()
+      .mockImplementation((args) =>
+        Promise.resolve({ id: args.where.id, ...args.data }),
+      ),
+    delete: jest
+      .fn()
+      .mockImplementation((args) => Promise.resolve({ id: args.where.id })),
   },
 };
 

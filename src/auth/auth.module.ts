@@ -21,7 +21,8 @@ type JwtExpiresIn = NonNullable<JwtModuleOptions['signOptions']>['expiresIn'];
       useFactory: (configService: ConfigService): JwtModuleOptions => ({
         secret: configService.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRES_IN') ?? '60m') as JwtExpiresIn,
+          expiresIn: (configService.get<string>('JWT_EXPIRES_IN') ??
+            '60m') as JwtExpiresIn,
         },
       }),
     }),

@@ -12,7 +12,15 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiOkResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
 import { PublicUserDto } from './dto/public-user.dto';
 import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
@@ -67,7 +75,11 @@ export class UsuariosController {
   @ApiOperation({ summary: 'List users (admin)' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  @ApiOkResponse({ description: 'List of users', type: PublicUserDto, isArray: true })
+  @ApiOkResponse({
+    description: 'List of users',
+    type: PublicUserDto,
+    isArray: true,
+  })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   async getUsers(

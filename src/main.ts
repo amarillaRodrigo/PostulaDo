@@ -20,13 +20,19 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalInterceptors(new LoggingInterceptor(), new StripPasswordInterceptor());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new StripPasswordInterceptor(),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Postulado API')
     .setDescription('API para la gestión de usuarios y postulaciones')
     .setVersion('1.0')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
     .build();
 
   if (process.env.NODE_ENV !== 'production') {

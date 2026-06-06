@@ -5,8 +5,14 @@ import { UsuariosService } from './usuarios.service';
 const mockUsuariosService = {
   user: jest.fn().mockResolvedValue(null),
   users: jest.fn().mockResolvedValue([]),
-  createUser: jest.fn().mockImplementation((dto) => Promise.resolve({ id: 'id', ...dto })),
-  updateUser: jest.fn().mockImplementation(({ where, data }) => Promise.resolve({ id: where.id, ...data })),
+  createUser: jest
+    .fn()
+    .mockImplementation((dto) => Promise.resolve({ id: 'id', ...dto })),
+  updateUser: jest
+    .fn()
+    .mockImplementation(({ where, data }) =>
+      Promise.resolve({ id: where.id, ...data }),
+    ),
   deleteUser: jest.fn().mockImplementation(({ id }) => Promise.resolve({ id })),
 };
 

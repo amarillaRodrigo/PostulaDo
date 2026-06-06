@@ -41,7 +41,7 @@ export class UsuariosService {
       data: {
         ...data,
         password: hashedPassword,
-        birthDate: birthDate as any,
+        birthDate: birthDate,
       },
     });
   }
