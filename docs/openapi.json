@@ -321,6 +321,26 @@
         ]
       }
     },
+    "/postulaciones/analisis-aprendizaje": {
+      "get": {
+        "operationId": "PostulacionesController_getLearningAnalysis",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "Learning roadmap analysis"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Analyze application patterns and suggest learning topics",
+        "tags": [
+          "postulaciones"
+        ]
+      }
+    },
     "/postulaciones/{id}": {
       "get": {
         "operationId": "PostulacionesController_findOne",
