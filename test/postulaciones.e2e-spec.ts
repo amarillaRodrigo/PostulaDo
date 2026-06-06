@@ -223,4 +223,141 @@ describe('Integracion postulaciones', () => {
 
     expect(response.body.message).toBeDefined();
   });
+
+  it('extrae tecnologías automáticamente al crear una postulación', async () => {
+    const owner = await registerAndLogin(`owner-${unique()}@test.com`);
+
+    const response = await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({
+        url: 'https://example.com/jobs/extract',
+        title: 'Full Stack Developer',
+        description: 'Buscamos desarrollador con conocimientos en React, NestJS, Docker y PostgreSQL.',
+      })
+      .expect(201);
+
+    expect(response.body.rawRequirements).toBeDefined();
+    expect(response.body.rawRequirements).toEqual(
+      expect.arrayContaining(['React', 'NestJS', 'Docker', 'PostgreSQL']),
+    );
+  });
+
+  it('realiza el análisis de aprendizaje correctamente', async () => {
+    const owner = await registerAndLogin(`owner-${unique()}@test.com`);
+
+    // Crear 3 postulaciones activas con distintas tecnologías
+    // React (3/3 = 100%), NestJS (2/3 = 67%), Docker (1/3 = 33%)
+    await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({
+        url: 'https://example.com/jobs/a',
+        title: 'Dev A',
+        description: 'React y NestJS',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({
+        url: 'https://example.com/jobs/b',
+        title: 'Dev B',
+        description: 'React y NestJS y Docker',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({
+        url: 'https://example.com/jobs/c',
+        title: 'Dev C',
+        description: 'React',
+      })
+      .expect(201);
+
+    const response = await request(app.getHttpServer())
+      .get('/postulaciones/analisis-aprendizaje')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      totalApplicationsAnalizadas: 3,
+    });
+
+    expect(response.body.tecnologiasMasDemandadas).toEqual(
+      expect.arrayContaining([
+        { name: 'React', count: 3, percentage: 100 },
+        { name: 'NestJS', count: 2, percentage: 67 },
+        { name: 'Docker', count: 1, percentage: 33 },
+      ]),
+    );
+
+    expect(response.body.sugerenciaAprendizaje).toContain('React');
+    expect(response.body.sugerenciaAprendizaje).toContain('NestJS');
+  });
+
+  it('excluye postulaciones archivadas del análisis de aprendizaje', async () => {
+    const owner = await registerAndLogin(`owner-${unique()}@test.com`);
+
+    // Postulación activa: React y NestJS
+    await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({
+        url: 'https://example.com/jobs/active',
+        title: 'Active Dev',
+        description: 'React y NestJS',
+      })
+      .expect(201);
+
+    // Postulación archivada: Python y Django
+    const archPost = await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({
+        url: 'https://example.com/jobs/archived',
+        title: 'Archived Dev',
+        description: 'Python y Django',
+      })
+      .expect(201);
+
+    // Archivarla
+    await prisma.postulacion.update({
+      where: { id: archPost.body.id },
+      data: { isArchived: true },
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/postulaciones/analisis-aprendizaje')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    expect(response.body.totalApplicationsAnalizadas).toBe(1);
+    expect(response.body.tecnologiasMasDemandadas.some((t: any) => t.name === 'Python')).toBe(false);
+  });
+
+  it('retorna estructura vacía/sugerencia inicial si no hay postulaciones', async () => {
+    const owner = await registerAndLogin(`owner-${unique()}@test.com`);
+
+    const response = await request(app.getHttpServer())
+      .get('/postulaciones/analisis-aprendizaje')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    expect(response.body).toEqual({
+      totalApplicationsAnalizadas: 0,
+      tecnologiasMasDemandadas: [],
+      sugerenciaAprendizaje:
+        'Aún no tienes postulaciones guardadas para analizar. Registra tus ofertas para ver recomendaciones de aprendizaje.',
+    });
+  });
+
+  it('rechaza el acceso no autorizado a analisis-aprendizaje', async () => {
+    await request(app.getHttpServer())
+      .get('/postulaciones/analisis-aprendizaje')
+      .expect(401);
+  });
 });

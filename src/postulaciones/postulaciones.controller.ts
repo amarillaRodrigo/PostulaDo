@@ -65,6 +65,18 @@ export class PostulacionesController {
     return this.service.findAll(userId, query);
   }
 
+  @Get('analisis-aprendizaje')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: 'Analyze application patterns and suggest learning topics',
+  })
+  @ApiResponse({ description: 'Learning roadmap analysis' })
+  async getLearningAnalysis(@Req() req: any) {
+    const userId = req.user?.sub ?? req.user?.id;
+    return this.service.getLearningAnalysis(userId);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
