@@ -16,11 +16,7 @@ export class PrismaService
     } else {
       // Fallback for local development / SQLite-based config
       super({
-        datasources: {
-          db: {
-            url: url || undefined,
-          },
-        },
+        datasourceUrl: url || undefined,
       });
     }
   }
