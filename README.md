@@ -248,9 +248,9 @@ El flujo implementado en la API es el siguiente:
 
 La API ya cubre autenticacion, gestion de usuarios y el flujo base de postulaciones con analisis de URL, creacion y consulta por usuario autenticado.
 
-## Documentaci\u00f3n de integraci\u00f3n
+## Documentación de integración
 
-El detalle del flujo de pruebas de integraci\u00f3n, la base de datos de test, Prisma y el runner automatizado est\u00e1 en [docs/testing-integration.md](docs/testing-integration.md).
+El detalle del flujo de pruebas de integración, la base de datos de test, Prisma y el runner automatizado está en [docs/testing-integration.md](docs/testing-integration.md).
 
 ## Pruebas de integración
 

@@ -10,21 +10,28 @@ export class PrismaService
   constructor() {
     // Prefer using PrismaPg adapter when a Postgres URL is present.
     const url = process.env.DATABASE_URL || process.env.DIRECT_URL;
-    if (url && url.startsWith('postgres')) {
-      const adapter = new PrismaPg({ connectionString: url });
-      super({ adapter });
-    } else {
-      throw new Error(
-        'PrismaService requires a Postgres DATABASE_URL at runtime. Set DATABASE_URL to a postgres://... URL (used by CI). For local SQLite-based generation use `npx prisma generate` only.',
-      );
-    }
+    const connectionString =
+      url && url.startsWith('postgres')
+        ? url
+        : 'postgresql://dummy:dummy@localhost:5432/dummy';
+    const adapter = new PrismaPg({ connectionString });
+    super({ adapter });
   }
 
   async onModuleInit() {
     if (process.env.SWAGGER_GEN === 'true') {
       return;
     }
-    await this.$connect();
+    try {
+      await this.$connect();
+    } catch (err) {
+      console.warn(
+        '⚠️ No se pudo conectar a la base de datos PostgreSQL al iniciar.',
+      );
+      console.warn(
+        'La API seguirá ejecutándose pero las consultas a la base de datos fallarán hasta que configures una base de datos PostgreSQL válida.',
+      );
+    }
   }
 
   async onModuleDestroy() {
