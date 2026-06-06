@@ -1,3 +1,7 @@
+process.env.SWAGGER_GEN = 'true';
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://dummy:dummy@localhost:5432/dummy';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'dummy-secret';
+
 import { NestFactory } from '@nestjs/core';
 import { writeFileSync, mkdirSync } from 'fs';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

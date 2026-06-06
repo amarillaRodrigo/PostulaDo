@@ -18,6 +18,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
+    if (process.env.SWAGGER_GEN === 'true') {
+      return;
+    }
     await this.$connect();
   }
 
