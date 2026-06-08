@@ -516,6 +516,10 @@
             "type": "string",
             "example": "AR"
           },
+          "profileText": {
+            "type": "string",
+            "example": "Soy desarrollador backend con experiencia en NestJS."
+          },
           "createdAt": {
             "type": "string",
             "example": "2024-01-01T00:00:00.000Z"
@@ -556,6 +560,10 @@
           "countryCode": {
             "type": "string",
             "example": "AR"
+          },
+          "profileText": {
+            "type": "string",
+            "example": "Soy desarrollador backend con experiencia en NestJS y TypeScript."
           }
         },
         "required": [
@@ -586,6 +594,38 @@
           "description": {
             "type": "string",
             "example": "Fullstack role at ACME"
+          },
+          "company": {
+            "type": "string",
+            "example": "ACME Corp"
+          },
+          "tecnologias": {
+            "example": [
+              "React",
+              "NestJS"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "aniosExperiencia": {
+            "type": "number",
+            "example": 3
+          },
+          "responsabilidades": {
+            "example": [
+              "Desarrollar APIs",
+              "Optimizar bases de datos"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tonoEmpresa": {
+            "type": "string",
+            "example": "Profesional y dinámico"
           }
         },
         "required": [
@@ -610,6 +650,38 @@
           "isArchived": {
             "type": "boolean",
             "example": false
+          },
+          "company": {
+            "type": "string",
+            "example": "ACME Corp"
+          },
+          "tecnologias": {
+            "example": [
+              "React",
+              "NestJS"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "aniosExperiencia": {
+            "type": "number",
+            "example": 3
+          },
+          "responsabilidades": {
+            "example": [
+              "Desarrollar APIs",
+              "Optimizar bases de datos"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tonoEmpresa": {
+            "type": "string",
+            "example": "Profesional y dinámico"
           }
         }
       },

@@ -37,8 +37,8 @@ export class PostulacionesController {
   })
   @ApiResponse({ description: 'Preview of the URL' })
   async analyze(@Body() dto: AnalyzePostulacionDto, @Req() req: any) {
-    // user must be logged in; we return preview for frontend
-    return this.service.analyze(dto.url);
+    const userId = req.user?.sub ?? req.user?.id;
+    return this.service.analyze(dto.url, userId);
   }
 
   @Post()

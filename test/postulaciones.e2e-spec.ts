@@ -365,4 +365,33 @@ describe('Integracion postulaciones', () => {
       .get('/postulaciones/analisis-aprendizaje')
       .expect(401);
   });
+
+  it('analiza una oferta de trabajo y devuelve el reporte estructurado de SGLang', async () => {
+    const owner = await registerAndLogin(`owner-${unique()}@test.com`);
+
+    // Actualizamos el profileText del usuario para la personalización de la IA
+    await prisma.user.update({
+      where: { id: owner.user.id },
+      data: { profileText: 'Desarrollador Full Stack con 3 años de experiencia en TypeScript y NestJS.' },
+    });
+
+    const response = await request(app.getHttpServer())
+      .post('/postulaciones/analizar')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({ url: 'https://example.com/jobs/nestjs-dev' })
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      url: 'https://example.com/jobs/nestjs-dev',
+      datosOferta: {
+        tecnologias: expect.arrayContaining(['React', 'NestJS', 'Docker', 'PostgreSQL']),
+        aniosExperiencia: 3,
+        responsabilidades: expect.any(Array),
+        tonoEmpresa: expect.any(String),
+      },
+      analisis: expect.any(String),
+      coverLetter: expect.any(String),
+      cvOptimizado: expect.any(String),
+    });
+  });
 });

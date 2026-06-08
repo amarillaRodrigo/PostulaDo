@@ -8,50 +8,49 @@ import { CreatePostulacionDto } from './dto/create-postulacion.dto';
 import { UpdatePostulacionDto } from './dto/update-postulacion.dto';
 import { ListPostulacionesQueryDto } from './dto/list-postulaciones-query.dto';
 import { extractTechnologies } from './helpers/technology-extractor.helper';
+import { JobAnalyzerService } from './job-analyzer.service';
 
 @Injectable()
 export class PostulacionesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jobAnalyzer: JobAnalyzerService,
+  ) {}
 
-  async analyze(url: string) {
-    try {
-      const res = await fetch(url, { redirect: 'follow' });
-      const finalUrl = res.url ?? url;
-      const text = await res.text();
+  async analyze(url: string, userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { profileText: true },
+    });
+    const profileText =
+      user?.profileText ||
+      'Desarrollador de software interesado en nuevas tecnologías.';
 
-      const titleMatch =
-        text.match(
-          /<meta\s+property=("|')og:title\1\s+content=("|')([^"']+)\2/i,
-        ) || text.match(/<title>([^<]+)<\/title>/i);
-      const descriptionMatch =
-        text.match(
-          /<meta\s+name=("|')description\1\s+content=("|')([^"']+)\2/i,
-        ) ||
-        text.match(
-          /<meta\s+property=("|')og:description\1\s+content=("|')([^"']+)\2/i,
-        );
+    const analysisResult = await this.jobAnalyzer.analyzeJob(url, profileText);
 
-      const title = titleMatch ? titleMatch[3] || titleMatch[1] : undefined;
-      const description = descriptionMatch
-        ? descriptionMatch[3] || descriptionMatch[1]
-        : undefined;
-
-      return { url: finalUrl, title, description };
-    } catch (err) {
-      return { url, title: undefined, description: undefined };
-    }
+    return {
+      url,
+      ...analysisResult,
+    };
   }
 
   async create(dto: CreatePostulacionDto, userId: string) {
     const combinedText = `${dto.title || ''} ${dto.description || ''}`;
     const technologies = extractTechnologies(combinedText);
 
+    const tecnologias = dto.tecnologias ?? technologies;
+
     return this.prisma.postulacion.create({
       data: {
         url: dto.url,
         title: dto.title,
         description: dto.description,
-        rawRequirements: technologies,
+        company: dto.company,
+        rawRequirements: tecnologias,
+        tecnologias: tecnologias,
+        aniosExperiencia: dto.aniosExperiencia,
+        responsabilidades: dto.responsabilidades ?? [],
+        tonoEmpresa: dto.tonoEmpresa,
         user: { connect: { id: userId } },
       },
     });
