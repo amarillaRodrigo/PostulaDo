@@ -8,7 +8,7 @@ La aplicación expone actualmente estas capacidades:
 
 - Registro e inicio de sesion con JWT.
 - Gestion de usuarios con proteccion por autenticacion, rol administrador y validacion de ownership.
-- Analisis de una URL de oferta para obtener un preview antes de crear la postulacion.
+- **Análisis Inteligente y Estructurado (IA):** Análisis de ofertas mediante **SGLang (XGrammar + RadixAttention)** para extraer de forma estructurada tecnologías, responsabilidades, años de experiencia y tono empresarial, y generar en paralelo informes personalizados (análisis de enfoque, cover letter y CV optimizado).
 - Creacion, consulta y actualizacion de postulaciones del usuario autenticado.
 - Eliminacion de contraseñas en respuestas publicas mediante interceptor global.
 
@@ -18,6 +18,8 @@ La aplicación expone actualmente estas capacidades:
 - TypeScript
 - Prisma
 - PostgreSQL
+- SGLang (Inferencia de LLMs)
+- OpenAI SDK & Cheerio (Scraping de texto plano)
 - JWT con Passport
 - class-validator y class-transformer
 
@@ -50,6 +52,10 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB"
 JWT_SECRET="una_clave_segura"
 JWT_EXPIRES_IN="60m"
 PORT=3000
+
+# SGLang Inferencia
+SGLANG_URL="http://localhost:30000/v1"
+SGLANG_API_KEY="EMPTY"
 ```
 
 ## Instalacion
@@ -174,7 +180,7 @@ Respuesta esperada:
 `POST /postulaciones/analizar`
 
 - Recibe una URL de oferta.
-- Devuelve un preview con datos extraidos para que el frontend confirme antes de guardar.
+- Devuelve la información extraída por SGLang estructurada por XGrammar (tecnologías, responsabilidades, años de experiencia, tono cultural) junto con el informe personalizado para el usuario (análisis, cover letter y CV optimizado) utilizando RadixAttention.
 - Requiere JWT.
 
 `POST /postulaciones`
@@ -209,6 +215,7 @@ Respuesta esperada:
 - `role`
 - `birthDate`
 - `countryCode`
+- `profileText` (CV o perfil del usuario para análisis de IA)
 - `createdAt`
 - `updatedAt`
 
@@ -222,6 +229,10 @@ Respuesta esperada:
 - `company`
 - `status`
 - `rawRequirements`
+- `tecnologias` (Extraídas estructuradamente)
+- `aniosExperiencia` (Años de experiencia requeridos)
+- `responsabilidades` (Lista de responsabilidades clave)
+- `tonoEmpresa` (Tono de la cultura de la empresa)
 - `isArchived`
 - `appliedAt`
 - `createdAt`
