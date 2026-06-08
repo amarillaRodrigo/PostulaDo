@@ -1,5 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsOptional, IsString, IsInt, IsArray } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsInt,
+  IsArray,
+} from 'class-validator';
 import { EstadoPostulacion } from '@prisma/client';
 
 export class UpdatePostulacionDto {
@@ -39,7 +46,9 @@ export class UpdatePostulacionDto {
   @IsInt()
   aniosExperiencia?: number;
 
-  @ApiPropertyOptional({ example: ['Desarrollar APIs', 'Optimizar bases de datos'] })
+  @ApiPropertyOptional({
+    example: ['Desarrollar APIs', 'Optimizar bases de datos'],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

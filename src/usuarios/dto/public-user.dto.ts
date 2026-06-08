@@ -19,7 +19,9 @@ export class PublicUserDto {
   @ApiPropertyOptional({ example: 'AR' })
   countryCode?: string;
 
-  @ApiPropertyOptional({ example: 'Soy desarrollador backend con experiencia en NestJS.' })
+  @ApiPropertyOptional({
+    example: 'Soy desarrollador backend con experiencia en NestJS.',
+  })
   profileText?: string;
 
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })

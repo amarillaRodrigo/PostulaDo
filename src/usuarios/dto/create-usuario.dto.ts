@@ -31,7 +31,10 @@ export class CreateUsuarioDto {
   @IsString()
   countryCode?: string;
 
-  @ApiPropertyOptional({ example: 'Soy desarrollador backend con experiencia en NestJS y TypeScript.' })
+  @ApiPropertyOptional({
+    example:
+      'Soy desarrollador backend con experiencia en NestJS y TypeScript.',
+  })
   @IsOptional()
   @IsString()
   profileText?: string;

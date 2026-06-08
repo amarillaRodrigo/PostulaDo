@@ -62,10 +62,7 @@ export class JobAnalyzerService {
       $('script, style, iframe, nav, footer, header, svg, noscript').remove();
 
       // Extraemos el texto plano limpio
-      const rawText = $('body')
-        .text()
-        .replace(/\s+/g, ' ')
-        .trim();
+      const rawText = $('body').text().replace(/\s+/g, ' ').trim();
 
       // Retornamos los primeros 6000 caracteres para evitar desbordar el prompt
       return rawText.slice(0, 6000);
@@ -76,7 +73,10 @@ export class JobAnalyzerService {
     }
   }
 
-  async analyzeJob(url: string, userProfile: string): Promise<JobAnalyzerResult> {
+  async analyzeJob(
+    url: string,
+    userProfile: string,
+  ): Promise<JobAnalyzerResult> {
     // Si estamos en un entorno de test o se solicita simulación, retornamos un mock estructurado
     if (process.env.NODE_ENV === 'test' || process.env.MOCK_SGLANG === 'true') {
       return this.getMockResult(userProfile);
@@ -110,39 +110,40 @@ export class JobAnalyzerService {
       });
 
       // 2. Tres llamadas en paralelo usando Promise.all para RadixAttention
-      const [structuredRes, focusRes, coverLetterRes, cvRes] = await Promise.all([
-        structuredPromise,
-        this.openai.chat.completions.create({
-          model: 'default',
-          messages: [
-            { role: 'system', content: baseContext },
-            {
-              role: 'user',
-              content: `Perfil del usuario: ${userProfile}. Basado en la oferta, dime exactamente en qué 3 cosas debe enfocarse para que lo contraten.`,
-            },
-          ],
-        }),
-        this.openai.chat.completions.create({
-          model: 'default',
-          messages: [
-            { role: 'system', content: baseContext },
-            {
-              role: 'user',
-              content: `Redacta una carta de presentación altamente persuasiva para esta oferta basada en el siguiente perfil: ${userProfile}`,
-            },
-          ],
-        }),
-        this.openai.chat.completions.create({
-          model: 'default',
-          messages: [
-            { role: 'system', content: baseContext },
-            {
-              role: 'user',
-              content: `Adapta el siguiente perfil de usuario para crear un CV optimizado para los sistemas ATS de esta oferta específica: ${userProfile}`,
-            },
-          ],
-        }),
-      ]);
+      const [structuredRes, focusRes, coverLetterRes, cvRes] =
+        await Promise.all([
+          structuredPromise,
+          this.openai.chat.completions.create({
+            model: 'default',
+            messages: [
+              { role: 'system', content: baseContext },
+              {
+                role: 'user',
+                content: `Perfil del usuario: ${userProfile}. Basado en la oferta, dime exactamente en qué 3 cosas debe enfocarse para que lo contraten.`,
+              },
+            ],
+          }),
+          this.openai.chat.completions.create({
+            model: 'default',
+            messages: [
+              { role: 'system', content: baseContext },
+              {
+                role: 'user',
+                content: `Redacta una carta de presentación altamente persuasiva para esta oferta basada en el siguiente perfil: ${userProfile}`,
+              },
+            ],
+          }),
+          this.openai.chat.completions.create({
+            model: 'default',
+            messages: [
+              { role: 'system', content: baseContext },
+              {
+                role: 'user',
+                content: `Adapta el siguiente perfil de usuario para crear un CV optimizado para los sistemas ATS de esta oferta específica: ${userProfile}`,
+              },
+            ],
+          }),
+        ]);
 
       const content = structuredRes.choices[0]?.message?.content;
       if (!content) {

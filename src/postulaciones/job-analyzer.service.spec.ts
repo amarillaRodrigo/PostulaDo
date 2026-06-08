@@ -81,15 +81,19 @@ describe('JobAnalyzerService', () => {
       expect(result).not.toContain('publicidad_anuncio');
       // Debe contener la información del main
       expect(result).toContain('Software Developer');
-      expect(result).toContain('Buscamos desarrollador experto en Node.js y React.');
+      expect(result).toContain(
+        'Buscamos desarrollador experto en Node.js y React.',
+      );
     });
 
     it('debería lanzar un InternalServerErrorException si la petición HTTP falla', async () => {
-      jest.spyOn(axios, 'get').mockRejectedValueOnce(new Error('Conexión fallida'));
+      jest
+        .spyOn(axios, 'get')
+        .mockRejectedValueOnce(new Error('Conexión fallida'));
 
-      await expect(service.scrapeUrl('https://example.com/job/1')).rejects.toThrow(
-        'Error al obtener o parsear la URL: Conexión fallida',
-      );
+      await expect(
+        service.scrapeUrl('https://example.com/job/1'),
+      ).rejects.toThrow('Error al obtener o parsear la URL: Conexión fallida');
     });
   });
 
@@ -118,7 +122,9 @@ describe('JobAnalyzerService', () => {
       process.env.MOCK_SGLANG = 'false';
 
       // Mock de scraping
-      jest.spyOn(service, 'scrapeUrl').mockResolvedValueOnce('Texto de la vacante');
+      const scrapeSpy = jest
+        .spyOn(service, 'scrapeUrl')
+        .mockResolvedValueOnce('Texto de la vacante');
 
       // Mock de las respuestas de SGLang (OpenAI API)
       // 1. Respuesta estructurada
@@ -129,7 +135,10 @@ describe('JobAnalyzerService', () => {
               content: JSON.stringify({
                 tecnologias: ['Java', 'Spring Boot', 'Kubernetes'],
                 aniosExperiencia: 5,
-                responsabilidades: ['Diseñar microservicios', 'Gestionar despliegues'],
+                responsabilidades: [
+                  'Diseñar microservicios',
+                  'Gestionar despliegues',
+                ],
                 tonoEmpresa: 'Formal y estructurado',
               }),
             },
@@ -154,7 +163,7 @@ describe('JobAnalyzerService', () => {
       );
 
       // Verificamos que se ejecutó el scrape
-      expect(service.scrapeUrl).toHaveBeenCalledWith('https://example.com/job/real');
+      expect(scrapeSpy).toHaveBeenCalledWith('https://example.com/job/real');
 
       // Verificamos que SGLang recibió las llamadas y estructuró bien
       expect(result.datosOferta).toEqual({
@@ -172,12 +181,16 @@ describe('JobAnalyzerService', () => {
       process.env.NODE_ENV = 'production';
       process.env.MOCK_SGLANG = 'false';
 
-      jest.spyOn(service, 'scrapeUrl').mockResolvedValueOnce('Texto de la vacante');
+      jest
+        .spyOn(service, 'scrapeUrl')
+        .mockResolvedValueOnce('Texto de la vacante');
 
       // Simulamos fallo en SGLang
       mockCompletionsCreate.mockRejectedValueOnce(new Error('SGLang Timeout'));
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
 
       const result = await service.analyzeJob(
         'https://example.com/job/error',

@@ -32,7 +32,9 @@ export class CreatePostulacionDto {
   @IsInt()
   aniosExperiencia?: number;
 
-  @ApiPropertyOptional({ example: ['Desarrollar APIs', 'Optimizar bases de datos'] })
+  @ApiPropertyOptional({
+    example: ['Desarrollar APIs', 'Optimizar bases de datos'],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
