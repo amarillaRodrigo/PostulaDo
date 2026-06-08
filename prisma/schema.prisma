@@ -32,6 +32,7 @@ model User {
   role        UserRole  @default(USER)
   birthDate   DateTime
   countryCode String?
+  profileText String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -49,6 +50,10 @@ model Postulacion {
   status EstadoPostulacion @default(ENVIADO)
 
   rawRequirements Json?
+  tecnologias     String[]
+  aniosExperiencia Int?
+  responsabilidades String[]
+  tonoEmpresa     String?
 
   isArchived Boolean @default(false)
 

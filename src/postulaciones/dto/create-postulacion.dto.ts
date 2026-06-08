@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsOptional, IsString, IsUrl, IsInt, IsArray } from 'class-validator';
 
 export class CreatePostulacionDto {
   @ApiProperty({ example: 'https://empresa.com/oferta/123' })
@@ -15,4 +15,31 @@ export class CreatePostulacionDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ example: 'ACME Corp' })
+  @IsOptional()
+  @IsString()
+  company?: string;
+
+  @ApiPropertyOptional({ example: ['React', 'NestJS'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tecnologias?: string[];
+
+  @ApiPropertyOptional({ example: 3 })
+  @IsOptional()
+  @IsInt()
+  aniosExperiencia?: number;
+
+  @ApiPropertyOptional({ example: ['Desarrollar APIs', 'Optimizar bases de datos'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  responsabilidades?: string[];
+
+  @ApiPropertyOptional({ example: 'Profesional y dinámico' })
+  @IsOptional()
+  @IsString()
+  tonoEmpresa?: string;
 }

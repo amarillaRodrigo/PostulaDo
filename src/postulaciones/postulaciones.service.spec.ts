@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PostulacionesService } from './postulaciones.service';
 import { PrismaService } from '../prisma.service';
+import { JobAnalyzerService } from './job-analyzer.service';
 
 const mockPrisma = {
   postulacion: {
@@ -13,6 +14,13 @@ const mockPrisma = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
+  user: {
+    findUnique: jest.fn(),
+  },
+};
+
+const mockJobAnalyzer = {
+  analyzeJob: jest.fn(),
 };
 
 describe('PostulacionesService', () => {
@@ -23,6 +31,7 @@ describe('PostulacionesService', () => {
       providers: [
         PostulacionesService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: JobAnalyzerService, useValue: mockJobAnalyzer },
       ],
     }).compile();
 
@@ -50,7 +59,12 @@ describe('PostulacionesService', () => {
           url: dto.url,
           title: dto.title,
           description: dto.description,
+          company: undefined,
           rawRequirements: ['TypeScript', 'NestJS', 'React', 'Docker'],
+          tecnologias: ['TypeScript', 'NestJS', 'React', 'Docker'],
+          aniosExperiencia: undefined,
+          responsabilidades: [],
+          tonoEmpresa: undefined,
           user: { connect: { id: userId } },
         },
       });
