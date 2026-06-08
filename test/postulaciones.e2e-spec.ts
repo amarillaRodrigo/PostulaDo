@@ -372,7 +372,10 @@ describe('Integracion postulaciones', () => {
     // Actualizamos el profileText del usuario para la personalización de la IA
     await prisma.user.update({
       where: { id: owner.user.id },
-      data: { profileText: 'Desarrollador Full Stack con 3 años de experiencia en TypeScript y NestJS.' },
+      data: {
+        profileText:
+          'Desarrollador Full Stack con 3 años de experiencia en TypeScript y NestJS.',
+      },
     });
 
     const response = await request(app.getHttpServer())
@@ -384,7 +387,12 @@ describe('Integracion postulaciones', () => {
     expect(response.body).toMatchObject({
       url: 'https://example.com/jobs/nestjs-dev',
       datosOferta: {
-        tecnologias: expect.arrayContaining(['React', 'NestJS', 'Docker', 'PostgreSQL']),
+        tecnologias: expect.arrayContaining([
+          'React',
+          'NestJS',
+          'Docker',
+          'PostgreSQL',
+        ]),
         aniosExperiencia: 3,
         responsabilidades: expect.any(Array),
         tonoEmpresa: expect.any(String),
