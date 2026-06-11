@@ -33,12 +33,24 @@ export class PostulacionesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({
-    summary: 'Analyze a job posting URL and return preview metadata',
+    summary: 'Queue a job posting URL for asynchronous analysis',
   })
-  @ApiResponse({ description: 'Preview of the URL' })
+  @ApiResponse({ description: 'Queue job created successfully' })
   async analyze(@Body() dto: AnalyzePostulacionDto, @Req() req: any) {
     const userId = req.user?.sub ?? req.user?.id;
     return this.service.analyze(dto.url, userId);
+  }
+
+  @Get('analizar/status/:jobId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: 'Check the status and retrieve results of an analysis job',
+  })
+  @ApiResponse({ description: 'Analysis job status and/or result' })
+  async getStatus(@Req() req: any, @Param('jobId') jobId: string) {
+    const userId = req.user?.sub ?? req.user?.id;
+    return this.service.getJobStatus(userId, jobId);
   }
 
   @Post()

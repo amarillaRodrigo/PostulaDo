@@ -9,12 +9,15 @@ import { UpdatePostulacionDto } from './dto/update-postulacion.dto';
 import { ListPostulacionesQueryDto } from './dto/list-postulaciones-query.dto';
 import { extractTechnologies } from './helpers/technology-extractor.helper';
 import { JobAnalyzerService } from './job-analyzer.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class PostulacionesService {
   constructor(
     private prisma: PrismaService,
     private jobAnalyzer: JobAnalyzerService,
+    @InjectQueue('analisis-trabajo') private readonly queue: Queue,
   ) {}
 
   async analyze(url: string, userId: string) {
@@ -26,11 +29,53 @@ export class PostulacionesService {
       user?.profileText ||
       'Desarrollador de software interesado en nuevas tecnologías.';
 
-    const analysisResult = await this.jobAnalyzer.analyzeJob(url, profileText);
+    const job = await this.queue.add(
+      'analizar-url',
+      { url, userId, profileText },
+      {
+        removeOnComplete: { age: 24 * 3600 },
+        removeOnFail: { age: 24 * 3600 },
+      },
+    );
 
     return {
-      url,
-      ...analysisResult,
+      jobId: job.id,
+      status: 'queued',
+    };
+  }
+
+  async getJobStatus(userId: string, jobId: string) {
+    const job = await this.queue.getJob(jobId);
+    if (!job) {
+      throw new NotFoundException('Trabajo de análisis no encontrado');
+    }
+
+    if (job.data.userId !== userId) {
+      throw new ForbiddenException('No autorizado para ver este trabajo');
+    }
+
+    const state = await job.getState();
+
+    if (state === 'completed') {
+      return {
+        jobId: job.id,
+        status: 'completed',
+        result: job.returnvalue,
+      };
+    }
+
+    if (state === 'failed') {
+      return {
+        jobId: job.id,
+        status: 'failed',
+        error:
+          job.failedReason || 'Error desconocido durante el procesamiento.',
+      };
+    }
+
+    return {
+      jobId: job.id,
+      status: state,
     };
   }
 

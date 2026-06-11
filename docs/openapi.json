@@ -222,7 +222,7 @@
         },
         "responses": {
           "default": {
-            "description": "Preview of the URL"
+            "description": "Queue job created successfully"
           }
         },
         "security": [
@@ -230,7 +230,36 @@
             "access-token": []
           }
         ],
-        "summary": "Analyze a job posting URL and return preview metadata",
+        "summary": "Queue a job posting URL for asynchronous analysis",
+        "tags": [
+          "postulaciones"
+        ]
+      }
+    },
+    "/postulaciones/analizar/status/{jobId}": {
+      "get": {
+        "operationId": "PostulacionesController_getStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Analysis job status and/or result"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Check the status and retrieve results of an analysis job",
         "tags": [
           "postulaciones"
         ]
