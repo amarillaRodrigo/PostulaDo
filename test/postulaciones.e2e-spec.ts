@@ -366,8 +366,9 @@ describe('Integracion postulaciones', () => {
       .expect(401);
   });
 
-  it('analiza una oferta de trabajo y devuelve el reporte estructurado de SGLang', async () => {
+  it('analiza una oferta de trabajo y devuelve el reporte estructurado de SGLang de forma asíncrona', async () => {
     const owner = await registerAndLogin(`owner-${unique()}@test.com`);
+    const other = await registerAndLogin(`other-${unique()}@test.com`);
 
     // Actualizamos el profileText del usuario para la personalización de la IA
     await prisma.user.update({
@@ -385,6 +386,36 @@ describe('Integracion postulaciones', () => {
       .expect(201);
 
     expect(response.body).toMatchObject({
+      jobId: expect.any(String),
+      status: 'queued',
+    });
+
+    const jobId = response.body.jobId;
+
+    // Verificar que otro usuario no puede acceder al estado del trabajo
+    await request(app.getHttpServer())
+      .get(`/postulaciones/analizar/status/${jobId}`)
+      .set('Authorization', `Bearer ${other.token}`)
+      .expect(403);
+
+    // Esperar a que el trabajo sea procesado en segundo plano
+    let jobStatus: any;
+    const maxAttempts = 15;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const statusRes = await request(app.getHttpServer())
+        .get(`/postulaciones/analizar/status/${jobId}`)
+        .set('Authorization', `Bearer ${owner.token}`)
+        .expect(200);
+
+      jobStatus = statusRes.body;
+      if (jobStatus.status === 'completed' || jobStatus.status === 'failed') {
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+
+    expect(jobStatus.status).toBe('completed');
+    expect(jobStatus.result).toMatchObject({
       url: 'https://example.com/jobs/nestjs-dev',
       datosOferta: {
         tecnologias: expect.arrayContaining([
