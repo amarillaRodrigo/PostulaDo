@@ -18,6 +18,8 @@ La aplicación expone actualmente estas capacidades:
 - TypeScript
 - Prisma
 - PostgreSQL
+- Redis (Caché y Colas)
+- BullMQ (Procesamiento de colas de fondo asíncronas)
 - SGLang (Inferencia de LLMs)
 - OpenAI SDK & Cheerio (Scraping de texto plano)
 - JWT con Passport
@@ -42,6 +44,7 @@ PostulaDo/
 - Node.js 20 o superior.
 - npm.
 - Una base de datos PostgreSQL accesible desde `DATABASE_URL`.
+- Un servidor Redis accesible para el sistema de colas (incluido en `compose.yaml`).
 
 ## Variables de entorno
 
@@ -56,6 +59,10 @@ PORT=3000
 # SGLang Inferencia
 SGLANG_URL="http://localhost:30000/v1"
 SGLANG_API_KEY="EMPTY"
+
+# Redis Config (BullMQ)
+REDIS_HOST="localhost"
+REDIS_PORT=6379
 ```
 
 ## Instalacion
@@ -180,8 +187,15 @@ Respuesta esperada:
 `POST /postulaciones/analizar`
 
 - Recibe una URL de oferta.
-- Devuelve la información extraída por SGLang estructurada por XGrammar (tecnologías, responsabilidades, años de experiencia, tono cultural) junto con el informe personalizado para el usuario (análisis, cover letter y CV optimizado) utilizando RadixAttention.
+- Encola de forma asíncrona un trabajo en la cola de Redis y retorna inmediatamente un `jobId` junto con el estado `queued`.
 - Requiere JWT.
+
+`GET /postulaciones/analizar/status/:jobId`
+
+- Consulta el estado de un trabajo de análisis por su `jobId`.
+- Devuelve el estado actual (`waiting`, `active`, `completed`, `failed`).
+- Si el estado es `completed`, incluye en el campo `result` la información estructurada por XGrammar generada por SGLang (tecnologías, responsabilidades, años de experiencia, tono cultural) y el informe personalizado (análisis de enfoque, cover letter y CV optimizado) utilizando RadixAttention.
+- Requiere JWT y validación de propiedad (ownership) del trabajo.
 
 `POST /postulaciones`
 
@@ -243,10 +257,11 @@ Respuesta esperada:
 El flujo implementado en la API es el siguiente:
 
 1. El usuario pega la URL de la oferta.
-2. `POST /postulaciones/analizar` obtiene un preview de la oferta.
-3. El frontend muestra el resultado al usuario.
-4. Si confirma, `POST /postulaciones` persiste la postulacion.
-5. Luego puede consultar o actualizar su listado desde los endpoints protegidos.
+2. `POST /postulaciones/analizar` encola el trabajo y responde con un `jobId`.
+3. El frontend realiza sondeo (*polling*) haciendo peticiones periódicas a `GET /postulaciones/analizar/status/:jobId` hasta que el estatus sea `completed`.
+4. El frontend muestra el resultado estructurado de la inferencia y los reportes al usuario.
+5. Si confirma la postulación, `POST /postulaciones` la persiste en base de datos.
+6. Luego puede consultar o actualizar su listado desde los endpoints protegidos.
 
 ## Notas tecnicas
 
@@ -265,7 +280,7 @@ El detalle del flujo de pruebas de integración, la base de datos de test, Prism
 
 ## Pruebas de integración
 
-La API incluye una suite e2e completa que valida la integración real entre Nest, Prisma y PostgreSQL sin mocks.
+La API incluye una suite e2e completa que valida la integración real entre Nest, Prisma, PostgreSQL y Redis sin mocks.
 
 Ejecución local:
 
@@ -274,8 +289,8 @@ npm run test:integration
 ```
 
 Este comando:
-1. Levanta un contenedor PostgreSQL con Docker Compose.
-2. Aplica migraciones Prisma.
+1. Levanta los contenedores de PostgreSQL y Redis en Docker Compose.
+2. Aplica migraciones Prisma en la base de datos de test temporal.
 3. Genera el cliente Prisma.
 4. Ejecuta todos los tests e2e en modo secuencial.
 5. Limpia la infraestructura al terminar.
