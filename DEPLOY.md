@@ -124,6 +124,36 @@ host, puerto y credenciales.
 mal copiadas, o Neon suspendido. La directa (sin `-pooler`) es la que usa
 `prisma migrate deploy`; el host del pooler es otro.
 
+## Memoria de Redis (plan free)
+
+El plan free de Redis Cloud son **30 MB**. BullMQ guarda cada trabajo, su
+resultado y un stream de eventos, así que sin techo la cola puede llenar la
+base y, con `noeviction`, Redis empieza a **rechazar escrituras**: el análisis
+falla con un error opaco.
+
+La limpieza vive en `src/postulaciones/cola-mantenimiento.service.ts` y tiene
+tres capas:
+
+| Capa | Cuándo | Qué hace |
+| --- | --- | --- |
+| Retención al encolar | Siempre | Un trabajo terminado se guarda 24 h y como máximo 200 completados / 100 fallidos |
+| Barrido | Al arrancar y cada 30 min | Borra terminados de más de 24 h; si Redis pasa el 85%, baja la gracia a 10 min |
+| Guardia | Antes de encolar | Al 85% limpia; si sigue al 95%, responde **503** con "la cola está llena, probá en unos minutos" |
+
+La gracia de 10 minutos en las limpiezas de emergencia existe porque la landing
+consulta el resultado del trabajo después de que termina: borrarlo en el acto
+rompería ese poll.
+
+`REDIS_MEMORY_LIMIT_MB` ajusta el límite cuando `maxmemory` viene en 0. Por
+defecto son 30 MB, que es el plan free.
+
+> **No cambies la política de desalojo a `allkeys-lru`.** BullMQ necesita
+> `noeviction`: si Redis desaloja claves de la cola, los trabajos quedan en un
+> estado inconsistente y se pierden sin error visible.
+
+Si la base ya está llena y querés recuperarla sin esperar al barrido: reiniciar
+el servicio en Render dispara un barrido al arrancar.
+
 ## Notas de operacion
 
 **Cold start.** Render free duerme el servicio. Si molesta, un cron gratis

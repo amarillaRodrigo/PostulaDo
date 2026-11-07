@@ -12,13 +12,21 @@ import { JobAnalyzerService } from './job-analyzer.service';
 import { detectarEcosistema, temaPorKey, temasDe } from '../common/taxonomy';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import {
+  COLA_ANALISIS,
+  ColaMantenimientoService,
+  MAX_COMPLETADOS,
+  MAX_FALLIDOS,
+  RETENCION_SEGUNDOS,
+} from './cola-mantenimiento.service';
 
 @Injectable()
 export class PostulacionesService {
   constructor(
     private prisma: PrismaService,
     private jobAnalyzer: JobAnalyzerService,
-    @InjectQueue('analisis-trabajo') private readonly queue: Queue,
+    private mantenimiento: ColaMantenimientoService,
+    @InjectQueue(COLA_ANALISIS) private readonly queue: Queue,
   ) {}
 
   async analyze(url: string, userId: string) {
@@ -30,12 +38,21 @@ export class PostulacionesService {
       user?.profileText ||
       'Desarrollador de software interesado en nuevas tecnologías.';
 
+    // Con el plan free (30 MB) la cola no puede crecer sin techo: si Redis
+    // está por llenarse, esto limpia lo terminado o responde 503.
+    await this.mantenimiento.asegurarEspacio();
+
     const job = await this.queue.add(
       'analizar-url',
       { url, userId, profileText },
       {
-        removeOnComplete: { age: 24 * 3600 },
-        removeOnFail: { age: 24 * 3600 },
+        // Edad y cantidad: lo que sobreviva al día, igual se borra al llegar
+        // al tope, para que un pico de tráfico no llene la memoria.
+        removeOnComplete: {
+          age: RETENCION_SEGUNDOS,
+          count: MAX_COMPLETADOS,
+        },
+        removeOnFail: { age: RETENCION_SEGUNDOS, count: MAX_FALLIDOS },
       },
     );
 

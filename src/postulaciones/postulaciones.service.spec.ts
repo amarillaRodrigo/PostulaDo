@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma.service';
 import { JobAnalyzerService } from './job-analyzer.service';
 import { getQueueToken } from '@nestjs/bullmq';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { ColaMantenimientoService } from './cola-mantenimiento.service';
 
 const mockPrisma = {
   postulacion: {
@@ -30,6 +31,10 @@ const mockQueue = {
   getJob: jest.fn(),
 };
 
+const mockMantenimiento = {
+  asegurarEspacio: jest.fn(),
+};
+
 describe('PostulacionesService', () => {
   let service: PostulacionesService;
 
@@ -40,6 +45,7 @@ describe('PostulacionesService', () => {
         PostulacionesService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: JobAnalyzerService, useValue: mockJobAnalyzer },
+        { provide: ColaMantenimientoService, useValue: mockMantenimiento },
         { provide: getQueueToken('analisis-trabajo'), useValue: mockQueue },
       ],
     }).compile();
@@ -116,11 +122,24 @@ describe('PostulacionesService', () => {
         'analizar-url',
         { url, userId, profileText: 'My Profile' },
         {
-          removeOnComplete: { age: 24 * 3600 },
-          removeOnFail: { age: 24 * 3600 },
+          removeOnComplete: { age: 24 * 3600, count: 200 },
+          removeOnFail: { age: 24 * 3600, count: 100 },
         },
       );
+      expect(mockMantenimiento.asegurarEspacio).toHaveBeenCalled();
       expect(result).toEqual({ jobId: 'job-id', status: 'queued' });
+    });
+
+    it('no encola si la cola está llena', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({ profileText: 'x' });
+      mockMantenimiento.asegurarEspacio.mockRejectedValueOnce(
+        new Error('La cola de análisis está llena'),
+      );
+
+      await expect(
+        service.analyze('https://example.com/jobs/1', 'user-uuid'),
+      ).rejects.toThrow(/llena/);
+      expect(mockQueue.add).not.toHaveBeenCalled();
     });
   });
 

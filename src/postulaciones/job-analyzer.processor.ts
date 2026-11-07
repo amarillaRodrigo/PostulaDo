@@ -1,8 +1,9 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { JobAnalyzerService } from './job-analyzer.service';
+import { COLA_ANALISIS } from './cola-mantenimiento.service';
 
-@Processor('analisis-trabajo')
+@Processor(COLA_ANALISIS)
 export class JobAnalyzerProcessor extends WorkerHost {
   constructor(private readonly jobAnalyzer: JobAnalyzerService) {
     super();
