@@ -69,6 +69,48 @@ describe('MailService', () => {
     );
   });
 
+  it('arma el enlace de recuperación contra la landing publicada', () => {
+    const mail = new MailService(
+      configCon({ APP_PUBLIC_URL: 'https://rodrigoamarilla.tech/postulado/' }),
+    );
+
+    expect(mail.enlaceRecuperacion(token)).toBe(
+      `https://rodrigoamarilla.tech/postulado/recuperar/?token=${token}`,
+    );
+  });
+
+  it('manda el enlace de recuperación con el asunto correcto', async () => {
+    const mail = new MailService(
+      configCon({
+        RESEND_API_KEY: 're_test',
+        APP_PUBLIC_URL: 'https://rodrigoamarilla.tech/postulado',
+      }),
+    );
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 });
+
+    const resultado = await mail.enviarRecuperacion('a@b.com', null, token);
+
+    expect(resultado).toEqual({ enviado: true });
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    const cuerpo = JSON.parse(init.body);
+
+    expect(cuerpo.subject).toBe('Restablecé tu contraseña de PostulaDo');
+    expect(cuerpo.text).toContain('1 hora');
+    expect(cuerpo.html).toContain(
+      `https://rodrigoamarilla.tech/postulado/recuperar/?token=${token}`,
+    );
+  });
+
+  it('sin proveedor no manda el correo de recuperación y lo informa', async () => {
+    const mail = new MailService(configCon({}));
+    global.fetch = jest.fn();
+
+    const resultado = await mail.enviarRecuperacion('a@b.com', 'Ana', token);
+
+    expect(resultado).toEqual({ enviado: false, motivo: 'sin-proveedor' });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
   it('si Resend rechaza, devuelve rechazado y no lanza', async () => {
     const mail = new MailService(configCon({ RESEND_API_KEY: 're_test' }));
     global.fetch = jest.fn().mockResolvedValue({

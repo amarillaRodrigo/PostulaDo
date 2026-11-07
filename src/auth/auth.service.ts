@@ -20,6 +20,9 @@ export type PublicUser = Omit<
   | 'emailVerificationToken'
   | 'emailVerificationSentAt'
   | 'emailVerificationExpiresAt'
+  | 'passwordResetToken'
+  | 'passwordResetSentAt'
+  | 'passwordResetExpiresAt'
 >;
 
 export type AuthResult = {
@@ -30,6 +33,8 @@ export type AuthResult = {
 };
 
 const VIGENCIA_TOKEN_MS = 24 * 60 * 60 * 1000;
+/** El enlace de recuperación vive menos: una hora y una sola vez. */
+const VIGENCIA_RESET_MS = 60 * 60 * 1000;
 const ESPERA_REENVIO_MS = 60 * 1000;
 
 @Injectable()
@@ -46,12 +51,18 @@ export class AuthService {
       emailVerificationToken: _token,
       emailVerificationSentAt: _enviado,
       emailVerificationExpiresAt: _expira,
+      passwordResetToken: _resetToken,
+      passwordResetSentAt: _resetEnviado,
+      passwordResetExpiresAt: _resetExpira,
       ...publicUser
     } = user;
     void _password;
     void _token;
     void _enviado;
     void _expira;
+    void _resetToken;
+    void _resetEnviado;
+    void _resetExpira;
 
     return publicUser;
   }
@@ -224,5 +235,96 @@ export class AuthService {
     const { enviado } = await this.emitirVerificacion(user);
 
     return { enviado, yaVerificado: false };
+  }
+
+  /**
+   * Pide un enlace de recuperación.
+   *
+   * La respuesta es siempre la misma exista o no la cuenta: si dijera "ese
+   * correo no está registrado", el formulario serviría para averiguar quién
+   * tiene cuenta. Cuando la cuenta existe se manda el mail; cuando no, se
+   * responde lo mismo y no pasa nada.
+   */
+  async olvidePassword(email: string): Promise<{ enviado: boolean }> {
+    const user = await this.usuariosService.user({ email });
+
+    if (!user) {
+      return { enviado: true };
+    }
+
+    const desdeElUltimo = user.passwordResetSentAt
+      ? Date.now() - user.passwordResetSentAt.getTime()
+      : Number.POSITIVE_INFINITY;
+
+    // Un pedido por minuto: sin esto, cualquiera puede usar el formulario
+    // para llenar de mails el buzón de otra persona.
+    if (desdeElUltimo < ESPERA_REENVIO_MS) {
+      return { enviado: true };
+    }
+
+    const token = randomBytes(32).toString('hex');
+    const ahora = new Date();
+
+    await this.usuariosService.updateUser({
+      where: { id: user.id },
+      data: {
+        passwordResetToken: this.hashToken(token),
+        passwordResetSentAt: ahora,
+        passwordResetExpiresAt: new Date(ahora.getTime() + VIGENCIA_RESET_MS),
+      },
+    });
+
+    const envio = await this.mail.enviarRecuperacion(
+      user.email,
+      user.name,
+      token,
+    );
+
+    return { enviado: envio.enviado };
+  }
+
+  /**
+   * Cambia la contraseña con un token válido.
+   *
+   * El token se borra al usarlo, así que el mismo enlace no sirve dos veces.
+   * Si el correo todavía no estaba confirmado, este paso lo confirma: quien
+   * abrió el enlace demostró que controla la dirección.
+   */
+  async resetPassword(
+    token: string,
+    password: string,
+  ): Promise<{ restablecida: true; email: string }> {
+    const user = await this.usuariosService.user({
+      passwordResetToken: this.hashToken(token),
+    });
+
+    if (!user) {
+      throw new BadRequestException(
+        'El enlace no es válido o ya se usó. Pedí uno nuevo.',
+      );
+    }
+
+    if (
+      !user.passwordResetExpiresAt ||
+      user.passwordResetExpiresAt.getTime() < Date.now()
+    ) {
+      throw new BadRequestException(
+        'El enlace venció. Pedí uno nuevo desde "Olvidé mi contraseña".',
+      );
+    }
+
+    await this.usuariosService.updateUser({
+      where: { id: user.id },
+      data: {
+        // `updateUser` hashea la contraseña antes de guardarla.
+        password,
+        passwordResetToken: null,
+        passwordResetSentAt: null,
+        passwordResetExpiresAt: null,
+        ...(user.emailVerifiedAt ? {} : { emailVerifiedAt: new Date() }),
+      },
+    });
+
+    return { restablecida: true, email: user.email };
   }
 }

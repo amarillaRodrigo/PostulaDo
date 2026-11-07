@@ -959,6 +959,70 @@ input {
   color: var(--ink);
 }
 
+.verify__form {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.verify__form .btn {
+  justify-self: start;
+}
+
+.verify__error {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #8c2f16;
+  background: #fdf1ec;
+  border: 1px solid rgba(140, 47, 22, 0.15);
+  border-radius: 8px;
+}
+
+/* ============================ OLVIDÉ MI CONTRASEÑA ============================ */
+
+.recuperar {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.recuperar__box {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+.recuperar__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.recuperar__aviso {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.recuperar__aviso.is-ok {
+  color: #15803d;
+}
+
+.recuperar__aviso.is-error {
+  color: #8c2f16;
+}
+
+.recuperar__box .cuenta__action {
+  justify-self: start;
+}
+
 
 /* ============================ SECCIONES ============================ */
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { colorDeTema } from '@/lib/themes';
 import {
   abrirLote,
@@ -11,6 +11,7 @@ import {
   entrarCuenta,
   guardarSesion,
   leerSesion,
+  olvidePassword,
   recuperarPlan,
   SIN_API,
   type LoteGuardado,
@@ -118,6 +119,12 @@ function aSesionGuardada(sesion: Sesion, ids: string[], loteId: string | null): 
 export function LoteForm() {
   const [urls, setUrls] = useState('');
   const [state, setState] = useState<Estado>({ kind: 'idle' });
+  const emailRef = useRef<HTMLInputElement>(null);
+  const [recuperar, setRecuperar] = useState<{
+    abierto: boolean;
+    enviando: boolean;
+    aviso: { tipo: 'ok' | 'error'; texto: string } | null;
+  }>({ abierto: false, enviando: false, aviso: null });
 
   // Al volver (F5, otra pestaña, otro día) se retoma el último lote. Se hace
   // en un efecto para no romper la hidratación del export estático.
@@ -243,6 +250,55 @@ export function LoteForm() {
     borrarUrlsPegadas();
     setUrls('');
     setState({ kind: 'idle' });
+  }
+
+  /**
+   * Pide el enlace de recuperación con el correo que está escrito arriba.
+   *
+   * La respuesta de la API es genérica a propósito: no confirma si el correo
+   * tiene cuenta. La landing repite esa fórmula en vez de inventar un
+   * "te lo mandamos" que podría ser mentira.
+   */
+  async function pedirEnlace() {
+    const email = emailRef.current?.value.trim() ?? '';
+
+    if (!email) {
+      setRecuperar((r) => ({
+        ...r,
+        aviso: { tipo: 'error', texto: 'Escribí tu correo arriba.' },
+      }));
+      return;
+    }
+
+    setRecuperar((r) => ({ ...r, enviando: true, aviso: null }));
+
+    try {
+      const { enviado } = await olvidePassword(email);
+
+      setRecuperar((prev) => ({
+        ...prev,
+        enviando: false,
+        aviso: enviado
+          ? {
+              tipo: 'ok',
+              texto: `Si ${email} tiene cuenta, te mandamos un enlace para elegir una contraseña nueva. Revisá spam: vence en 1 hora.`,
+            }
+          : {
+              tipo: 'error',
+              texto:
+                'El servidor no pudo enviar el correo en este momento. Probá de nuevo en un rato.',
+            },
+      }));
+    } catch {
+      setRecuperar((prev) => ({
+        ...prev,
+        enviando: false,
+        aviso: {
+          tipo: 'error',
+          texto: 'No pudimos pedir el enlace. Probá de nuevo en un rato.',
+        },
+      }));
+    }
   }
 
   /* ---------------------------------------------------------------- */
@@ -413,6 +469,7 @@ export function LoteForm() {
               autoComplete="email"
               placeholder="vos@ejemplo.com"
               defaultValue={cuenta.email}
+              ref={emailRef}
             />
           </div>
           <div className="field">
@@ -452,18 +509,65 @@ export function LoteForm() {
           <button
             type="button"
             className="cuenta__switch"
-            onClick={() =>
+            onClick={() => {
+              setRecuperar({ abierto: false, enviando: false, aviso: null });
               setState({
                 kind: 'needs-account',
                 cuenta: { ...cuenta, password: '' },
                 modo: entrando ? 'crear' : 'entrar',
-              })
-            }
+              });
+            }}
           >
             {entrando
               ? 'No tengo cuenta: crear una'
               : 'Ya tengo cuenta: entrar'}
           </button>
+
+          {entrando ? (
+            <div className="recuperar">
+              <button
+                type="button"
+                className="cuenta__switch"
+                onClick={() =>
+                  setRecuperar((r) => ({
+                    ...r,
+                    abierto: !r.abierto,
+                    aviso: r.abierto ? null : r.aviso,
+                  }))
+                }
+                aria-expanded={recuperar.abierto}
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+
+              {recuperar.abierto ? (
+                <div className="recuperar__box">
+                  <p className="recuperar__text">
+                    Escribí tu correo arriba y te mandamos un enlace para elegir
+                    una nueva. El enlace vence en 1 hora y sirve una sola vez.
+                  </p>
+
+                  {recuperar.aviso ? (
+                    <p
+                      className={`recuperar__aviso is-${recuperar.aviso.tipo}`}
+                      role={recuperar.aviso.tipo === 'error' ? 'alert' : 'status'}
+                    >
+                      {recuperar.aviso.texto}
+                    </p>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    className="cuenta__action"
+                    onClick={() => void pedirEnlace()}
+                    disabled={recuperar.enviando}
+                  >
+                    {recuperar.enviando ? 'Pidiendo el enlace…' : 'Mandame el enlace'}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         <div className="ingest__foot">
           <span className="ingest__gets">

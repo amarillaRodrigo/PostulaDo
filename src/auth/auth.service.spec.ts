@@ -34,6 +34,9 @@ describe('AuthService', () => {
     emailVerificationToken: null,
     emailVerificationSentAt: null,
     emailVerificationExpiresAt: null,
+    passwordResetToken: null,
+    passwordResetSentAt: null,
+    passwordResetExpiresAt: null,
   };
 
   const mockUsuariosService = {
@@ -48,6 +51,7 @@ describe('AuthService', () => {
 
   const mockMail = {
     enviarVerificacion: jest.fn(),
+    enviarRecuperacion: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -55,6 +59,7 @@ describe('AuthService', () => {
 
     mockUsuariosService.updateUser.mockResolvedValue(mockUser);
     mockMail.enviarVerificacion.mockResolvedValue({ enviado: true });
+    mockMail.enviarRecuperacion.mockResolvedValue({ enviado: true });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -331,6 +336,148 @@ describe('AuthService', () => {
 
       expect(result).toEqual({ enviado: true, yaVerificado: false });
       expect(mockMail.enviarVerificacion).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('olvidePassword', () => {
+    it('responde igual aunque el correo no tenga cuenta', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce(null);
+
+      const result = await service.olvidePassword('nadie@example.com');
+
+      expect(result).toEqual({ enviado: true });
+      expect(mockUsuariosService.updateUser).not.toHaveBeenCalled();
+      expect(mockMail.enviarRecuperacion).not.toHaveBeenCalled();
+    });
+
+    it('guarda el hash del token, no el token, y manda el mail', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce(mockUser);
+
+      const result = await service.olvidePassword(mockUser.email);
+
+      expect(result).toEqual({ enviado: true });
+      const datos = mockUsuariosService.updateUser.mock.calls[0][0].data;
+      const tokenEnviado = mockMail.enviarRecuperacion.mock.calls[0][2];
+
+      expect(datos.passwordResetToken).toMatch(/^[a-f0-9]{64}$/);
+      expect(datos.passwordResetToken).not.toBe(tokenEnviado);
+      expect(createHash('sha256').update(tokenEnviado).digest('hex')).toBe(
+        datos.passwordResetToken,
+      );
+      expect(datos.passwordResetExpiresAt.getTime()).toBeGreaterThan(
+        Date.now(),
+      );
+      expect(mockMail.enviarRecuperacion).toHaveBeenCalledWith(
+        mockUser.email,
+        mockUser.name,
+        tokenEnviado,
+      );
+    });
+
+    it('no manda dos mails en el mismo minuto', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        passwordResetSentAt: new Date(Date.now() - 5_000),
+      });
+
+      const result = await service.olvidePassword(mockUser.email);
+
+      expect(result).toEqual({ enviado: true });
+      expect(mockUsuariosService.updateUser).not.toHaveBeenCalled();
+      expect(mockMail.enviarRecuperacion).not.toHaveBeenCalled();
+    });
+
+    it('informa si el proveedor no pudo enviar', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce(mockUser);
+      mockMail.enviarRecuperacion.mockResolvedValueOnce({
+        enviado: false,
+        motivo: 'sin-proveedor',
+      });
+
+      const result = await service.olvidePassword(mockUser.email);
+
+      expect(result).toEqual({ enviado: false });
+    });
+
+    it('no reutiliza el token anterior al pedir uno nuevo', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        passwordResetSentAt: new Date(Date.now() - 120_000),
+      });
+
+      await service.olvidePassword(mockUser.email);
+
+      const datos = mockUsuariosService.updateUser.mock.calls[0][0].data;
+      expect(datos.passwordResetToken).toMatch(/^[a-f0-9]{64}$/);
+    });
+  });
+
+  describe('resetPassword', () => {
+    const token = 'c'.repeat(64);
+    const hash = createHash('sha256').update(token).digest('hex');
+
+    it('cambia la contraseña, borra el token y confirma el correo', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        passwordResetToken: hash,
+        passwordResetExpiresAt: new Date(Date.now() + 60_000),
+      });
+
+      const result = await service.resetPassword(token, 'NuevaClave123');
+
+      expect(mockUsuariosService.user).toHaveBeenCalledWith({
+        passwordResetToken: hash,
+      });
+      expect(result).toEqual({
+        restablecida: true,
+        email: mockUser.email,
+      });
+      expect(mockUsuariosService.updateUser).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
+        data: {
+          password: 'NuevaClave123',
+          passwordResetToken: null,
+          passwordResetSentAt: null,
+          passwordResetExpiresAt: null,
+          emailVerifiedAt: expect.any(Date),
+        },
+      });
+    });
+
+    it('no vuelve a confirmar un correo que ya estaba confirmado', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        emailVerifiedAt: new Date('2026-01-01'),
+        passwordResetToken: hash,
+        passwordResetExpiresAt: new Date(Date.now() + 60_000),
+      });
+
+      await service.resetPassword(token, 'NuevaClave123');
+
+      const datos = mockUsuariosService.updateUser.mock.calls[0][0].data;
+      expect(datos.emailVerifiedAt).toBeUndefined();
+    });
+
+    it('rechaza un token que no existe', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce(null);
+
+      await expect(
+        service.resetPassword(token, 'NuevaClave123'),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockUsuariosService.updateUser).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un token vencido y no toca la contraseña', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        passwordResetToken: hash,
+        passwordResetExpiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(
+        service.resetPassword(token, 'NuevaClave123'),
+      ).rejects.toThrow(/venció/);
+      expect(mockUsuariosService.updateUser).not.toHaveBeenCalled();
     });
   });
 

@@ -17,6 +17,8 @@ describe('AuthController', () => {
       role: UserRole.USER,
       birthDate: new Date('1995-05-15'),
       countryCode: 'AR',
+      profileText: null,
+      emailVerifiedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -25,6 +27,8 @@ describe('AuthController', () => {
   const mockAuthService = {
     register: jest.fn(),
     loginWithCredentials: jest.fn(),
+    olvidePassword: jest.fn(),
+    resetPassword: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -76,6 +80,41 @@ describe('AuthController', () => {
 
       expect(mockAuthService.loginWithCredentials).toHaveBeenCalledWith(dto);
       expect(result).toEqual(mockAuthResult);
+    });
+  });
+
+  describe('olvidePassword', () => {
+    it('debería delegar el pedido al servicio', async () => {
+      mockAuthService.olvidePassword.mockResolvedValueOnce({ enviado: true });
+
+      const result = await controller.olvidePassword({
+        email: 'test@example.com',
+      });
+
+      expect(mockAuthService.olvidePassword).toHaveBeenCalledWith(
+        'test@example.com',
+      );
+      expect(result).toEqual({ enviado: true });
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('debería pasar el token y la contraseña nueva', async () => {
+      mockAuthService.resetPassword.mockResolvedValueOnce({
+        restablecida: true,
+        email: 'test@example.com',
+      });
+
+      const result = await controller.resetPassword({
+        token: 'a'.repeat(64),
+        password: 'NuevaClave123',
+      });
+
+      expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
+        'a'.repeat(64),
+        'NuevaClave123',
+      );
+      expect(result.restablecida).toBe(true);
     });
   });
 });

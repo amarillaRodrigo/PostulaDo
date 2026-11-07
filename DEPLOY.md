@@ -88,6 +88,13 @@ Sin dominio verificado, Resend rechaza el envio con `403` y la API lo registra
 como `Resend rechazo el envio`. La cuenta sigue funcionando; solo falta el
 mail.
 
+El mismo remitente cubre el flujo de **olvide mi contrasena**
+(`POST /auth/olvide-password` y `POST /auth/reset-password`). El enlace de
+recuperacion vence en 1 hora, se guarda solo su hash y sirve una sola vez. La
+respuesta de `olvide-password` es siempre la misma exista o no la cuenta, para
+no revelar que correos estan registrados; si no hay proveedor, la landing lo
+dice en vez de fingir que lo mando.
+
 ## 4. Verificar
 
 ```powershell

@@ -42,6 +42,11 @@ model User {
   emailVerificationSentAt    DateTime?
   emailVerificationExpiresAt DateTime?
 
+  // Recuperación de contraseña: mismo criterio, solo el hash.
+  passwordResetToken     String?   @unique
+  passwordResetSentAt    DateTime?
+  passwordResetExpiresAt DateTime?
+
   postulaciones Postulacion[]
   lotes         Lote[]
 }

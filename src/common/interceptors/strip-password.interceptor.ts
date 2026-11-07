@@ -11,7 +11,11 @@ import { map } from 'rxjs/operators';
 const CAMPOS_PRIVADOS = new Set([
   'password',
   'emailVerificationToken',
+  'emailVerificationSentAt',
   'emailVerificationExpiresAt',
+  'passwordResetToken',
+  'passwordResetSentAt',
+  'passwordResetExpiresAt',
 ]);
 
 function esObjetoPlano(obj: object): boolean {

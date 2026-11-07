@@ -213,6 +213,31 @@ export async function reenviarVerificacion(
   });
 }
 
+/**
+ * Pide el enlace de recuperación.
+ *
+ * La API responde lo mismo exista o no la cuenta, así que la landing no puede
+ * (ni debe) decir "ese correo no está registrado".
+ */
+export async function olvidePassword(
+  email: string,
+): Promise<{ enviado: boolean }> {
+  return pedir('/auth/olvide-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(
+  token: string,
+  password: string,
+): Promise<{ restablecida: boolean; email: string }> {
+  return pedir('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
+}
+
 export async function listarLotes(token: string): Promise<LoteGuardado[]> {
   try {
     return await pedir<LoteGuardado[]>('/lotes', {

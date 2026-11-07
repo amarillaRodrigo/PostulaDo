@@ -11,6 +11,8 @@ import { CreateUsuarioDto } from '../usuarios/dto/create-usuario.dto';
 import { AuthResult, AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { VerificarEmailDto } from './dto/verificar-email.dto';
+import { OlvidePasswordDto } from './dto/olvide-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthResultDto } from './dto/auth-result.dto';
 import { PublicUserDto } from '../usuarios/dto/public-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -65,5 +67,22 @@ export class AuthController {
   async yo(@Req() req: any) {
     const userId = req.user?.sub ?? req.user?.id;
     return this.authService.perfil(userId);
+  }
+
+  @Post('olvide-password')
+  @ApiOperation({ summary: 'Send a password reset link' })
+  @ApiOkResponse({
+    description:
+      'The same answer whether or not the email has an account. `enviado` is false only when the mail provider could not send it.',
+  })
+  async olvidePassword(@Body() dto: OlvidePasswordDto) {
+    return this.authService.olvidePassword(dto.email);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Set a new password with the reset token' })
+  @ApiOkResponse({ description: 'Password updated' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.password);
   }
 }
