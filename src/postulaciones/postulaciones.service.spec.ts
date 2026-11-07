@@ -107,6 +107,33 @@ describe('PostulacionesService', () => {
     });
   });
 
+  describe('analisisDeLote', () => {
+    const userId = 'user-uuid';
+
+    it('concuerda en singular cuando un solo tema domina el lote', async () => {
+      mockPrisma.postulacion.findMany.mockResolvedValueOnce([
+        { id: 'a', tecnologias: ['NestJS', 'TypeScript'] },
+        { id: 'b', tecnologias: ['Spring Boot', 'Java'] },
+      ]);
+
+      const result = await service.analisisDeLote(userId, ['a', 'b']);
+
+      expect(result.sugerenciaAprendizaje).toContain('Este tema cubre el 100%');
+      expect(result.sugerenciaAprendizaje).not.toContain('Estos 1');
+    });
+
+    it('concuerda en plural cuando son varios temas', async () => {
+      mockPrisma.postulacion.findMany.mockResolvedValueOnce([
+        { id: 'a', tecnologias: ['NestJS', 'Docker', 'PostgreSQL'] },
+        { id: 'b', tecnologias: ['Spring Boot', 'Docker', 'PostgreSQL'] },
+      ]);
+
+      const result = await service.analisisDeLote(userId, ['a', 'b']);
+
+      expect(result.sugerenciaAprendizaje).toContain('Estos 3 temas cubren');
+    });
+  });
+
   describe('analyze', () => {
     it('should add a job to the queue and return jobId', async () => {
       const url = 'https://example.com/jobs/1';

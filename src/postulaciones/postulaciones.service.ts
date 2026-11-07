@@ -302,8 +302,16 @@ export class PostulacionesService {
     ).length;
     const coberturaConjunta = Math.round((cubiertos / total) * 100);
 
+    const primero = principales[0];
+    const alternativas = primero?.alternativas.slice(0, 2).join(' o ') ?? '';
+    const verbo = principales.length === 1 ? 'cubre' : 'cubren';
+    const sujeto =
+      principales.length === 1
+        ? 'Este tema'
+        : `Estos ${principales.length} temas`;
+
     const sugerenciaAprendizaje = principales.length
-      ? `Estos ${principales.length} ${principales.length === 1 ? 'tema cubre' : 'temas cubren'} el ${coberturaConjunta}% de las ${total} ofertas del lote. Empezá por ${principales[0].label.toLowerCase()} y entrá por ${principales[0].alternativas.slice(0, 2).join(' o ')}, según lo que ya tengas a mano.`
+      ? `${sujeto} ${verbo} el ${coberturaConjunta}% de las ${total} ofertas del lote. Empezá por ${primero.label.toLowerCase()} y entrá por ${alternativas}, según lo que ya tengas a mano.`
       : `Este lote pide ${temas.length} oficios distintos y ninguno domina. Revisá las ${total} ofertas y elegí el tipo de trabajo que más te interese antes de armar un plan.`;
 
     return {
