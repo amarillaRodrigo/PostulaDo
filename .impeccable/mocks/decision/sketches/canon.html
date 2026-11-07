@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — El estándar de la categoría</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;height:900px;overflow:hidden;background:#fff;color:#111827;
+    font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+  nav{height:58px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;padding:0 40px}
+  .mark{font-size:20px;font-weight:700}
+  .links{display:flex;gap:26px;align-items:center}
+  .links a{font-size:13px;color:#4b5563;text-decoration:none}
+  .cta{background:#2563eb;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500}
+  .hero{text-align:center;padding:38px 0 22px}
+  .hero h1{font-size:50px;line-height:1.08;font-weight:700;letter-spacing:-.025em;max-width:720px;margin:0 auto}
+  .hero h1 em{font-style:normal;color:#2563eb}
+  .hero p{font-size:16px;color:#4b5563;margin:14px auto 0;max-width:600px;line-height:1.5}
+  .inputrow{display:flex;gap:10px;justify-content:center;margin-top:20px}
+  .inputrow input{width:380px;padding:11px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
+  .inputrow button{background:#2563eb;color:#fff;border:0;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:600}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1020px;margin:24px auto 0;padding:0 40px}
+  .card{border:1px solid #e5e7eb;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .ico{width:34px;height:34px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;
+    color:#2563eb;font-size:16px;font-weight:700}
+  .card h3{font-size:15px;margin:11px 0 5px}
+  .card p{font-size:12.5px;color:#6b7280;line-height:1.5}
+  .shot{max-width:1020px;margin:20px auto 0;padding:0 40px}
+  .shotbox{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff;
+    box-shadow:0 4px 12px rgba(0,0,0,.07);display:grid;grid-template-columns:290px 1fr}
+  .shotleft{background:#f9fafb;border-right:1px solid #e5e7eb;padding:14px}
+  .shotleft .t{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-bottom:8px}
+  .chip{display:inline-block;background:#eff6ff;color:#2563eb;border-radius:6px;padding:3px 8px;font-size:11px;margin:0 4px 4px 0}
+  .shotright{padding:14px}
+  .row{display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px solid #f3f4f6}
+  .quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1020px;margin:20px auto 0;padding:0 40px}
+  .quote{border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+  .av{width:30px;height:30px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;
+    color:#2563eb;font-weight:700;font-size:12px}
+  .quote p{font-size:12px;color:#4b5563;line-height:1.45;margin:9px 0}
+  .quote b{font-size:12px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="mark">PostulaDo</div>
+  <div class="links"><a href="#">Producto</a><a href="#">Cómo funciona</a><a href="#">Precios</a><span class="cta">Entrar</span></div>
+</nav>
+
+<section class="hero">
+  <h1>Tu plan de estudio, <em>hecho con IA</em></h1>
+  <p>Pegá las ofertas que estás mirando y PostulaDo te dice qué temas tienen en común y qué aprendés primero.</p>
+  <div class="inputrow">
+    <input placeholder="URLs de tus ofertas" value="https://example.com/jobs/cloud-sre">
+    <button>Analizar mi lote</button>
+  </div>
+</section>
+
+<section class="cards">
+  <div class="card"><div class="ico">✦</div><h3>Ecosistema detectado</h3><p>El tipo de trabajo que comparten tus ofertas, aunque no usen las mismas herramientas.</p></div>
+  <div class="card"><div class="ico">✎</div><h3>Temas con cobertura</h3><p>Qué temas pide el porcentaje de tus ofertas, ordenado por lo que más cubren.</p></div>
+  <div class="card"><div class="ico">▤</div><h3>Alternativas por tema</h3><p>Cómo entrar a cada tema sin quedarte atado a una herramienta en particular.</p></div>
+</section>
+
+<section class="shot">
+  <div class="shotbox">
+    <div class="shotleft">
+      <div class="t">Temas detectados · 5 ofertas</div>
+      <span class="chip">Pruebas 100%</span><span class="chip">CI/CD 80%</span><span class="chip">Despliegue 60%</span>
+      <span class="chip">Observabilidad 40%</span><span class="chip">Orquestación 20%</span>
+    </div>
+    <div class="shotright">
+      <div class="row"><span>Ecosistema detectado</span><span style="color:#2563eb;font-weight:600">Cloud Engineering</span></div>
+      <div class="row"><span>Plan de estudio</span><span style="color:#2563eb;font-weight:600">Listo</span></div>
+      <div class="row"><span>Alternativas por tema</span><span style="color:#2563eb;font-weight:600">Listo</span></div>
+      <div class="row" style="border-bottom:0"><span>Guardado</span><span style="color:#9ca3af">Sin guardar</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="quotes">
+  <div class="quote"><div class="av">MG</div><p>“Me ahorró dos horas por oferta y la carta salió mucho mejor que las que escribía yo.”</p><b>Mariana G.</b></div>
+  <div class="quote"><div class="av">DR</div><p>“El CV optimizado pasó el filtro de la empresa que me había rechazado antes.”</p><b>Diego R.</b></div>
+  <div class="quote"><div class="av">LP</div><p>“Ya no copio el texto de la oferta. Solo pego la URL.”</p><b>Lucía P.</b></div>
+  <div style="grid-column:1/4;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#9ca3af;text-align:center">Testimonios ficticios · material de demostración</div>
+</section>
+</body>
+</html>

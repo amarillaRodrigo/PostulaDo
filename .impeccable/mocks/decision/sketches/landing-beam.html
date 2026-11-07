@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="es" data-p="papel">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — Plan de estudio desde tu lote de ofertas</title>
+<script>const q=new URLSearchParams(location.search);const p=q.get('p');const v=q.get('cta');if(p)document.documentElement.setAttribute('data-p',p);if(v)document.documentElement.setAttribute('data-cta',v);</script>
+<style>
+  :root{
+    --bg:#F5F3EE; --bg2:#FFFFFF; --bg3:#16181A; --ink:#16181A; --muted:#61656B;
+    --accent:#D9542B; --accent-soft:#FBEDE6; --band:#CFE0C9; --band2:#DCDFF2;
+    --card:#FFFFFF; --line:rgba(22,24,26,.10); --line2:rgba(255,255,255,.12);
+    --shadow:0 1px 2px rgba(22,24,26,.04),0 8px 24px rgba(22,24,26,.06);
+    --big:0 18px 48px rgba(22,24,26,.12);
+    --radius:14px;
+    /* LA LENTE: el ground óptico donde vive el haz */
+    --lens-1:#C9C2B2; --lens-2:#8E887A; --lens-3:#45423C; --on-lens:#F7F5F0;
+    /* EL ESPECTRO: el acento del producto no es un color, es la dispersión */
+    --sp1:#2563EB; --sp2:#22D3EE; --sp3:#A5F3FC; --sp4:#FFFFFF;
+    --sp5:#FBCFE8; --sp6:#E879F9; --sp7:#C084FC; --sp8:#FB923C; --sp9:#F59E0B;
+    --spec:linear-gradient(100deg,#2563EB 0%,#22D3EE 11%,#A5F3FC 21%,#FFFFFF 29%,#FBCFE8 38%,#E879F9 50%,#C084FC 62%,#FB923C 83%,#F59E0B 100%);
+  }
+  html[data-p="marea"]{
+    --bg:#0C0D10; --bg2:#141519; --bg3:#0A0B0D; --ink:#F4F4F2; --muted:#969AA1;
+    --accent:#7A5AF8; --accent-soft:#1B1633; --band:#1B1730; --band2:#12271F;
+    --card:#16181C; --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.10);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.4);
+    --big:0 18px 48px rgba(0,0,0,.55);
+    --lens-1:#24262E; --lens-2:#121318; --lens-3:#08080A;
+  }
+  html[data-p="tinta"]{
+    --bg:#FFFFFF; --bg2:#F6F7F9; --bg3:#111318; --ink:#111318; --muted:#62666E;
+    --accent:#2563EB; --accent-soft:#EAF0FF; --band:#EAF0FF; --band2:#F1F5F4;
+    --card:#FFFFFF; --line:rgba(17,19,24,.10); --line2:rgba(255,255,255,.12);
+    --shadow:0 1px 2px rgba(17,19,24,.04),0 8px 24px rgba(17,19,24,.06);
+    --big:0 18px 48px rgba(17,19,24,.14);
+    --lens-1:#BFC5CE; --lens-2:#7D8794; --lens-3:#3B424C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .muted{color:var(--muted)}
+  .spec-text{background:var(--spec);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* ===== EL HAZ ===== */
+  /* ===== EL HAZ: luz blanca con bordes cromáticos, no pintura ===== */
+  .optical{position:relative;overflow:hidden;color:var(--on-lens);
+    background:radial-gradient(130% 100% at 50% -18%,var(--lens-1),var(--lens-2) 52%,var(--lens-3) 100%)}
+  .optical .wrap{position:relative;z-index:3}
+  .beam{position:absolute;left:-16%;right:-16%;top:44%;height:140px;transform:rotate(-4deg);
+    pointer-events:none;z-index:1;filter:saturate(.42)}
+  .beam i{position:absolute;display:block}
+  .beam .ray{left:0;right:0;top:50%;height:14px;margin-top:-7px;background:var(--c);
+    transform-origin:30% 50%;transform:rotate(var(--r));filter:blur(18px) saturate(.7);opacity:.30;mix-blend-mode:screen;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 26%,#000 70%,transparent 100%);
+    mask-image:linear-gradient(90deg,transparent 0%,#000 26%,#000 70%,transparent 100%)}
+  .beam .bloom{left:0;right:0;top:50%;height:118px;margin-top:-59px;background:var(--spec);
+    filter:blur(54px) saturate(.5);opacity:.17;mix-blend-mode:screen;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 30%,#000 66%,transparent 100%);
+    mask-image:linear-gradient(90deg,transparent 0%,#000 30%,#000 66%,transparent 100%)}
+  .beam .core{left:0;right:0;top:50%;height:15px;margin-top:-7.5px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.92) 40%,rgba(255,255,255,.86) 62%,transparent);
+    filter:blur(14px);opacity:.58;mix-blend-mode:screen}
+  .flare{position:absolute;left:36%;top:16%;width:420px;height:320px;z-index:2;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(255,255,255,.15),rgba(255,255,255,0) 68%);
+    filter:blur(34px);mix-blend-mode:screen}
+  .optical .lensgrid{position:absolute;inset:0;z-index:0;opacity:.10;
+    background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+    background-size:76px 76px;
+    -webkit-mask-image:radial-gradient(90% 70% at 50% 40%,#000,transparent 78%);
+    mask-image:radial-gradient(90% 70% at 50% 40%,#000,transparent 78%)}
+  .prism-tag{position:absolute;right:46px;bottom:34px;z-index:3;font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:rgba(255,255,255,.42)}
+
+  /* ===== NAV ===== */
+  nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 86%,transparent);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .navin{height:68px;display:flex;align-items:center;justify-content:space-between;gap:32px}
+  .logo{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .navlinks{display:flex;gap:28px;font-size:14px;color:var(--muted)}
+  .navlinks a{color:inherit;text-decoration:none}
+  .navcta{display:flex;gap:10px;align-items:center}
+  .navcta .btn-accent{background:var(--ink);color:var(--bg)}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:10px 18px;font-size:14px;
+    font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;position:relative}
+  .btn-ghost{border-color:var(--line);color:var(--ink);background:transparent}
+  .btn-solid{background:var(--ink);color:var(--bg)}
+  .btn-accent{background:var(--accent);color:#fff}
+  .btn-spec{background:var(--spec);color:#101114;font-weight:700}
+  /* EL BOTÓN ES UN PRISMA: la luz se refracta por su canto y se derrama abajo */
+  .btn-caustic{position:relative;isolation:isolate;overflow:visible}
+  .btn-caustic::before{content:"";position:absolute;left:12px;right:12px;bottom:-10px;height:22px;
+    background:var(--spec);filter:blur(11px);opacity:.5;border-radius:12px;z-index:-1;pointer-events:none}
+  .btn-caustic::after{content:"";position:absolute;left:12px;right:12px;bottom:2px;height:2px;
+    background:var(--spec);filter:blur(.5px);opacity:.95;border-radius:2px;pointer-events:none}
+  html[data-cta="caustic"] .btn-spec{background:var(--ink);color:var(--bg);box-shadow:none}
+  html[data-cta="caustic-terra"] .btn-spec{background:var(--accent);color:#fff;box-shadow:none}
+  html[data-cta="caustic-spec"] .btn-spec{background:var(--spec);color:#0E0F12;
+    box-shadow:0 10px 30px -12px rgba(70,110,240,.7)}
+  .planword{position:relative;display:inline-block}
+  .planword::after{content:"";position:absolute;left:.02em;right:.02em;bottom:.10em;height:.055em;
+    background:var(--spec);border-radius:2px;opacity:.92}
+
+  /* ===== HERO ===== */
+  .hero{padding:76px 0 0;text-align:center}
+  .chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
+  .chip{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);border-radius:999px;
+    padding:6px 14px;font-size:13px;color:rgba(255,255,255,.82)}
+  h1{font-size:78px;line-height:1.0;font-weight:800;letter-spacing:-.04em;max-width:920px;margin:0 auto}
+  .sub{font-size:19px;line-height:1.55;color:rgba(255,255,255,.88);max-width:640px;margin:24px auto 0;
+    text-shadow:0 1px 12px rgba(0,0,0,.35)}
+  .ingest{margin:32px auto 0;max-width:720px;text-align:left;background:rgba(255,255,255,.96);color:#16181A;
+    border:1px solid rgba(255,255,255,.5);border-radius:var(--radius);box-shadow:0 24px 60px rgba(0,0,0,.35);overflow:hidden}
+  .ingest .ih{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;
+    border-bottom:1px solid rgba(22,24,26,.1);font-size:12px;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:#61656B}
+  .ingest .ib{padding:12px 16px}
+  .ingest .u{font-family:ui-monospace,Consolas,monospace;font-size:13.5px;padding:3px 0;color:#16181A;opacity:.9}
+  .ingest .u i{font-style:normal;color:#8C8E92;margin-right:10px}
+  .ingest .if{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 16px;
+    border-top:1px solid rgba(22,24,26,.1);background:#FAFAF9}
+  .ingest .if .gets{font-size:13px;color:#61656B;line-height:1.45}
+  .ingest .if .gets b{color:#16181A;font-weight:600}
+  .micro{margin-top:18px;font-size:13px;color:rgba(255,255,255,.56)}
+  .shotcard{margin:56px auto 0;max-width:1080px;background:var(--card);border:1px solid var(--line);
+    border-radius:18px;box-shadow:var(--big);overflow:hidden;text-align:left;color:var(--ink)}
+  .shotbar{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg2)}
+  .shotbar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+  .shotbody{display:grid;grid-template-columns:250px 1fr;min-height:340px}
+  .shotnav{padding:18px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+  .shotnav a{padding:8px 10px;border-radius:8px;font-size:13.5px;color:var(--muted);text-decoration:none}
+  .shotnav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .shotmain{padding:20px 24px}
+  .shotmain h3{font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .shotmain .sm{font-size:13px;color:var(--muted);margin-top:4px;margin-bottom:16px}
+  .srow{display:grid;grid-template-columns:1fr 92px 150px;gap:14px;align-items:center;padding:11px 0;
+    border-bottom:1px solid var(--line);font-size:14.5px}
+  .srow:last-child{border-bottom:0}
+  .srow .pct{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--accent);text-align:right;font-weight:600}
+  .srow .alt{font-size:12.5px;color:var(--muted);text-align:right}
+  .bar{height:7px;border-radius:4px;background:var(--line);position:relative;margin-top:5px;overflow:hidden}
+  .bar i{position:absolute;inset:0 auto 0 0;background:var(--spec);border-radius:4px}
+
+  /* ===== TIRA ===== */
+  .strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:26px 0;margin-top:76px}
+  .strip p{text-align:center;font-size:13px;color:var(--muted);margin-bottom:16px}
+  .techrow{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+  .tech{border:1px solid var(--line);background:var(--bg2);border-radius:8px;padding:6px 11px;
+    font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:var(--muted)}
+
+  /* ===== SECCIONES ===== */
+  section.band{padding:84px 0}
+  .sechead{text-align:center;max-width:720px;margin:0 auto 44px}
+  .sechead h2{font-size:46px;line-height:1.06;font-weight:800;letter-spacing:-.035em;margin:14px 0 0}
+  .sechead p{font-size:17px;line-height:1.55;color:var(--muted);margin:18px 0 0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+  .ico{width:40px;height:40px;border-radius:11px;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700}
+  .card h3{font-size:19px;font-weight:700;letter-spacing:-.015em;margin:16px 0 8px}
+  .card p{font-size:14.5px;line-height:1.6;color:var(--muted)}
+  .card .n{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--accent);font-weight:700}
+  .spectrule{height:2px;width:150px;margin:0 auto 34px;background:var(--spec);border-radius:2px;
+    filter:blur(.2px)}
+
+  /* ===== OSCURA ===== */
+  .dark{background:var(--bg3);color:#F4F4F2}
+  .dark .muted{color:#A0A4AA}
+  .dark .sechead h2{color:#F4F4F2}
+  .dark .card{background:rgba(255,255,255,.04);border-color:var(--line2)}
+  .dark .card p{color:#A0A4AA}
+  .dark .ico{background:rgba(255,255,255,.08);color:#fff}
+  .converge{display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:center;margin-top:48px}
+  .post .r{display:grid;grid-template-columns:30px 1fr 130px 116px;gap:14px;align-items:center;padding:13px 0;
+    border-bottom:1px solid var(--line2);font-size:15px}
+  .post .r .i{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#7B7F86}
+  .post .r .co{font-size:12.5px;color:#A0A4AA}
+  .post .r .st{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;text-align:right;
+    background:var(--spec);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+  .eco{border:1px solid var(--line2);border-radius:var(--radius);padding:26px;background:rgba(255,255,255,.04)}
+  .eco .lab{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--sp2)}
+  .eco h3{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:10px 0 12px}
+  .eco p{font-size:14px;line-height:1.6;color:#A0A4AA}
+  .eco .barr{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:16px}
+  .eco .barr i{height:100%}
+
+  /* ===== EL PRISMA ===== */
+  .prismwrap{border:1px solid var(--line);border-radius:var(--radius);background:var(--card);padding:26px 24px 12px;
+    overflow:hidden}
+  .prismwrap .cap{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .prismwrap .cap span{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .prism svg{display:block;width:100%;height:auto}
+
+  /* ===== PLAN ===== */
+  .planrow{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .plan{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;
+    position:relative;overflow:hidden}
+  .plan::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+  .plan:nth-child(1)::before{background:var(--sp1)}
+  .plan:nth-child(2)::before{background:var(--sp6)}
+  .plan:nth-child(3)::before{background:var(--sp8)}
+  .plan:nth-child(4)::before{background:var(--sp2)}
+  .plan .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .plan h4{font-size:18px;font-weight:700}
+  .plan .pctv{font-family:ui-monospace,Consolas,monospace;font-size:14px;font-weight:700}
+  .plan .why{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+  .alts{display:flex;flex-wrap:wrap;gap:8px}
+  .alts span{border:1px solid var(--line);border-radius:7px;padding:5px 10px;font-size:12.5px;color:var(--muted);
+    font-family:ui-monospace,Consolas,monospace}
+
+  /* ===== STATS ===== */
+  .stats{background:var(--band);padding:64px 0}
+  .statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center}
+  .statgrid>div{padding:0 30px;border-left:1px solid rgba(22,24,26,.12)}
+  .statgrid>div:first-child{border-left:0}
+  .statgrid b{display:block;font-size:68px;font-weight:800;letter-spacing:-.05em;line-height:1}
+  .statgrid span{display:block;margin-top:10px;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .statgrid p{margin-top:10px;font-size:13.5px;color:var(--muted);line-height:1.5}
+  html[data-p="marea"] .statgrid>div{border-color:var(--line2)}
+  html[data-p="marea"] .statgrid p{color:#A0A4AA}
+
+  /* ===== CTA ===== */
+  .ctaband{background:var(--band2);padding:78px 0;text-align:center}
+  .ctaband h2{font-size:50px;line-height:1.04;font-weight:800;letter-spacing:-.035em;max-width:760px;margin:0 auto}
+  .ctaband p{font-size:17px;color:var(--muted);margin:18px auto 28px;max-width:560px}
+
+  /* ===== FAQ ===== */
+  .faq{display:grid;grid-template-columns:420px 1fr;gap:64px}
+  .faq h2{font-size:40px;line-height:1.06;font-weight:800;letter-spacing:-.03em;margin:14px 0 0}
+  .q{border-top:1px solid var(--line);padding:20px 0}
+  .q:last-child{border-bottom:1px solid var(--line)}
+  .q b{font-size:17px;font-weight:700}
+  .q p{font-size:14.5px;line-height:1.6;color:var(--muted);margin-top:8px}
+
+  /* ===== FOOTER ===== */
+  footer{background:var(--bg3);color:#F4F4F2;padding:58px 0 30px}
+  .footmark{font-size:96px;line-height:.9;font-weight:800;letter-spacing:-.045em;color:transparent;
+    -webkit-text-stroke:1.5px rgba(255,255,255,.34);text-align:center}
+  .footcols{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;border-top:1px solid var(--line2);
+    margin-top:40px;padding-top:26px}
+  .footcols h5{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#868A91;margin-bottom:12px}
+  .footcols a{display:block;font-size:14px;color:#C6C8CC;text-decoration:none;padding:4px 0}
+  .footbar{display:flex;justify-content:space-between;border-top:1px solid var(--line2);margin-top:30px;padding-top:18px;
+    font-size:12.5px;color:#868A91}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap navin">
+    <div class="logo">PostulaDo</div>
+    <div class="navlinks"><a href="#">Producto</a><a href="#">Cómo funciona</a><a href="#">Ejemplo real</a><a href="#">Precios</a></div>
+    <div class="navcta"><span class="btn btn-ghost">Entrar</span><span class="btn btn-accent">Ver mi plan</span></div>
+  </div>
+</nav>
+
+<!-- ===== HERO CON LA LENTE Y EL HAZ ===== -->
+<header class="optical">
+  <div class="lensgrid"></div>
+  <div class="beam">
+    <i class="bloom"></i>
+    <i class="ray" style="--c:#2563EB;--r:-6deg"></i>
+    <i class="ray" style="--c:#22D3EE;--r:-4deg"></i>
+    <i class="ray" style="--c:#A5F3FC;--r:-2.2deg"></i>
+    <i class="ray" style="--c:#FBCFE8;--r:-.4deg"></i>
+    <i class="ray" style="--c:#E879F9;--r:1.4deg"></i>
+    <i class="ray" style="--c:#FB923C;--r:3deg"></i>
+    <i class="ray" style="--c:#F59E0B;--r:4.4deg"></i>
+    <i class="core"></i>
+  </div>
+  <div class="flare"></div>
+  <div class="wrap hero">
+    <div class="chips">
+      <span class="chip">Para profesionales de IT en búsqueda activa</span>
+    </div>
+    <h1>Dejá de adivinar<br><span class="planword">qué estudiar</span>.</h1>
+    <p class="sub">Las ofertas que estás mirando ya dicen qué tenés que saber. El problema es que están separadas. Leídas juntas, te dicen por dónde empezar.</p>
+
+    <div class="ingest">
+      <div class="ih"><span>Ofertas (URL)</span><span>5 líneas · ejemplo</span></div>
+      <div class="ib">
+        <div class="u"><i>01</i>https://example.com/jobs/cloud-sre</div>
+        <div class="u"><i>02</i>https://example.com/jobs/platform-eng</div>
+        <div class="u"><i>03</i>https://example.com/jobs/aws-cloud</div>
+        <div class="u"><i>04</i>https://example.com/jobs/devops-lead</div>
+        <div class="u"><i>05</i>https://example.com/jobs/k8s-infra</div>
+      </div>
+      <div class="if">
+        <span class="gets"><b>Vas a obtener:</b> el tipo de trabajo que comparten, los temas que lo cubren y por cuál empezar.</span>
+        <span class="btn btn-spec btn-caustic">Ver mi plan</span>
+      </div>
+    </div>
+    <div class="micro">Sin cuenta para probar · El análisis corre en background mientras seguís buscando</div>
+  </div>
+</header>
+
+<!-- ===== CAPTURA ===== -->
+<section class="band" style="padding-top:70px">
+  <div class="wrap">
+    <div class="shotcard" style="margin:0 auto">
+      <div class="shotbar"><i></i><i></i><i></i></div>
+      <div class="shotbody">
+        <div class="shotnav">
+          <a class="on" href="#">Mi plan</a><a href="#">Ofertas (5)</a><a href="#">Temas</a><a href="#">Alternativas</a><a href="#">Brechas</a>
+        </div>
+        <div class="shotmain">
+          <h3>Plan de estudio</h3>
+          <div class="sm">Lote de 5 ofertas · Cloud Engineering · analizado el 06.11.2026</div>
+          <div class="srow"><div><div>Pruebas automatizadas</div><div class="bar"><i style="width:100%"></i></div></div><div class="pct">100%</div><div class="alt">JUnit · Vitest</div></div>
+          <div class="srow"><div><div>Integración y entrega continua</div><div class="bar"><i style="width:80%"></i></div></div><div class="pct">80%</div><div class="alt">GH Actions · GitLab</div></div>
+          <div class="srow"><div><div>Despliegue en la nube</div><div class="bar"><i style="width:60%"></i></div></div><div class="pct">60%</div><div class="alt">AWS · Azure</div></div>
+          <div class="srow"><div><div>Observabilidad</div><div class="bar"><i style="width:40%"></i></div></div><div class="pct">40%</div><div class="alt">OTel · Grafana</div></div>
+          <div class="srow"><div><div>Orquestación</div><div class="bar"><i style="width:20%"></i></div></div><div class="pct">20%</div><div class="alt">K8s · ECS</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TECNOLOGIAS ===== -->
+<div class="strip">
+  <div class="wrap">
+    <p>Reconoce 35 tecnologías y las agrupa en el oficio al que apuntan — no solo en el nombre del producto:</p>
+    <div class="techrow">
+      <span class="tech">React</span><span class="tech">NestJS</span><span class="tech">TypeScript</span><span class="tech">PostgreSQL</span>
+      <span class="tech">Redis</span><span class="tech">Docker</span><span class="tech">Kubernetes</span><span class="tech">AWS</span>
+      <span class="tech">Azure</span><span class="tech">GCP</span><span class="tech">GraphQL</span><span class="tech">CI/CD</span>
+      <span class="tech">Python</span><span class="tech">Django</span><span class="tech">FastAPI</span><span class="tech">Golang</span>
+      <span class="tech">Rust</span><span class="tech">Java</span><span class="tech">Spring Boot</span><span class="tech">MySQL</span>
+      <span class="tech">MongoDB</span><span class="tech">Tailwind</span><span class="tech">Jest</span><span class="tech">Cypress</span>
+      <span class="tech">Next.js</span><span class="tech">Vue</span><span class="tech">Angular</span><span class="tech">Node.js</span>
+      <span class="tech">Git</span><span class="tech">REST</span><span class="tech">PHP</span><span class="tech">Ruby</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PASOS ===== -->
+<section class="band">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow">Cómo funciona</div>
+      <h2>Tres pasos y un denominador<br>siempre a la vista</h2>
+      <p>El trabajo pesado —leer, extraer, agrupar, contar— ocurre en el servidor mientras seguís buscando ofertas.</p>
+    </div>
+    <div class="grid3">
+      <div class="card"><div class="n">01</div><div class="ico">↳</div><h3>Juntá el lote</h3><p>Pegá las URLs de las ofertas que te interesan. Cinco, diez, las que tengas: no hace falta ordenarlas.</p></div>
+      <div class="card"><div class="n">02</div><div class="ico">◎</div><h3>Dejá que lo lea</h3><p>PostulaDo scrapea cada posting, extrae los requisitos y agrupa el lote por ecosistema de trabajo.</p></div>
+      <div class="card"><div class="n">03</div><div class="ico">▤</div><h3>Recibe el plan</h3><p>Los temas con su cobertura y sus alternativas. Guardá el plan y compará el próximo lote contra este.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EL PATRON ===== -->
+<section class="band dark">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow">Paso 01 · El patrón</div>
+      <h2>No comparten herramientas.<br>Comparten <span class="spec-text">ecosistema</span>.</h2>
+      <p>Cinco ofertas de cinco empresas piden React, Go, Terraform y Kubernetes. Leídas por separado son cuatro planes distintos. Leídas juntas, son un solo tipo de trabajo.</p>
+    </div>
+    <div class="converge">
+      <div class="post">
+        <div class="r"><span class="i">01</span><span>Site Reliability Engineer</span><span class="co">Norte fintech</span><span class="st">4 temas</span></div>
+        <div class="r"><span class="i">02</span><span>Platform Engineer</span><span class="co">Pampa SaaS</span><span class="st">4 temas</span></div>
+        <div class="r"><span class="i">03</span><span>Cloud Infrastructure Engineer</span><span class="co">Delta Sur</span><span class="st">3 temas</span></div>
+        <div class="r"><span class="i">04</span><span>DevOps Lead</span><span class="co">Taller Norte</span><span class="st">3 temas</span></div>
+        <div class="r"><span class="i">05</span><span>Infrastructure Developer</span><span class="co">Kobalto</span><span class="st">2 temas</span></div>
+      </div>
+      <div class="eco">
+        <div class="lab">Tipo de trabajo detectado</div>
+        <h3>Cloud Engineering</h3>
+        <p>El agrupamiento no se basa en coincidencias de stacks: se basa en <span style="color:#22D3EE">hacia dónde apuntan</span>. Las cinco postings describen el mismo oficio, con cinco vocabularios técnicos encima.</p>
+        <div class="barr">
+          <i style="width:100%;background:#2563EB"></i><i style="width:80%;background:#22D3EE"></i>
+          <i style="width:60%;background:#E879F9"></i><i style="width:40%;background:#FB923C"></i><i style="width:20%;background:#F59E0B"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EL PRISMA: EL MECANISMO ===== -->
+<section class="band">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow">Paso 02 · La dispersión</div>
+      <h2>Una luz, cinco colores</h2>
+      <p>El lote entra como luz blanca y sale descompuesto en los temas que lo cubren. Cada rayo es un tema; el largo del rayo es el porcentaje de ofertas que lo piden.</p>
+    </div>
+    <div class="prismwrap">
+      <div class="cap"><span>Fig. 2 — Dispersión del lote de 5 ofertas</span><span>Cloud Engineering</span></div>
+      <svg viewBox="0 0 1130 250" role="img" aria-label="Un haz blanco entra a un prisma y sale disperso en cinco rayos de colores: pruebas, integración y entrega, despliegue, observabilidad y orquestación.">
+        <defs>
+          <linearGradient id="ray" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".15"/></linearGradient>
+        </defs>
+        <line x1="0" y1="125" x2="300" y2="125" stroke="url(#ray)" stroke-width="5"/>
+        <text x="18" y="108" fill="#8C8E92" font-size="12" font-family="system-ui" letter-spacing="1.5">EL LOTE · 5 OFERTAS</text>
+        <polygon points="300,60 300,190 400,125" fill="none" stroke="rgba(22,24,26,.35)" stroke-width="1.5"/>
+        <line x1="400" y1="125" x2="470" y2="125" stroke="rgba(22,24,26,.2)" stroke-width="1" stroke-dasharray="4 4"/>
+        <g stroke-width="3" stroke-linecap="round">
+          <line x1="400" y1="125" x2="1040" y2="16"  stroke="#2563EB"/>
+          <line x1="400" y1="125" x2="1040" y2="62"  stroke="#22D3EE"/>
+          <line x1="400" y1="125" x2="1040" y2="108" stroke="#C084FC"/>
+          <line x1="400" y1="125" x2="1040" y2="154" stroke="#E879F9"/>
+          <line x1="400" y1="125" x2="1040" y2="200" stroke="#FB923C"/>
+        </g>
+        <g fill="#16181A" font-family="system-ui">
+          <text x="1056" y="16"  font-size="13" font-weight="700" dy="-6">Pruebas</text>
+          <text x="1056" y="62"  font-size="13" font-weight="700" dy="-6">CI / CD</text>
+          <text x="1056" y="108" font-size="13" font-weight="700" dy="-6">Despliegue</text>
+          <text x="1056" y="154" font-size="13" font-weight="700" dy="-6">Observabilidad</text>
+          <text x="1056" y="200" font-size="13" font-weight="700" dy="-6">Orquestación</text>
+        </g>
+        <g font-family="ui-monospace,Consolas,monospace" font-size="12" fill="#8C8E92">
+          <text x="1056" y="16"  dy="10">100%</text>
+          <text x="1056" y="62"  dy="10">80%</text>
+          <text x="1056" y="108" dy="10">60%</text>
+          <text x="1056" y="154" dy="10">40%</text>
+          <text x="1056" y="200" dy="10">20%</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PLAN ===== -->
+<section class="band" style="padding-top:0">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow">Paso 03 · Los temas</div>
+      <h2>Lo que las cinco<br>ofertas tienen en común</h2>
+      <p>No tools sueltas. Los temas que el lote pide en común, ordenados por la parte del oficio que cubren — con el porcentaje de ofertas que los piden a la vista.</p>
+    </div>
+    <div class="planrow">
+      <div class="plan"><div class="ph"><h4>Pruebas automatizadas</h4><div class="pctv" style="color:#2563EB">5 de 5 · 100%</div></div><div class="why">Verificar el comportamiento, no compilarlo.</div><div class="alts"><span>JUnit</span><span>Vitest</span><span>Playwright</span><span>Pytest</span></div></div>
+      <div class="plan"><div class="ph"><h4>Integración y entrega continua</h4><div class="pctv" style="color:#E879F9">4 de 5 · 80%</div></div><div class="why">El camino del commit a producción.</div><div class="alts"><span>GitHub Actions</span><span>GitLab CI</span><span>Jenkins</span></div></div>
+      <div class="plan"><div class="ph"><h4>Despliegue en la nube</h4><div class="pctv" style="color:#FB923C">3 de 5 · 60%</div></div><div class="why">Levantar, versionar y revertir.</div><div class="alts"><span>AWS</span><span>Azure</span><span>GCP</span><span>Cloudflare</span></div></div>
+      <div class="plan"><div class="ph"><h4>Observabilidad</h4><div class="pctv" style="color:#22D3EE">2 de 5 · 40%</div></div><div class="why">Saber qué está pasando cuando falla.</div><div class="alts"><span>OpenTelemetry</span><span>Datadog</span><span>Grafana</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section class="stats">
+  <div class="wrap statgrid">
+    <div><b>5</b><span>Ofertas en el lote</span><p>El denominador de todos los porcentajes. Nunca implícito.</p></div>
+    <div><b>4</b><span>Temas cubren el 80%</span><p>Cuatro temas, no treinta y cinco herramientas.</p></div>
+    <div><b>0</b><span>Vendor obligatorio</span><p>Cada tema trae alternativas. La única decisión es por cuál entrás.</p></div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="ctaband">
+  <div class="wrap">
+    <div class="spectrule"></div>
+    <h2>Pegá cinco ofertas.<br>Salí con un plan.</h2>
+    <p>Sin cuenta para probar. El análisis corre en background y te avisa cuando está.</p>
+    <span class="btn btn-spec">Analizar mi lote</span>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="band">
+  <div class="wrap faq">
+    <div>
+      <div class="eyebrow">Notas</div>
+      <h2>Lo que la correlación<br>no dice</h2>
+      <p class="muted" style="font-size:16px;line-height:1.6;margin-top:16px">Un plan sale de lo que el mercado pidió, no de lo que va a pedir. PostulaDo te muestra de dónde viene cada porcentaje y deja las brechas a la vista.</p>
+    </div>
+    <div>
+      <div class="q"><b>¿Esto reemplaza saber una herramienta concreta?</b><p>No. Te dice qué temas cubren más ofertas y, por cada tema, las alternativas que existen. Con eso elegís por dónde entrar según lo que tu trabajo ya tiene.</p></div>
+      <div class="q"><b>¿De dónde salen los porcentajes?</b><p>De tu lote. Cada cobertura cuenta cuántas de las ofertas que pegaste piden ese tema. El lote siempre está a la vista, porque un porcentaje sin denominador no significa nada.</p></div>
+      <div class="q"><b>¿Y si dos postings piden temas contradictorios?</b><p>Quedan a la vista. Si el 40% pide AWS y el 40% pide Azure, no escondemos ninguna: el tema es uno solo, la alternativa es decisión tuya.</p></div>
+      <div class="q"><b>¿Puedo empezar con pocas ofertas?</b><p>Sí. Con cinco ya se ve un patrón. El lote crece y los porcentajes se recalculan; cada plan queda guardado para comparar contra el siguiente.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footmark">PostulaDo</div>
+    <div class="footcols">
+      <div><h5>Producto</h5><a href="#">Cómo funciona</a><a href="#">Precios</a><a href="#">Changelog</a></div>
+      <div><h5>Recursos</h5><a href="#">Guía de campos</a><a href="#">Cómo leer un plan</a><a href="#">FAQ</a></div>
+      <div><h5>Empresa</h5><a href="#">Sobre el proyecto</a><a href="#">Privacidad</a><a href="#">Contacto</a></div>
+      <div><h5>Estado</h5><a href="#">SGLang: operativo</a><a href="#">Colas: sin retraso</a><a href="#">Ejemplo: 5 ofertas</a></div>
+    </div>
+    <div class="footbar"><span>© 2026 PostulaDo</span><span>Hecho para quienes necesitan ganarse un sueldo</span><span>Español · AR</span></div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — Comparativa de CTA</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;height:900px;background:#0E0F12;color:#EDE9E0;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:34px 32px}
+  h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .sub{font-size:14px;color:#8E9098;margin-top:7px;margin-bottom:26px}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .col h2{font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9C6BF;
+    display:flex;align-items:center;gap:9px}
+  .col h2 i{width:9px;height:9px;border-radius:50%;background:#4E8FE8;display:block}
+  .col h2 em{font-style:normal;font-size:12px;letter-spacing:.04em;text-transform:none;color:#8E9098;font-weight:400}
+  .crop{width:100%;height:290px;overflow:hidden;position:relative;margin-top:12px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.12)}
+  .crop img{position:absolute;image-rendering:auto}
+  .zoom{width:100%;height:190px;overflow:hidden;position:relative;margin-top:12px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.12)}
+  .zoom img{position:absolute}
+  .cap{font-size:12.5px;color:#8E9098;margin-top:10px;line-height:1.45}
+  .cap b{color:#DCD9D2;font-weight:600}
+  .foot{margin-top:22px;border-top:1px solid rgba(255,255,255,.12);padding-top:14px;display:flex;
+    justify-content:space-between;font-size:12px;color:#6E7078;letter-spacing:.04em}
+</style>
+</head>
+<body>
+  <h1>Tratamiento del CTA — mismo haz, tres llamadas a la acción</h1>
+  <p class="sub">El haz es idéntico en las tres. Lo que cambia es dónde vive el color y cuánto.</p>
+
+  <div class="cols">
+    <div class="col">
+      <h2><i></i>Espectro <em>A</em></h2>
+      <div class="crop"><img src="../cta-spec.png" style="width:1224px;left:-663px;top:-357px"></div>
+      <div class="zoom"><img src="../cta-spec.png" style="width:4090px;left:-2528px;top:-1903px"></div>
+      <p class="cap"><b>Todo el color en el botón.</b> Es el punto más saturado de la página: el ojo va directo a la acción. El haz queda arriba, como luz de fondo. Es el más llamativo y el menos discreto.</p>
+    </div>
+
+    <div class="col">
+      <h2><i style="background:#D9542B"></i>Tinta + filete <em>B</em></h2>
+      <div class="crop"><img src="../cta-ink.png" style="width:1224px;left:-663px;top:-357px"></div>
+      <div class="zoom"><img src="../cta-ink.png" style="width:4090px;left:-2528px;top:-1903px"></div>
+      <p class="cap"><b>Botón de tinta, spectrum en el filete.</b> El color aparece recién cuando lo mirás de cerca. Es el más serio y el que mejor sostiene la promesa sin gritar.</p>
+    </div>
+
+    <div class="col">
+      <h2><i style="background:#D9542B"></i>Terracota + filete <em>C</em></h2>
+      <div class="crop"><img src="../cta-terracotta.png" style="width:1224px;left:-663px;top:-357px"></div>
+      <div class="zoom"><img src="../cta-terracotta.png" style="width:4090px;left:-2528px;top:-1903px"></div>
+      <p class="cap"><b>Botón terracota, spectrum debajo.</b> Conserva el color de marca de siempre y deja el prisma como un detalle. El más cercano a la referencia que me mandaste.</p>
+    </div>
+  </div>
+
+  <div class="foot"><span>PostulaDo · lente + dispersión · Papel</span><span>El haz no cambia en ninguna: es el mecanismo, no la decoración</span><span>3 / 3</span></div>
+</body>
+</html>

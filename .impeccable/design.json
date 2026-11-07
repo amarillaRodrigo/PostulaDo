@@ -1,0 +1,449 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T00:00:00Z",
+  "title": "Design System: PostulaDo",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Papel cálido",
+        "canonical": "#f5f3ee",
+        "tonalRamp": [
+          "#2b2a26",
+          "#4e4c46",
+          "#747169",
+          "#9a978e",
+          "#b6b3aa",
+          "#d5d2c9",
+          "#e6e3db",
+          "#f8f6f1"
+        ]
+      },
+      "paper-raised": {
+        "role": "neutral",
+        "displayName": "Papel elevado",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#000000",
+          "#141517",
+          "#26282b",
+          "#3a3d41",
+          "#55585d",
+          "#787c82",
+          "#a4a8ad",
+          "#ffffff"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#16181a",
+        "tonalRamp": [
+          "#000000",
+          "#141517",
+          "#26282b",
+          "#3a3d41",
+          "#55585d",
+          "#787c82",
+          "#a4a8ad",
+          "#d9dbde"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Tinta suave",
+        "canonical": "#61656b",
+        "tonalRamp": [
+          "#1b1d20",
+          "#333639",
+          "#4d5155",
+          "#61656b",
+          "#8a8d92",
+          "#b0b2b6",
+          "#d0d2d5",
+          "#eceef0"
+        ]
+      },
+      "terracotta": {
+        "role": "primary",
+        "displayName": "Terracota",
+        "canonical": "#d9542b",
+        "tonalRamp": [
+          "#3d1408",
+          "#6b2210",
+          "#9a3118",
+          "#c24020",
+          "#d9542b",
+          "#e47a58",
+          "#f0a488",
+          "#f8d3c2"
+        ]
+      },
+      "sage": {
+        "role": "secondary",
+        "displayName": "Salvia",
+        "canonical": "#cfe0c9",
+        "tonalRamp": [
+          "#24331f",
+          "#3d5736",
+          "#5c7d52",
+          "#7ea471",
+          "#9bb68e",
+          "#b8cdad",
+          "#d0e0c9",
+          "#edf3ea"
+        ]
+      },
+      "periwinkle": {
+        "role": "secondary",
+        "displayName": "Periwinkle",
+        "canonical": "#dcdff2",
+        "tonalRamp": [
+          "#26293f",
+          "#414663",
+          "#62678b",
+          "#858ab0",
+          "#a4a9c9",
+          "#c0c4dd",
+          "#d6d9ec",
+          "#f0f1f8"
+        ]
+      },
+      "lens-light": {
+        "role": "neutral",
+        "displayName": "Lente clara",
+        "canonical": "#c9c2b2",
+        "tonalRamp": [
+          "#322f29",
+          "#555046",
+          "#7b7568",
+          "#a49d8e",
+          "#c9c2b2",
+          "#d5cfc1",
+          "#e6e1d6",
+          "#f6f3ec"
+        ]
+      },
+      "spectrum-blue": {
+        "role": "tertiary",
+        "displayName": "Espectro azul",
+        "canonical": "#2563eb",
+        "tonalRamp": [
+          "#0a1c52",
+          "#123394",
+          "#1b4bd6",
+          "#2563eb",
+          "#4f80f0",
+          "#85a6f5",
+          "#bacdf9",
+          "#e4ecfd"
+        ]
+      },
+      "spectrum-cyan": {
+        "role": "tertiary",
+        "displayName": "Espectro cian",
+        "canonical": "#22d3ee",
+        "tonalRamp": [
+          "#0b3f47",
+          "#0f6f80",
+          "#149fb9",
+          "#22d3ee",
+          "#5adff2",
+          "#93e9f7",
+          "#c2f2fa",
+          "#e9fbfd"
+        ]
+      },
+      "spectrum-magenta": {
+        "role": "tertiary",
+        "displayName": "Espectro magenta",
+        "canonical": "#e879f9",
+        "tonalRamp": [
+          "#4c114f",
+          "#7f1f85",
+          "#b04cb3",
+          "#e879f9",
+          "#ee97fa",
+          "#f3b5fc",
+          "#f9d3fd",
+          "#fdeefe"
+        ]
+      },
+      "spectrum-violet": {
+        "role": "tertiary",
+        "displayName": "Espectro violeta",
+        "canonical": "#c084fc",
+        "tonalRamp": [
+          "#3c1a5e",
+          "#5f2d8e",
+          "#8540b8",
+          "#c084fc",
+          "#cca4fd",
+          "#dcc4fe",
+          "#ede1ff",
+          "#f7f1ff"
+        ]
+      },
+      "spectrum-orange": {
+        "role": "tertiary",
+        "displayName": "Espectro naranja",
+        "canonical": "#fb923c",
+        "tonalRamp": [
+          "#522000",
+          "#8a3a08",
+          "#bc550f",
+          "#e07016",
+          "#fb923c",
+          "#fcae6d",
+          "#fdca9b",
+          "#feebd5"
+        ]
+      },
+      "spectrum-amber": {
+        "role": "tertiary",
+        "displayName": "Espectro ámbar",
+        "canonical": "#f59e0b",
+        "tonalRamp": [
+          "#523500",
+          "#8a5a00",
+          "#c28300",
+          "#edaa00",
+          "#f59e0b",
+          "#f7bc4d",
+          "#f9d488",
+          "#fdf0ce"
+        ]
+      },
+      "terracotta-ink": {
+        "role": "primary",
+        "displayName": "Terracota de texto",
+        "canonical": "#a83c18",
+        "tonalRamp": [
+          "#2d0e05",
+          "#4d170b",
+          "#6b2210",
+          "#8a2f14",
+          "#a83c18",
+          "#c25f42",
+          "#d98a74",
+          "#e9b9a8"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Titular del hero y del cierre, siempre en dos líneas centradas."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Titulares de sección, centrados, sin etiqueta encima."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Títulos de tarjeta y de tema."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prosa y explicaciones. Medida máxima 65ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Etiquetas de campo y rótulos. Nunca como kicker sobre un titular."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "URLs, porcentajes, medidas e identificadores. Cifras tabulares."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient",
+        "value": "0 1px 2px rgba(22,24,26,.04), 0 8px 24px rgba(22,24,26,.06)",
+        "purpose": "Tarjetas sobre papel. Planas en reposo."
+      },
+      {
+        "name": "lift",
+        "value": "0 18px 48px rgba(22,24,26,.12)",
+        "purpose": "El shotcard del producto, que flota sobre la sección."
+      },
+      {
+        "name": "hero",
+        "value": "0 24px 60px rgba(0,0,0,.35)",
+        "purpose": "El panel del formulario sobre la lente. La única sombra profunda del sistema."
+      }
+    ],
+    "motion": [
+      {
+        "name": "beam-drift",
+        "value": "28s ease-in-out infinite",
+        "purpose": "Deriva lenta del haz de la lente. El momento autorado del sistema."
+      },
+      {
+        "name": "caustic-breathe",
+        "value": "7s ease-in-out infinite",
+        "purpose": "El derrame espectral del botón respira; se apaga en disabled."
+      },
+      {
+        "name": "state",
+        "value": "160ms ease",
+        "purpose": "Transiciones de estado de los controles."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "lg",
+        "value": "1080px"
+      },
+      {
+        "name": "md",
+        "value": "860px"
+      },
+      {
+        "name": "sm",
+        "value": "520px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "La acción principal: placa de tinta, sin sombra, con foco de anillo azul.",
+      "html": "<button class=\"ds-btn-primary\">Ver mi plan</button>",
+      "css": ".ds-btn-primary { background: #16181a; color: #f5f3ee; border: 1px solid transparent; border-radius: 10px; padding: 10px 18px; font: 600 14px/1.2 Geist, system-ui, sans-serif; cursor: pointer; transition: background 160ms ease; } .ds-btn-primary:hover { background: #000; } .ds-btn-primary:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; border-radius: 10px; }"
+    },
+    {
+      "name": "Botón cáustica",
+      "kind": "button",
+      "refersTo": "button-caustic",
+      "description": "El CTA que refracta la luz: filete espectral en el canto y derrame debajo.",
+      "html": "<button class=\"ds-btn-caustic\">Ver mi plan</button>",
+      "css": ".ds-btn-caustic { position: relative; isolation: isolate; overflow: visible; background: #16181a; color: #f5f3ee; border: 1px solid transparent; border-radius: 10px; padding: 10px 18px; font: 600 14px/1.2 Geist, system-ui, sans-serif; cursor: pointer; } .ds-btn-caustic::before { content: ''; position: absolute; left: 12px; right: 12px; bottom: -10px; height: 22px; border-radius: 12px; background: linear-gradient(100deg,#2563eb,#22d3ee,#ffffff,#e879f9,#c084fc,#fb923c,#f59e0b); filter: blur(11px); opacity: .5; z-index: -1; animation: ds-breathe 7s ease-in-out infinite; } .ds-btn-caustic::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 2px; height: 2px; border-radius: 2px; background: linear-gradient(100deg,#2563eb,#22d3ee,#ffffff,#e879f9,#c084fc,#fb923c,#f59e0b); opacity: .95; } .ds-btn-caustic:hover { background: #000; } .ds-btn-caustic:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; } @keyframes ds-breathe { 0%,100% { opacity: .45; } 50% { opacity: .72; } }"
+    },
+    {
+      "name": "Botón fantasma",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Acción secundaria: sólo borde.",
+      "html": "<button class=\"ds-btn-ghost\">Entrar</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #16181a; border: 1px solid rgba(22,24,26,.10); border-radius: 10px; padding: 10px 18px; font: 600 14px/1.2 Geist, system-ui, sans-serif; cursor: pointer; transition: border-color 160ms ease; } .ds-btn-ghost:hover { border-color: #16181a; } .ds-btn-ghost:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Campo con label real, placeholder tintado y anillo de foco azul.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-email\">Correo</label><input id=\"ds-email\" class=\"ds-input\" type=\"email\" placeholder=\"vos@ejemplo.com\">",
+      "css": ".ds-field-label { display: block; font: 700 11px/1 Geist, system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #61656b; margin-bottom: 6px; } .ds-input { width: 100%; padding: 11px 13px; border: 1px solid rgba(22,24,26,.10); border-radius: 8px; background: #fff; color: #16181a; font: 400 16px/1.4 Geist, system-ui, sans-serif; caret-color: #2563eb; } .ds-input::placeholder { color: #61656b; opacity: 1; } .ds-input:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip de tecnología",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Tecnología reconocida, en mono, como dato y no como acción.",
+      "html": "<span class=\"ds-chip\">TypeScript</span>",
+      "css": ".ds-chip { display: inline-block; border: 1px solid rgba(22,24,26,.10); background: #fff; border-radius: 8px; padding: 6px 11px; font: 400 12.5px/1.2 Consolas, 'Courier New', monospace; color: #61656b; }"
+    },
+    {
+      "name": "Tarjeta de tema",
+      "kind": "card",
+      "refersTo": "card-plan",
+      "description": "Un tema con su cobertura y sus alternativas. El color va en el swatch, nunca en una franja lateral.",
+      "html": "<article class=\"ds-plan\"><div class=\"ds-plan-head\"><h3>Pruebas automatizadas</h3><span class=\"ds-plan-pct\"><i></i>100%</span></div><p>Verificar el comportamiento, no compilarlo.</p><div class=\"ds-alts\"><span>JUnit</span><span>Vitest</span><span>Playwright</span></div></article>",
+      "css": ".ds-plan { position: relative; background: #fff; border: 1px solid rgba(22,24,26,.10); border-radius: 14px; padding: 22px; color: #16181a; } .ds-plan-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; } .ds-plan h3 { font: 700 18px/1.2 Geist, system-ui, sans-serif; margin: 0; } .ds-plan-pct { display: inline-flex; align-items: center; gap: 8px; font: 700 14px/1 Consolas, monospace; font-variant-numeric: tabular-nums; } .ds-plan-pct i { width: 10px; height: 10px; border-radius: 3px; background: #2563eb; } .ds-plan p { font: 400 13.5px/1.5 Geist, system-ui, sans-serif; color: #61656b; margin: 6px 0 14px; } .ds-alts { display: flex; flex-wrap: wrap; gap: 8px; } .ds-alts span { border: 1px solid rgba(22,24,26,.10); border-radius: 7px; padding: 5px 10px; font: 400 12.5px/1.2 Consolas, monospace; color: #61656b; }"
+    },
+    {
+      "name": "Navegación",
+      "kind": "nav",
+      "description": "Barra de 68px sobre papel translúcido, con el CTA de tinta a la derecha.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-logo\">PostulaDo</span><div class=\"ds-nav-links\"><a href=\"#\">Producto</a><a href=\"#\">Cómo funciona</a><a href=\"#\">Ejemplo real</a></div><button class=\"ds-nav-cta\">Ver mi plan</button></nav>",
+      "css": ".ds-nav { height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 0 32px; background: rgba(245,243,238,.86); border-bottom: 1px solid rgba(22,24,26,.10); backdrop-filter: blur(12px); } .ds-nav-logo { font: 800 19px/1 Geist, system-ui, sans-serif; letter-spacing: -0.02em; } .ds-nav-links { display: flex; gap: 28px; } .ds-nav-links a { font: 400 14px/1 Geist, system-ui, sans-serif; color: #61656b; text-decoration: none; } .ds-nav-links a:hover { color: #16181a; } .ds-nav-cta { background: #16181a; color: #f5f3ee; border: 0; border-radius: 10px; padding: 10px 18px; font: 600 14px/1.2 Geist, system-ui, sans-serif; cursor: pointer; } .ds-nav-cta:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }"
+    },
+    {
+      "name": "Prisma",
+      "kind": "custom",
+      "description": "El haz blanco entra, el prisma lo dispersa, y cada rayo es un tema cuyo largo es su cobertura.",
+      "html": "<figure class=\"ds-prism\"><figcaption class=\"ds-prism-cap\"><span>Ejemplo · dispersión de un lote de 5 ofertas</span><span>Cloud Engineering</span></figcaption><svg viewBox=\"0 0 1240 250\" role=\"img\" aria-label=\"Un haz blanco entra a un prisma y sale disperso en cinco rayos, uno por tema, con la cobertura de cada uno.\"><defs><linearGradient id=\"ds-in\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"125\" x2=\"300\" y2=\"125\"><stop offset=\"0\" stop-color=\"#ffffff\" stop-opacity=\"0.95\"/><stop offset=\"1\" stop-color=\"#ffffff\" stop-opacity=\"0.5\"/></linearGradient></defs><rect x=\"0\" y=\"120\" width=\"300\" height=\"10\" rx=\"5\" fill=\"url(#ds-in)\"/><polygon points=\"300,60 300,190 400,125\" fill=\"none\" stroke=\"rgba(22,24,26,.35)\" stroke-width=\"1.5\"/><line x1=\"400\" y1=\"125\" x2=\"940\" y2=\"16\" stroke=\"#2563eb\" stroke-width=\"3\" stroke-linecap=\"round\"/><line x1=\"400\" y1=\"125\" x2=\"832\" y2=\"62\" stroke=\"#22d3ee\" stroke-width=\"3\" stroke-linecap=\"round\"/><line x1=\"400\" y1=\"125\" x2=\"724\" y2=\"108\" stroke=\"#c084fc\" stroke-width=\"3\" stroke-linecap=\"round\"/><line x1=\"400\" y1=\"125\" x2=\"616\" y2=\"154\" stroke=\"#e879f9\" stroke-width=\"3\" stroke-linecap=\"round\"/><line x1=\"400\" y1=\"125\" x2=\"508\" y2=\"200\" stroke=\"#fb923c\" stroke-width=\"3\" stroke-linecap=\"round\"/><text x=\"1060\" y=\"16\" dy=\"-4\" fill=\"#16181a\" font-size=\"14\" font-weight=\"700\" font-family=\"Geist, system-ui, sans-serif\">Pruebas</text><text x=\"1060\" y=\"16\" dy=\"12\" fill=\"#61656b\" font-size=\"12\" font-family=\"Consolas, monospace\">100% · 5 de 5</text><text x=\"1060\" y=\"62\" dy=\"-4\" fill=\"#16181a\" font-size=\"14\" font-weight=\"700\" font-family=\"Geist, system-ui, sans-serif\">CI / CD</text><text x=\"1060\" y=\"108\" dy=\"-4\" fill=\"#16181a\" font-size=\"14\" font-weight=\"700\" font-family=\"Geist, system-ui, sans-serif\">Despliegue</text><text x=\"1060\" y=\"154\" dy=\"-4\" fill=\"#16181a\" font-size=\"14\" font-weight=\"700\" font-family=\"Geist, system-ui, sans-serif\">Orquestación</text><text x=\"1060\" y=\"200\" dy=\"-4\" fill=\"#16181a\" font-size=\"14\" font-weight\"700\" font-family=\"Geist, system-ui, sans-serif\">Backend</text></svg></figure>",
+      "css": ".ds-prism { margin: 0; background: radial-gradient(130% 130% at 22% -10%, #ded9cd 0%, #c2bcad 48%, #9a9486 100%); border: 1px solid rgba(22,24,26,.16); border-radius: 14px; padding: 26px 24px 12px; } .ds-prism-cap { display: flex; justify-content: space-between; margin-bottom: 6px; } .ds-prism-cap span { font: 700 11px/1 Geist, system-ui, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #61656b; } .ds-prism svg { display: block; width: 100%; height: auto; }"
+    },
+    {
+      "name": "Flujo de pasos",
+      "kind": "custom",
+      "description": "Tres pasos como una secuencia sobre una regla de 1px con nodos, no como tres tarjetas iguales.",
+      "html": "<ol class=\"ds-flow\"><li><span class=\"ds-flow-node\"></span><span class=\"ds-flow-n\">01</span><h3>Juntá el lote</h3><p>Pegá las URLs de las ofertas que te interesan.</p></li><li><span class=\"ds-flow-node\"></span><span class=\"ds-flow-n\">02</span><h3>Dejá que lo lea</h3><p>El servidor scrapea cada posting y agrupa el lote.</p></li><li><span class=\"ds-flow-node\"></span><span class=\"ds-flow-n\">03</span><h3>Recibe el plan</h3><p>Los temas con su cobertura y sus alternativas.</p></li></ol>",
+      "css": ".ds-flow { list-style: none; display: grid; grid-template-columns: repeat(3,1fr); position: relative; margin: 0; padding: 0; } .ds-flow::before { content: ''; position: absolute; left: 14%; right: 14%; top: 11px; height: 1px; background: rgba(22,24,26,.10); } .ds-flow li { position: relative; padding: 0 34px; } .ds-flow li:first-child { padding-left: 0; } .ds-flow li:last-child { padding-right: 0; } .ds-flow-node { display: block; width: 23px; height: 23px; margin-bottom: 18px; border: 1px solid #16181a; border-radius: 50%; background: #f5f3ee; position: relative; } .ds-flow-node::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: #d9542b; } .ds-flow-n { font: 700 12px/1 Consolas, monospace; color: #a83c18; } .ds-flow h3 { font: 700 19px/1.2 Geist, system-ui, sans-serif; margin: 6px 0 8px; } .ds-flow p { font: 400 14.5px/1.6 Geist, system-ui, sans-serif; color: #61656b; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Lente y el Prisma",
+    "overview": "PostulaDo se ve como un instrumento óptico, no como un sitio de producto. La idea que ordena todo: el usuario trae un lote de ofertas —información cruda, separada, sin leer— y el producto lo hace pasar por un prisma. La luz blanca entra, y sale descompuesta en los temas que la cubren. Esa es la metáfora del producto (de una bolsa de postings a un plan de estudio) y también la del diseño: el bundle de color no es un acento, es una física.\n\nEl papel cálido y la tinta profunda son el ground. Todo lo demás —la lente, el haz, la retícula, las barras— es material óptico: cristal, luz, cáusticas. La página no decora con luz; usa la luz para explicar el mecanismo. Por eso el único elemento policromático del sistema es el espectro, y por eso está racionado a tres usos.\n\nEl tono es serio sin ser frío. La persona que llega está buscando trabajo: no necesita que la alegren ni que la impresionen, necesita que le digan la verdad y le den un plan. Por eso no hay gradientes de vidrio, ni íconos genéricos, ni emojis, ni testimonios inventados: la credibilidad del producto sale de que los porcentajes son del lote de ella y el denominador está siempre a la vista.",
+    "keyCharacteristics": [
+      "Un solo gesto visual: la luz que se dispersa. Se repite, no se decora.",
+      "Papel y tinta como ground; el color llega sólo cuando significa algo.",
+      "El denominador es un dato de diseño, no un dato de negocio: nunca está oculto.",
+      "Nada de prueba social ni métricas de mercado que el producto no pueda respaldar."
+    ],
+    "rules": [
+      {
+        "name": "The Four-Use Rule",
+        "body": "El espectro aparece en exactamente cuatro lugares, y ninguno más: el haz de la lente, el relleno de las barras de cobertura, la cáustica del botón y el subrayado de la palabra del titular. Un quinto uso lo convierte en decoración.",
+        "section": "colors"
+      },
+      {
+        "name": "The Denominator Rule",
+        "body": "Todo porcentaje lleva su denominador al lado. Un número sin el lote al que corresponde es ruido, no información.",
+        "section": "colors"
+      },
+      {
+        "name": "The One-Ink Rule",
+        "body": "Los botones y los datos son tinta o papel. El color de marca sólo aparece en el acento de marca, nunca como relleno de una superficie grande.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Kicker Rule",
+        "body": "Ningún titular lleva una etiqueta o un eyebrow encima. El titular lleva su propio peso; los rótulos van debajo o al lado.",
+        "section": "typography"
+      },
+      {
+        "name": "The Data-Is-Mono Rule",
+        "body": "Si el texto es un dato —un porcentaje, una URL, un identificador— va en mono con cifras tabulares. Si es una frase, va en Geist.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Nada tiene sombra en reposo salvo que sea una capa sobre otra capa. Las sombras no son textura.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Border-Not-Shadow Rule",
+        "body": "Una tarjeta lleva borde de 1px o sombra, nunca las dos. El borde y la sombra juntos producen la 'carta fantasma'.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Opaque-Data Rule",
+        "body": "Un color de dato sobre papel tiene que pasar 4.5:1. Los dos stops claros del espectro (hielo, rubor) y el cian no sirven: los temas que los necesitan usan su propio valor opaco (cache #0e8fa8, ci #0e7490, frontend #d63a8a).",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do mostrá el denominador junto a cada porcentaje: '5 ofertas' al lado de '100%'.",
+      "Do rotulá como Ejemplo cualquier dataset que no venga de un lote real del usuario.",
+      "Do mantené el foco visible en todo control: anillo de 2px azul.",
+      "Do reduuí el largo del rayo del prisma al porcentaje, y el del texto al dato real.",
+      "Do derivá el número de tecnologías del extractor real, no de un número escrito a mano.",
+      "Do usá el espectro para marcar información (cobertura, dispersión, cáustica, subrayado del titular), nunca para decorar."
+    ],
+    "donts": [
+      "Don't pongas un eyebrow, un kicker o una etiqueta encima de un titular.",
+      "Don't uses texto con gradiente: el énfasis viene del peso o del tamaño.",
+      "Don't uses una franja de color de más de 1px en el borde de una tarjeta.",
+      "Don't uses caracteres unicode como íconos; los íconos se dibujan.",
+      "Don't inventes testimonios, logos de clientes, precios ni estadísticas de mercado.",
+      "Don't prometas análisis en background ni notificaciones que el producto no tiene.",
+      "Don't uses los dos stops claros del espectro como color de un dato sobre papel.",
+      "Don't muestres un porcentaje sin el lote al que corresponde."
+    ]
+  }
+}

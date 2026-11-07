@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — El cartel de cabaret</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;height:900px;overflow:hidden;background:#000;color:#f5d64c;
+    font-family:Impact,"Haettenschweiler","Arial Narrow Bold","Arial Black",sans-serif}
+  .lbl{font-size:13px;letter-spacing:.24em;text-transform:uppercase}
+  nav{height:66px;border-bottom:2px solid #f5d64c;display:flex;align-items:center;justify-content:space-between;padding:0 30px}
+  .mark{font-size:25px;letter-spacing:.14em;text-transform:uppercase;transform:rotate(-2deg)}
+  .links{display:flex;gap:30px;align-items:center}
+  .links a{font-size:14px;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;color:#f5d64c}
+  .go{background:#f5d64c;color:#000;padding:8px 18px;font-size:14px;letter-spacing:.16em;text-transform:uppercase}
+  main{display:grid;grid-template-columns:1fr 620px;gap:34px;padding:26px 30px 0}
+  .title{font-size:96px;line-height:.84;letter-spacing:.005em;text-transform:uppercase;transform:rotate(-1.6deg);
+    transform-origin:left top}
+  .title .l2{display:block;margin-left:52px}
+  .sub{font-size:17px;letter-spacing:.1em;text-transform:uppercase;line-height:1.45;margin-top:18px;max-width:520px}
+  .form{display:flex;gap:14px;align-items:flex-end;margin-top:26px}
+  .fld{flex:1}
+  .fld .lbl{display:block;margin-bottom:7px}
+  .fld .val{border:2px solid #f5d64c;padding:11px 13px;font-size:15px;color:#f5d64c;
+    font-family:"Courier New",Courier,monospace}
+  .eval{background:#f5d64c;color:#000;padding:13px 28px;font-size:16px;letter-spacing:.16em;text-transform:uppercase}
+  .prog{border-left:2px solid #f5d64c;padding-left:22px}
+  .prog h2{font-size:34px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
+  .row{display:grid;grid-template-columns:54px 1fr 150px 96px;gap:12px;align-items:start;
+    padding:11px 0;border-bottom:1px solid rgba(245,214,76,.42)}
+  .n{font-size:40px;line-height:.9;text-align:center;transform:rotate(-3deg)}
+  .r1{font-size:27px;line-height:1;letter-spacing:.01em}
+  .r2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin-top:5px;opacity:.8}
+  .st{font-size:13px;letter-spacing:.16em;text-transform:uppercase;border:2px solid #f5d64c;padding:3px 8px;
+    justify-self:start}
+  .tm{font-size:15px;letter-spacing:.1em;justify-self:end}
+  .struck{text-decoration:line-through;text-decoration-thickness:3px;opacity:.62}
+  .expanded{margin-top:12px;border:2px solid #f5d64c;padding:13px 15px}
+  .expanded .lbl{margin-bottom:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips span{border:1px solid #f5d64c;padding:4px 9px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+    font-family:"Courier New",Courier,monospace}
+  .panels{display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid #f5d64c;margin:24px 30px 0}
+  .panel{padding:16px 22px;border-right:2px solid #f5d64c}
+  .panel:last-child{border-right:0}
+  .panel h3{font-size:24px;letter-spacing:.05em;text-transform:uppercase}
+  .panel p{font-size:12.5px;line-height:1.5;letter-spacing:.03em;margin-top:8px;opacity:.86;
+    font-family:"Courier New",Courier,monospace}
+  footer{border-top:2px solid #f5d64c;margin-top:18px;padding:12px 30px;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<nav>
+  <div class="mark">PostulaDo</div>
+  <div class="links">
+    <a href="#">Programa</a><a href="#">Análisis</a><a href="#">Cartas</a><a href="#">Info</a>
+    <span class="go">Entrar</span>
+  </div>
+</nav>
+
+<main>
+  <section>
+    <h1 class="title">Hoy<span class="l2">Postulas</span></h1>
+    <p class="sub">El programa de esta noche: cada vacante que abrís, desarmada en lo que la empresa pide de verdad — y con tu carta al final.</p>
+    <div class="form">
+      <div class="fld">
+        <span class="lbl">Oferta (URL)</span>
+        <div class="val">https://example.com/jobs/nestjs-dev</div>
+      </div>
+      <div class="eval">Evaluar</div>
+    </div>
+  </section>
+
+  <section class="prog">
+    <h2>El programa</h2>
+    <div class="expanded">
+      <div class="lbl">Número 1 · en evaluation</div>
+      <div class="chips"><span>TypeScript</span><span>NestJS</span><span>PostgreSQL</span><span>Redis</span><span>Docker</span><span>3 años</span></div>
+    </div>
+    <div class="row"><div class="n">1</div>
+      <div><div class="r1">Senior Backend Engineer</div><div class="r2">Aurelia Fintech</div></div>
+      <div class="st">Enviado</div><div class="tm">12 días</div></div>
+    <div class="row"><div class="n">2</div>
+      <div><div class="r1 struck">Frontend Engineer</div><div class="r2">Kobalto</div></div>
+      <div class="st">Rechazado</div><div class="tm">19 días</div></div>
+    <div class="row"><div class="n">3</div>
+      <div><div class="r1">Data Analyst</div><div class="r2">Taller Norte</div></div>
+      <div class="st">Entrevista</div><div class="tm">4 días</div></div>
+    <div class="row"><div class="n">4</div>
+      <div><div class="r1 struck">Mobile Engineer</div><div class="r2">Pampa</div></div>
+      <div class="st">Rechazado</div><div class="tm">31 días</div></div>
+    <div class="row"><div class="n">5</div>
+      <div><div class="r1">Platform Engineer</div><div class="r2">Delta Sur</div></div>
+      <div class="st">Oferta</div><div class="tm">2 días</div></div>
+  </section>
+</main>
+
+<section class="panels">
+  <div class="panel"><h3>Análisis de enfoque</h3><p>Priorizá TypeScript por sobre infraestructura: la empresa separa backend de plataforma en la oferta.</p></div>
+  <div class="panel"><h3>Carta de presentación</h3><p>En el tono detectado — profesional y dinámico — y abriendo con el proyecto donde más pesa tu TypeScript.</p></div>
+  <div class="panel"><h3>CV optimizado</h3><p>Reordenado para ATS: competencias de TypeScript primero, infraestructura al final con su estado real.</p></div>
+</section>
+
+<footer>
+  <span class="lbl">PostulaDo · El programa de tus postulaciones</span>
+  <span class="lbl">Entrada 60 min · Sin datos inventados</span>
+</footer>
+</body>
+</html>

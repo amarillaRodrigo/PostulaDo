@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — El despiece · plano de estudio</title>
+<style>
+  :root{
+    --paper:#ECECE7; --sheet:#F8F8F5; --ink:#191A1C; --ink2:#5C5E62; --ink3:#8C8E92;
+    --blue:#2340C8; --grid:#DCDCD6; --dark:#161719;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;overflow:hidden;background:var(--paper);color:var(--ink);
+    font-family:"Bahnschrift","Bahnschrift SemiCondensed","DIN Alternate","Arial Narrow",Arial,sans-serif;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px}
+  .mono{font-family:Consolas,"Courier New",monospace}
+  .lbl{font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600}
+  .num{font-family:Consolas,"Courier New",monospace;font-size:12px;letter-spacing:.06em}
+  section{background:var(--paper)}
+  .pad{padding:0 64px}
+  .rule{height:1px;background:var(--ink);opacity:.28}
+  .rule-b{height:2px;background:var(--ink)}
+  .hair{height:1px;background:var(--ink);opacity:.16}
+
+  /* ---------- NAV ---------- */
+  nav{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 64px;
+    border-bottom:1px solid rgba(25,26,28,.22);background:var(--paper)}
+  .mark{font-size:22px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+  .links{display:flex;gap:30px;align-items:center}
+  .links a{font-size:13px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;color:var(--ink)}
+  .btn-solid{background:var(--ink);color:var(--paper);padding:9px 20px;font-size:13px;letter-spacing:.16em;text-transform:uppercase}
+  .btn-blue{background:var(--blue);color:#fff;padding:14px 30px;font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+
+  /* ---------- HERO ---------- */
+  .hero{display:grid;grid-template-columns:520px 1fr;gap:44px;padding:52px 64px 40px}
+  .eyebrow{display:flex;align-items:center;gap:10px;color:var(--blue)}
+  .eyebrow .bar{width:26px;height:2px;background:var(--blue)}
+  h1{font-size:60px;line-height:.98;font-weight:700;letter-spacing:-.005em;margin:16px 0 18px}
+  h1 .cut{color:var(--blue)}
+  .lede{font-size:17px;line-height:1.5;color:var(--ink2);max-width:470px}
+  .fieldblock{margin-top:26px;border:1px solid var(--ink);background:var(--sheet)}
+  .fieldblock .fb-head{display:flex;justify-content:space-between;align-items:center;
+    padding:9px 14px;border-bottom:1px solid var(--ink);opacity:.9}
+  .fb-body{padding:12px 14px}
+  .fb-body .u{font-family:Consolas,monospace;font-size:13px;color:var(--ink);padding:3px 0}
+  .fb-body .u span{color:var(--ink3)}
+  .fb-foot{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;
+    border-top:1px solid rgba(25,26,28,.28);gap:16px}
+  .fb-foot .note{font-size:11.5px;color:var(--ink2)}
+  .hero-meta{display:flex;gap:26px;margin-top:24px}
+  .hero-meta div{border-left:2px solid var(--ink);padding-left:11px}
+  .hero-meta b{display:block;font-family:Consolas,monospace;font-size:23px;letter-spacing:-.02em}
+  .hero-meta span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+
+  /* ---------- DESPIECE ---------- */
+  .drawing{position:relative;border:1px solid var(--ink);background:var(--sheet);height:560px;overflow:hidden}
+  .drawing svg{position:absolute;inset:0;width:100%;height:100%}
+  .plate{position:absolute;border:1px solid var(--ink);background:var(--sheet);padding:9px 12px}
+  .plate.core{border-width:2px;background:var(--ink);color:var(--paper)}
+  .plate.hot{border-color:var(--blue)}
+  .plate.hot::after{content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,rgba(35,64,200,.13) 0 2px,transparent 2px 7px)}
+  .plate .t{position:relative;z-index:1;font-size:14px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+  .plate .s{position:relative;z-index:1;font-family:Consolas,monospace;font-size:11px;letter-spacing:.04em;opacity:.72;margin-top:2px}
+  .plate.core .s{opacity:.75}
+  .balloon{position:absolute;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--blue);
+    color:var(--blue);display:flex;align-items:center;justify-content:center;font-family:Consolas,monospace;
+    font-size:13px;background:var(--sheet)}
+  .balloon.ink{border-color:var(--ink);color:var(--ink)}
+  .titleblock{position:absolute;left:0;bottom:0;right:0;border-top:2px solid var(--ink);
+    display:grid;grid-template-columns:repeat(5,1fr);background:var(--sheet)}
+  .titleblock div{border-right:1px solid rgba(25,26,28,.3);padding:8px 12px}
+  .titleblock div:last-child{border-right:0}
+  .titleblock b{display:block;font-family:Consolas,monospace;font-size:14px;letter-spacing:-.01em;margin-top:3px}
+  .draw-cap{position:absolute;top:12px;left:14px;color:var(--ink2)}
+
+  /* ---------- SECCION OSCURA ---------- */
+  .dark{background:var(--dark);color:#F2F2EE}
+  .dark .lbl{color:#8E9098}
+  .dark .rule{background:#3A3B3F}
+  .dark h2{font-size:44px;line-height:1.02;font-weight:700;letter-spacing:-.005em;margin:14px 0 16px}
+  .dark p{color:#A9ABB2;font-size:16px;line-height:1.55;max-width:480px}
+  .pat{display:grid;grid-template-columns:1fr 300px;gap:56px;padding:74px 64px;align-items:center}
+  .post{display:grid;grid-template-columns:1fr;gap:0}
+  .post .row{display:grid;grid-template-columns:22px 1fr 150px 90px;gap:12px;align-items:center;
+    padding:13px 0;border-bottom:1px solid #2E2F33}
+  .post .row .i{font-family:Consolas,monospace;font-size:12px;color:#6E7078}
+  .post .row .ti{font-size:16px}
+  .post .row .co{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8E9098}
+  .post .row .pc{font-family:Consolas,monospace;font-size:12px;color:#4E8FE8;text-align:right}
+  .converge{border:1px solid #3A3B3F;padding:26px 24px;position:relative}
+  .converge .cap{color:#8E9098}
+  .converge .eco{margin-top:12px;border:2px solid #4E8FE8;padding:16px 18px;background:#12233F}
+  .converge .eco b{display:block;font-size:26px;letter-spacing:.02em;margin-top:5px}
+  .converge .why{margin-top:20px;font-size:13px;color:#A9ABB2;line-height:1.55}
+  .converge .why i{color:#4E8FE8;font-style:normal}
+
+  /* ---------- INDICE DE PIEZAS ---------- */
+  .parts{padding:74px 64px 80px}
+  .sechead{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:30px}
+  .sechead h2{font-size:44px;line-height:1.02;font-weight:700;letter-spacing:-.005em;margin:12px 0 0}
+  .sechead p{color:var(--ink2);font-size:15.5px;line-height:1.55;max-width:400px}
+  table{width:100%;border-collapse:collapse;background:var(--sheet);border:1px solid var(--ink)}
+  thead th{text-align:left;padding:11px 16px;border-bottom:1px solid var(--ink);
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600}
+  tbody td{padding:14px 16px;border-bottom:1px solid rgba(25,26,28,.22);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  .pid{font-family:Consolas,monospace;font-size:13px;color:var(--blue)}
+  .pth{font-size:19px;font-weight:600;letter-spacing:.01em}
+  .pth small{display:block;font-weight:400;font-size:12px;color:var(--ink2);margin-top:3px;letter-spacing:.02em}
+  .cov{width:190px}
+  .cov .bar{height:11px;border:1px solid var(--ink);position:relative;background:
+    repeating-linear-gradient(45deg,rgba(35,64,200,.30) 0 2px,transparent 2px 6px)}
+  .cov .bar i{position:absolute;inset:0 auto 0 0;background:var(--blue)}
+  .cov .n{font-family:Consolas,monospace;font-size:13px;margin-top:5px;color:var(--ink2)}
+  .alt .a{display:inline-block;border:1px solid rgba(25,26,28,.38);padding:3px 9px;font-size:12.5px;margin:0 6px 5px 0;
+    font-family:Consolas,monospace}
+
+  /* ---------- ALTERNATIVAS ---------- */
+  .alts{background:#E7E9F4;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+  .alts .inner{display:grid;grid-template-columns:460px 1fr;gap:60px;padding:70px 64px;align-items:center}
+  .alts h2{font-size:42px;line-height:1.03;font-weight:700;margin:12px 0 16px}
+  .alts p{color:var(--ink2);font-size:16px;line-height:1.55}
+  .alts .pull{border-left:3px solid var(--blue);padding-left:16px;margin-top:22px;font-size:16px;line-height:1.5}
+  .altgrid{display:grid;gap:0}
+  .altgrid .r{display:grid;grid-template-columns:210px 1fr;gap:26px;padding:16px 0;border-bottom:1px solid rgba(25,26,28,.25)}
+  .altgrid .r:first-child{border-top:1px solid rgba(25,26,28,.25)}
+  .altgrid .th{font-size:15px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;padding-top:5px}
+  .altgrid .th small{display:block;font-family:Consolas,monospace;font-size:11px;color:var(--ink2);font-weight:400;margin-top:3px}
+  .altgrid .op{display:flex;flex-wrap:wrap;gap:8px}
+  .altgrid .op span{border:1px solid var(--ink);background:var(--sheet);padding:6px 12px;font-size:13.5px;
+    font-family:Consolas,monospace}
+
+  /* ---------- CAPTURA ---------- */
+  .shot{padding:74px 64px}
+  .shotbox{border:1px solid var(--ink);background:var(--sheet);display:grid;grid-template-columns:270px 1fr;
+    height:360px;overflow:hidden}
+  .shotnav{border-right:1px solid var(--ink);padding:18px 16px;background:var(--paper)}
+  .shotnav .n{padding:7px 0;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+  .shotnav .n.on{color:var(--ink);font-weight:600;border-left:2px solid var(--blue);padding-left:9px;margin-left:-11px}
+  .shotmain{padding:20px 24px;overflow:hidden}
+  .shotmain h3{font-size:24px;letter-spacing:.02em;margin-bottom:4px}
+  .shotmain .sm{font-size:12px;color:var(--ink2);margin-bottom:16px}
+  .shotrow{display:grid;grid-template-columns:34px 1fr 130px 150px;gap:12px;align-items:center;
+    padding:10px 0;border-bottom:1px solid rgba(25,26,28,.2)}
+  .shotrow .t{font-size:15px}
+  .shotrow .c{font-family:Consolas,monospace;font-size:13px;color:var(--blue);text-align:right}
+  .shotrow .a{font-size:12.5px;color:var(--ink2);text-align:right;font-family:Consolas,monospace}
+
+  /* ---------- CIFRAS ---------- */
+  .figs{background:var(--ink);color:var(--paper);padding:66px 64px}
+  .figs .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  .figs .cell{padding:0 40px;border-left:1px solid #3A3B3F}
+  .figs .cell:first-child{padding-left:0;border-left:0}
+  .figs b{display:block;font-family:Consolas,monospace;font-size:74px;line-height:.9;letter-spacing:-.05em}
+  .figs span{display:block;margin-top:12px;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#9A9CA2}
+  .figs p{margin-top:12px;font-size:13.5px;color:#8E9098;line-height:1.5}
+
+  /* ---------- PASOS ---------- */
+  .steps{padding:74px 64px}
+  .steprow{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--ink);background:var(--sheet)}
+  .step{padding:26px 26px 30px;border-right:1px solid var(--ink)}
+  .step:last-child{border-right:0}
+  .step .st{font-family:Consolas,monospace;font-size:40px;color:var(--blue);letter-spacing:-.04em}
+  .step h4{font-size:20px;letter-spacing:.02em;margin:8px 0 9px}
+  .step p{font-size:14px;color:var(--ink2);line-height:1.55}
+  .step .dia{height:74px;margin:16px 0 4px;border:1px solid rgba(25,26,28,.25);position:relative;overflow:hidden}
+  .step .dia .ln{position:absolute;background:var(--ink);opacity:.5}
+
+  /* ---------- NOTAS ---------- */
+  .notes{padding:70px 64px;background:var(--paper)}
+  .notesgrid{display:grid;grid-template-columns:420px 1fr;gap:60px}
+  .notesgrid h2{font-size:40px;line-height:1.04;font-weight:700;margin:12px 0 14px}
+  .notesgrid p{color:var(--ink2);font-size:15.5px;line-height:1.55}
+  .qa{border-top:1px solid var(--ink)}
+  .qa .q{padding:16px 0;border-bottom:1px solid rgba(25,26,28,.22);display:grid;grid-template-columns:34px 1fr;gap:14px}
+  .qa .q b{font-size:15.5px;font-weight:600;letter-spacing:.01em}
+  .qa .q p{font-size:14px;color:var(--ink2);line-height:1.5;margin-top:5px;grid-column:2}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--ink);color:var(--paper);padding:56px 64px 30px}
+  .footmark{font-size:118px;line-height:.86;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
+    color:transparent;-webkit-text-stroke:1.5px #5A5C60}
+  .footcols{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;border-top:1px solid #3A3B3F;margin-top:34px;padding-top:24px}
+  .footcols h5{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8E9098;margin-bottom:10px}
+  .footcols a{display:block;font-size:13.5px;color:#D8D8D3;text-decoration:none;padding:3px 0}
+  .footbar{display:flex;justify-content:space-between;border-top:1px solid #3A3B3F;margin-top:30px;padding-top:16px;
+    font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#8E9098}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="mark">PostulaDo</div>
+  <div class="links">
+    <a href="#">Producto</a><a href="#">Cómo funciona</a><a href="#">Precios</a>
+    <span class="btn-solid">Entrar</span>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div>
+    <div class="eyebrow lbl"><span class="bar"></span>Plano de estudio · Ecosistema detectado</div>
+    <h1>Cinco ofertas.<br>Un solo <span class="cut">plan</span>.</h1>
+    <p class="lede">PostulaDo lee el lote de ofertas que vos elegiste, encuentra el ecosistema que comparten y te dice qué temas hay que cubrir — por tipo de trabajo, no por herramienta.</p>
+
+    <div class="fieldblock">
+      <div class="fb-head">
+        <span class="lbl">Ofertas (URL)</span>
+        <span class="num">5 líneas</span>
+      </div>
+      <div class="fb-body">
+        <div class="u"><span>01</span>&nbsp; https://example.com/jobs/cloud-sre</div>
+        <div class="u"><span>02</span>&nbsp; https://example.com/jobs/platform-eng</div>
+        <div class="u"><span>03</span>&nbsp; https://example.com/jobs/aws-cloud</div>
+        <div class="u"><span>04</span>&nbsp; https://example.com/jobs/devops-lead</div>
+        <div class="u"><span>05</span>&nbsp; https://example.com/jobs/k8s-infra</div>
+      </div>
+      <div class="fb-foot">
+        <span class="note">Las cinco apuntan al mismo ecosistema.</span>
+        <span class="btn-blue">Analizar el lote</span>
+      </div>
+    </div>
+
+    <div class="hero-meta">
+      <div><b>5</b><span>Ofertas del lote</span></div>
+      <div><b>4</b><span>Temas principales</span></div>
+      <div><b>80%</b><span>Cobertura con 4 temas</span></div>
+    </div>
+  </div>
+
+  <div class="drawing">
+    <div class="draw-cap lbl">Fig. 1 — Despiece del plan de estudio</div>
+    <svg>
+      <line x1="330" y1="235" x2="300" y2="104" stroke="#2340C8" stroke-width="1"/>
+      <line x1="450" y1="235" x2="510" y2="97" stroke="#2340C8" stroke-width="1"/>
+      <line x1="330" y1="258" x2="274" y2="312" stroke="#2340C8" stroke-width="1"/>
+      <line x1="450" y1="258" x2="520" y2="300" stroke="#2340C8" stroke-width="1"/>
+      <line x1="390" y1="274" x2="390" y2="420" stroke="#5C5E62" stroke-width="1" stroke-dasharray="5 4"/>
+    </svg>
+    <div class="plate core" style="left:330px;top:222px;width:120px;text-align:center">
+      <div class="t">Plan</div><div class="s">5 ofertas</div>
+    </div>
+    <div class="plate hot" style="left:110px;top:80px;width:190px">
+      <div class="t">Pruebas</div><div class="s">Cobertura 100%</div>
+    </div>
+    <div class="plate hot" style="left:510px;top:74px;width:214px">
+      <div class="t">Integración y entrega</div><div class="s">Cobertura 80%</div>
+    </div>
+    <div class="plate hot" style="left:60px;top:290px;width:214px">
+      <div class="t">Despliegue en la nube</div><div class="s">Cobertura 60%</div>
+    </div>
+    <div class="plate" style="left:520px;top:280px;width:190px">
+      <div class="t">Observabilidad</div><div class="s">Cobertura 40%</div>
+    </div>
+    <div class="plate" style="left:300px;top:420px;width:186px">
+      <div class="t">Orquestación</div><div class="s">Cobertura 20%</div>
+    </div>
+    <div class="balloon" style="left:296px;top:76px">1</div>
+    <div class="balloon" style="left:492px;top:70px">2</div>
+    <div class="balloon" style="left:288px;top:282px">3</div>
+    <div class="balloon" style="left:504px;top:270px">4</div>
+    <div class="balloon ink" style="left:482px;top:392px">5</div>
+    <div class="titleblock">
+      <div><span class="lbl">Proyecto</span><b>PLAN-2026-11</b></div>
+      <div><span class="lbl">Escala</span><b>1:1</b></div>
+      <div><span class="lbl">Hoja</span><b>01 / 01</b></div>
+      <div><span class="lbl">Fecha</span><b>06.11.2026</b></div>
+      <div><span class="lbl">Revisión</span><b>A</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PATRON ================= -->
+<section class="dark pat">
+  <div>
+    <div class="lbl">Paso 01 · El patrón</div>
+    <h2>No comparten herramientas.<br>Comparten ecosistema.</h2>
+    <p>Cinco ofertas de cinco empresas distintas piden React, Go, Terraform y Kubernetes. Leídas por separado son cuatro planes distintos. Leídas juntas, son <span style="color:#4E8FE8">un solo tipo de trabajo</span> con una jerarquía de temas.</p>
+    <div class="post" style="margin-top:26px">
+      <div class="row"><span class="i">01</span><span class="ti">Site Reliability Engineer</span><span class="co">Norte fintech</span><span class="pc">K8s · Go</span></div>
+      <div class="row"><span class="i">02</span><span class="ti">Platform Engineer</span><span class="co">Pampa SaaS</span><span class="pc">AWS · Terraform</span></div>
+      <div class="row"><span class="i">03</span><span class="ti">Cloud Infrastructure Engineer</span><span class="co">Delta Sur</span><span class="pc">GCP · Docker</span></div>
+      <div class="row"><span class="i">04</span><span class="ti">DevOps Lead</span><span class="co">Taller Norte</span><span class="pc">Azure · Helm</span></div>
+      <div class="row"><span class="i">05</span><span class="ti">Infrastructure Developer</span><span class="co">Kobalto</span><span class="pc">AWS · EKS</span></div>
+    </div>
+  </div>
+  <div class="converge">
+    <span class="lbl cap">Resultado del agrupamiento</span>
+    <div class="eco">
+      <span class="lbl" style="color:#7FA9EE">Tipo de trabajo</span>
+      <b>Cloud Engineering</b>
+    </div>
+    <div class="why">El agrupamiento no se basa en coincidencias de stacks: se basa en <i>hacia dónde apuntan</i>. Las cinco postings describen el mismo oficio, con cinco vocabularios técnicos encima.</div>
+  </div>
+</section>
+
+<!-- ================= INDICE DE PIEZAS ================= -->
+<section class="parts">
+  <div class="sechead">
+    <div>
+      <div class="lbl">Paso 02 · Índice de piezas</div>
+      <h2>Los temas que<br>hay que cubrir</h2>
+    </div>
+    <p>No tools sueltas. Los temas que las cinco postings tienen en común, ordenados por la parte del oficio que cubren — y con el porcentaje de ofertas que los piden a la vista.</p>
+  </div>
+  <table>
+    <thead><tr><th style="width:52px">N°</th><th style="width:290px">Tema</th><th style="width:210px">Cobertura</th><th>Alternativas (a tu criterio)</th></tr></thead>
+    <tbody>
+      <tr><td class="pid">01</td><td class="pth">Pruebas automatizadas<small>Verificar el comportamiento, no compilarlo</small></td>
+        <td class="cov"><div class="bar"><i style="width:100%"></i></div><div class="n">5 de 5 · 100%</div></td>
+        <td class="alt"><span class="a">JUnit</span><span class="a">Vitest</span><span class="a">Playwright</span><span class="a">Pytest</span></td></tr>
+      <tr><td class="pid">02</td><td class="pth">Integración y entrega continua<small>El camino del commit a producción</small></td>
+        <td class="cov"><div class="bar"><i style="width:80%"></i></div><div class="n">4 de 5 · 80%</div></td>
+        <td class="alt"><span class="a">GitHub Actions</span><span class="a">GitLab CI</span><span class="a">Jenkins</span><span class="a">CircleCI</span></td></tr>
+      <tr><td class="pid">03</td><td class="pth">Despliegue en la nube<small>Levantar, versionar y revertir</small></td>
+        <td class="cov"><div class="bar"><i style="width:60%"></i></div><div class="n">3 de 5 · 60%</div></td>
+        <td class="alt"><span class="a">AWS</span><span class="a">Azure</span><span class="a">GCP</span><span class="a">Cloudflare</span></td></tr>
+      <tr><td class="pid">04</td><td class="pth">Observabilidad<small>Saber qué está pasando cuando falla</small></td>
+        <td class="cov"><div class="bar"><i style="width:40%"></i></div><div class="n">2 de 5 · 40%</div></td>
+        <td class="alt"><span class="a">OpenTelemetry</span><span class="a">Datadog</span><span class="a">Grafana</span><span class="a">Prometheus</span></td></tr>
+      <tr><td class="pid">05</td><td class="pth">Orquestación<small>Por qué el contenedor solo no alcanza</small></td>
+        <td class="cov"><div class="bar"><i style="width:20%"></i></div><div class="n">1 de 5 · 20%</div></td>
+        <td class="alt"><span class="a">Kubernetes</span><span class="a">ECS</span><span class="a">Nomad</span><span class="a">Docker Compose</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================= ALTERNATIVAS ================= -->
+<section class="alts">
+  <div class="inner">
+    <div>
+      <div class="lbl" style="color:#2340C8">Paso 03 · Las alternativas</div>
+      <h2>El tema es el mismo.<br>La herramienta no.</h2>
+      <p>En el oficio de Cloud Engineering, "despliegue en la nube" no significa AWS. Significa el oficio de desplegar en la nube. Por eso cada tema trae alternativas: podés entrar por la puerta que te sirva y no quedás atado a un vendor.</p>
+      <div class="pull">Si cuatro temas cubren el 80% de tu lote, tu tiempo está en esos cuatro — no en las 35 herramientas que los pedidos mencionan.</div>
+    </div>
+    <div class="altgrid">
+      <div class="r"><div class="th">Pruebas<small>100% · 5 de 5</small></div><div class="op"><span>JUnit</span><span>Vitest</span><span>Playwright</span><span>Pytest</span></div></div>
+      <div class="r"><div class="th">Integración y entrega<small>80% · 4 de 5</small></div><div class="op"><span>GitHub Actions</span><span>GitLab CI</span><span>Jenkins</span><span>CircleCI</span></div></div>
+      <div class="r"><div class="th">Despliegue en la nube<small>60% · 3 de 5</small></div><div class="op"><span>AWS</span><span>Azure</span><span>GCP</span><span>Cloudflare</span></div></div>
+      <div class="r"><div class="th">Observabilidad<small>40% · 2 de 5</small></div><div class="op"><span>OpenTelemetry</span><span>Datadog</span><span>Grafana</span><span>Prometheus</span></div></div>
+      <div class="r"><div class="th">Orquestación<small>20% · 1 de 5</small></div><div class="op"><span>Kubernetes</span><span>ECS</span><span>Nomad</span><span>Docker Compose</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CAPTURA ================= -->
+<section class="shot">
+  <div class="sechead">
+    <div>
+      <div class="lbl">El plan, en pantalla</div>
+      <h2>Todo el dibujo<br>en una sola vista</h2>
+    </div>
+    <p>El mismo índice de piezas, ahora como la pantalla que usás todos los días: con el lote arriba, el plan al centro y el denominador siempre a la vista.</p>
+  </div>
+  <div class="shotbox">
+    <div class="shotnav">
+      <div class="n on">Mi plan</div>
+      <div class="n">Ofertas (5)</div>
+      <div class="n">Temas</div>
+      <div class="n">Alternativas</div>
+      <div class="n">Brechas</div>
+    </div>
+    <div class="shotmain">
+      <h3>Plan de estudio</h3>
+      <div class="sm">Lote de 5 ofertas · Cloud Engineering · analizado el 06.11.2026</div>
+      <div class="shotrow"><span class="pid">01</span><span class="t">Pruebas automatizadas</span><span class="c">100%</span><span class="a">JUnit · Vitest</span></div>
+      <div class="shotrow"><span class="pid">02</span><span class="t">Integración y entrega continua</span><span class="c">80%</span><span class="a">GH Actions · GitLab</span></div>
+      <div class="shotrow"><span class="pid">03</span><span class="t">Despliegue en la nube</span><span class="c">60%</span><span class="a">AWS · Azure</span></div>
+      <div class="shotrow"><span class="pid">04</span><span class="t">Observabilidad</span><span class="c">40%</span><span class="a">OTel · Grafana</span></div>
+      <div class="shotrow"><span class="pid">05</span><span class="t">Orquestación</span><span class="c">20%</span><span class="a">K8s · ECS</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CIFRAS ================= -->
+<section class="figs">
+  <div class="grid">
+    <div class="cell"><b>5</b><span>Ofertas en el lote</span><p>El denominador de todos los porcentajes. Siempre visible, nunca implícito.</p></div>
+    <div class="cell"><b>4</b><span>Temas cubren el 80%</span><p>Pruebas, CI/CD, despliegue en la nube y observabilidad. Cuatro temas, no treinta y cinco herramientas.</p></div>
+    <div class="cell"><b>0</b><span>Vendor obligatorio</span><p>Cada tema trae alternativas. La única decisión que tomás es por cuál entrás.</p></div>
+  </div>
+</section>
+
+<!-- ================= PASOS ================= -->
+<section class="steps">
+  <div class="sechead">
+    <div>
+      <div class="lbl">Cómo funciona</div>
+      <h2>Tres pasos,<br>sin cuenta que administrar</h2>
+    </div>
+    <p>El trabajo pesado —leer, extraer, agrupar, contar— ocurre en el servidor, en background, mientras seguís buscando ofertas.</p>
+  </div>
+  <div class="steprow">
+    <div class="step">
+      <div class="st">01</div>
+      <h4>Juntá el lote</h4>
+      <p>Pegá las URLs de las ofertas que te interesan. Cinco, diez, las que tengas.</p>
+      <div class="dia"><span class="ln" style="left:18px;top:16px;width:180px;height:1px"></span><span class="ln" style="left:18px;top:34px;width:140px;height:1px"></span><span class="ln" style="left:18px;top:52px;width:205px;height:1px"></span></div>
+    </div>
+    <div class="step">
+      <div class="st">02</div>
+      <h4>Dejá que lo lea</h4>
+      <p>PostulaDo scrapea cada posting, extrae los requisitos y agrupa las cinco por ecosistema y por tema.</p>
+      <div class="dia"><span class="ln" style="left:30px;top:20px;width:1px;height:40px"></span><span class="ln" style="left:60px;top:28px;width:1px;height:32px"></span><span class="ln" style="left:90px;top:16px;width:1px;height:44px"></span><span class="ln" style="left:120px;top:26px;width:1px;height:34px"></span><span class="ln" style="left:150px;top:22px;width:1px;height:38px"></span></div>
+    </div>
+    <div class="step">
+      <div class="st">03</div>
+      <h4>Recibe el plan</h4>
+      <p>Los temas con su cobertura y sus alternativas. Guardá el plan y compará cada lote nuevo contra el anterior.</p>
+      <div class="dia"><span class="ln" style="left:24px;top:18px;width:120px;height:2px"></span><span class="ln" style="left:24px;top:34px;width:190px;height:2px"></span><span class="ln" style="left:24px;top:50px;width:86px;height:2px"></span><span class="ln" style="left:24px;top:66px;width:150px;height:2px"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NOTAS ================= -->
+<section class="notes">
+  <div class="notesgrid">
+    <div>
+      <div class="lbl">Notas</div>
+      <h2>Lo que la<br>correlación<br>no dice</h2>
+      <p>Un plan de estudio sale de lo que el mercado pidió, no de lo que el mercado va a pedir. PostulaDo te muestra de dónde viene cada porcentaje, y te deja ver las brechas en vez de esconderlas.</p>
+    </div>
+    <div class="qa">
+      <div class="q"><span class="pid">01</span><b>¿Esto reemplaza a saber una herramienta concreta?</b><p>No. Te dice qué temas cubren más ofertas, y por cada tema te da las alternativas que existen. Con eso elegís por dónde entrar según lo que tu trabajo ya tiene.</p></div>
+      <div class="q"><span class="pid">02</span><b>¿De dónde salen los porcentajes?</b><p>De tu lote. Cada cobertura cuenta cuántas de las ofertas que pegaste piden ese tema. El lote siempre está a la vista, porque un porcentaje sin denominador no significa nada.</p></div>
+      <div class="q"><span class="pid">03</span><b>¿Y si dos postings piden temas contradictorios?</b><p>Quedan a la vista. Si el 40% pide AWS y el 40% pide Azure, no escondemos ninguna: el tema es uno solo, la alternativa es decisión tuya.</p></div>
+      <div class="q"><span class="pid">04</span><b>¿Puedo empezar con pocas ofertas?</b><p>Sí. Con cinco ya se ve un patrón. El lote crece y los porcentajes se recalculan; cada plan queda guardado para comparar contra el siguiente.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="footmark">PostulaDo</div>
+  <div class="footcols">
+    <div><h5>Producto</h5><a href="#">Cómo funciona</a><a href="#">Precios</a><a href="#">Changelog</a></div>
+    <div><h5>Recursos</h5><a href="#">Guía de campos</a><a href="#">Cómo leer un plan</a><a href="#">FAQ</a></div>
+    <div><h5>Empresa</h5><a href="#">Sobre el proyecto</a><a href="#">Privacidad</a><a href="#">Contacto</a></div>
+    <div><h5>Estado</h5><a href="#">SGLang: operativo</a><a href="#">Colas: sin retraso</a><a href="#">Lotes: 5 analizados</a></div>
+  </div>
+  <div class="footbar"><span>© 2026 PostulaDo</span><span>Hecho para quienes necesitan ganarse un sueldo</span><span>Español · AR</span></div>
+</footer>
+
+</body>
+</html>

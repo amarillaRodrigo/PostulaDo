@@ -1,0 +1,176 @@
+{
+  "title": "Elegí el mundo visual · ronda 2",
+  "question": "El roll asignó «El despiece». Quedátelo, tomá una alternativa o pedí otra mano.",
+  "options": [
+    {
+      "id": "assigned",
+      "kind": "assigned",
+      "label": "El despiece",
+      "kicker": "THE ROLL",
+      "lineage": "planos de despiece, catálogos de recambios, dibujo técnico con cajetín de título",
+      "thesis": "Un plan de estudio es un despiece: piezas que se pueden cambiar por otras equivalentes. La landing es el plano del plan, con el lote de ofertas como el conjunto a analizar.",
+      "palette": ["#ECECE7", "#191A1C", "#2340C8", "#F8F8F5"],
+      "materials": ["papel de delineación", "tinta de regla", "rayado de sección", "cajetín de título"],
+      "viewport": "La hoja del plano: a la izquierda el campo de ofertas, a la derecha el despiece del plan con sus globos de llamada numerados y el cajetín de título abajo.",
+      "risk": "El lenguaje del plano puede sentirse técnico-frío para alguien que está nervioso buscando trabajo; si el rayado y la regla dominan, la página pierde la calidez que la situación pide.",
+      "raised": [
+        {
+          "from": "challenger-azulejo",
+          "raise": "Cada sección es un panel enmarcado y la grilla engancha a unidades enteras: las costuras se ven y nada flota suelto."
+        },
+        {
+          "from": "challenger-split-flap-concourse",
+          "raise": "La máquina se ve trabajar: el progreso del análisis se anima en el sitio, renglón por renglón, sin spinner."
+        },
+        {
+          "from": "challenger-boarding-pass-and-gate-board",
+          "raise": "Un solo color de alerta, reservado a los cambios; y la fila se reordena en su sitio sin perder identidad."
+        },
+        {
+          "from": "challenger-ice-press",
+          "raise": "Lo que no se sabe queda a la vista: las brechas del corpus no se esconden ni se promedian."
+        },
+        {
+          "from": "challenger-color-chord-counterpoint",
+          "raise": "El solapamiento produce un tercer significado, y los estados se nombran en texto, no solo se colorean."
+        },
+        {
+          "from": "challenger-webgl-shader-portal",
+          "raise": "El fondo es un campo continuo que la data modula, en vez de una imagen estática de stock."
+        }
+      ],
+      "comp": ".impeccable/mocks/decision/assigned.png",
+      "html": ".impeccable/mocks/decision/sketches/assigned-despiece.html"
+    },
+    {
+      "id": "model-pick",
+      "kind": "pick",
+      "label": "La ficha técnica",
+      "kicker": "IMPECCABLE'S PICK",
+      "lineage": "datasheets y fichas técnicas de componentes: bloques, tabla de características, notas al pie",
+      "thesis": "El plan como la ficha técnica del ecosistema: bloque a bloque, con la cobertura como parámetro y el denominador impreso en el pie del documento.",
+      "palette": ["#F4F5F6", "#111214", "#0B6E6E", "#FFFFFF"],
+      "materials": ["papel de hoja de datos", "serigrafía monocroma", "retícula de tabla"],
+      "viewport": "La hoja de datos a la derecha, con la tabla de cobertura por tema y el pie con el identificador del documento, la hoja, la revisión y el denominador.",
+      "risk": "Es la dirección más obvia para un producto de IT: un datasheet es lo que cualquiera esperaría. Puede sentirse correcta sin sentirse memorable.",
+      "comp": ".impeccable/mocks/decision/model-pick.png",
+      "html": ".impeccable/mocks/decision/sketches/model-pick-datasheet.html"
+    },
+    {
+      "id": "challenger-azulejo",
+      "kind": "challenger",
+      "catalogId": "architecture-places-azulejo-station-hall",
+      "label": "La sala de azulejos",
+      "verdict": "competitive",
+      "lineage": "azulejos de estación: cobalto sobre blanco leche, mostaza solo en los marcos, juntas de lechada",
+      "thesis": "Cada sección como un panel de azulejos enmarcado, y el corpus como la hilera de piezas que la empresa pintó y vos completás.",
+      "palette": ["#F8F4E9", "#1B3FA0", "#2A56C4", "#D8A521"],
+      "materials": ["vidriado estañado", "junta de lechada", "trazo de pincel"],
+      "viewport": "El panel enmarcado con el titular y el campo de ofertas, y a la derecha la hilera de azulejos con los temas y la pieza en blanco esperando tu próxima oferta.",
+      "case": "Encaja fuerte: los paneles enmarcados son literalmente las secciones que pediste, y la pieza en blanco es el estado vacío resuelto. Pierde en identificación de audiencia: el azulejo es patrimonio local, no el idioma cotidiano de un profesional de IT, y el adorno compite con la densidad de datos.",
+      "risk": "Con más decoración de la necesaria, la página se vuelve un mueble en vez de un instrumento.",
+      "comp": ".impeccable/mocks/decision/challenger-azulejo.png",
+      "html": ".impeccable/mocks/decision/sketches/challenger-azulejo.html",
+      "hero": "https://impeccable.style/worlds/cards/architecture-places-azulejo-station-hall-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/architecture-places-azulejo-station-hall.webp"
+    },
+    {
+      "id": "challenger-split-flap",
+      "kind": "challenger",
+      "catalogId": "signals-instruments-split-flap-concourse",
+      "label": "El tablero de aletas",
+      "verdict": "competitive",
+      "lineage": "tableros de aletas giratorias en andenes: flaps negros, letras blancas, acero, ámbar de demora",
+      "thesis": "El análisis como un tablero vivo: las ofertas van caendo al ranking y la máquina se ve trabajar aleta por aleta.",
+      "palette": ["#0B0B0D", "#2A2D31", "#FBB000", "#F2F2F2"],
+      "materials": ["acero cepillado", "flap mate", "pintura blanca"],
+      "viewport": "A la izquierda el titular sobre una hilera de aletas; a la derecha el tablero con las cinco ofertas ranked y la cola de análisis escribiendo sus pasos.",
+      "case": "Encaja en el mecanismo: la cascada muestra a la máquina trabajando y el ámbar marca lo que cambió. Pierde en identificación de audiencia y en claridad: es el idioma de un aeropuerto y de un tablero de salidas, no el de un plan de estudio; además oscurece la escena justo cuando el usuario está ansioso.",
+      "risk": "Con la tipografía en condensada extrema, la legibilidad de la promesa se pierde en la primera línea.",
+      "comp": ".impeccable/mocks/decision/challenger-splitflap.png",
+      "html": ".impeccable/mocks/decision/sketches/challenger-splitflap.html",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse.webp"
+    },
+    {
+      "id": "challenger-boarding-pass",
+      "kind": "challenger",
+      "catalogId": "vernacular-ephemera-boarding-pass-and-gate-board",
+      "label": "El pasaje y la bandeja",
+      "verdict": "competitive",
+      "lineage": "pasaje de embarque segmentado junto a una bandeja de salidas vivas",
+      "thesis": "Cada oferta como un segmento del pasaje y el plan como el tablero que se reordena cuando una cobertura cambia.",
+      "palette": ["#F1F1EE", "#1A1B1D", "#D8442E", "#1F7A5C"],
+      "materials": ["papel de pase segmentado", "código monoespaciado", "panel neutro"],
+      "viewport": "El pasaje segmentado arriba —oferta, ecosistema, tema, cobertura— con su bloque escaneable, y debajo la bandeja con las cinco ofertas reordenadas.",
+      "case": "Encaja bien: los segmentos del pasaje mapean uno a uno con las etapas del análisis y el bloque escaneable lleva el denominador. Pierde en identificación de audiencia: un pasaje es para irse, y este producto es para quedarse; el formato también tiende a lo diminuto y técnico.",
+      "risk": "Con demasiados segmentos y bloques, la portada se lee como un formulario de aduana.",
+      "comp": ".impeccable/mocks/decision/challenger-pass.png",
+      "html": ".impeccable/mocks/decision/sketches/challenger-pass.html",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-boarding-pass-and-gate-board-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/vernacular-ephemera-boarding-pass-and-gate-board.webp"
+    },
+    {
+      "id": "challenger-ice-press",
+      "kind": "challenger",
+      "catalogId": "graphic-worlds-publishing-expedition-ice-press",
+      "label": "La imprenta de hielo",
+      "verdict": "declined",
+      "lineage": "imprenta Polar: una sola tinta negra sobre papel rag húmedo, erratas del compositor sin corregir",
+      "thesis": "El plan como un número impreso en condiciones malas, con los huecos del corpus dejados a la vista como erratas.",
+      "palette": ["#E8E2D6", "#1A1A1A", "#8A8578"],
+      "materials": ["papel rag húmedo", "tinta única", "placa litografiada"],
+      "case": "No se fusiona: una hut en la oscuridad polar no es el mundo de nadie que esté buscando trabajo, y el ritmo lento de la imprenta contradice la urgencia del oficio.",
+      "kept": "Lo que no se sabe queda a la vista: las erratas —las brechas del corpus— no se corrigen ni se esconden.",
+      "hero": "https://impeccable.style/worlds/cards/graphic-worlds-publishing-expedition-ice-press-hero.webp"
+    },
+    {
+      "id": "challenger-color-chord",
+      "kind": "challenger",
+      "catalogId": "generative-art-computational-color-chord-counterpoint",
+      "label": "El contrapunto de color",
+      "verdict": "declined",
+      "lineage": "pabellón de sedas traslúcidas: índigo, madder y azafrán, y el solapamiento como acorde calculado",
+      "thesis": "Cada tema como una banda de color y el ecosistema como el acorde que surge donde varias bandas se cruzan.",
+      "palette": ["#F5F2EC", "#3A3F8F", "#9B4A3C", "#D9A227"],
+      "materials": ["seda traslúcida", "color calculado", "piso de sol"],
+      "case": "No se fusiona: es una instalación de arte generativo, no un instrumento de trabajo; el usuario no se reconoce en un pabellón de sedas y la legibilidad del dato se pierde en la mezcla.",
+      "kept": "El solapamiento produce un tercer significado, y los estados se nombran en texto además de color.",
+      "hero": "https://impeccable.style/worlds/cards/generative-art-computational-color-chord-counterpoint-hero.webp"
+    },
+    {
+      "id": "challenger-webgl-portal",
+      "kind": "challenger",
+      "catalogId": "webgl-shader-portal",
+      "label": "El portal de shader",
+      "verdict": "declined",
+      "lineage": "portal WebGL a pantalla completa con tipografía fina flotando sobre píxeles vivos",
+      "thesis": "La portada como un campo continuo que respira mientras el cursor lo deforma.",
+      "palette": ["#0B0B14", "#1E1E30", "#F5F0E6"],
+      "materials": ["grano de película", "píxel vivo", "cursor personal"],
+      "case": "No se fusiona: es el costume del sitio de IA, justo el riesgo que marcaste —parecer un chatbot generativo—; además esconde el dato detrás del efecto y compite con la seriedad del oficio.",
+      "kept": "El fondo es un campo continuo que la data modula, en vez de una imagen de stock.",
+      "hero": "https://impeccable.style/worlds/cards/webgl-shader-portal-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría siempre entrega, ejecutado con oficio: titular grande, captura del producto, tres tarjetas de beneficios, testimonios y un botón azul.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["rejilla limpia", "fotografía de producto"],
+    "viewport": "La disposición que el visitante espera, a pleno oficio.",
+    "risk": "Indistinguible de la competencia, por diseño.",
+    "comp": ".impeccable/mocks/decision/canon.png",
+    "html": ".impeccable/mocks/decision/sketches/canon.html"
+  },
+  "steer": true
+}

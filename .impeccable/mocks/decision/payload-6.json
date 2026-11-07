@@ -1,0 +1,146 @@
+{
+  "title": "El botón · PostulaDo",
+  "question": "El haz ya está. Ahora: ¿qué cuerpo tiene el botón, y cuánta luz se le deja pasar?",
+  "options": [
+    {
+      "id": "assigned",
+      "kind": "assigned",
+      "label": "A · Tinta + cáustica",
+      "kicker": "THE ROLL",
+      "lineage": "placa negra, el espectro refractando por el canto del botón",
+      "thesis": "El botón es un prisma de vidrio oscuro: la luz no lo pinta, lo atraviesa. Un filete de 2px y un derrame bajo el borde. El botón dice «esto importa» sin gritar.",
+      "palette": ["#C9C2B2", "#16181A", "#D9542B", "#22D3EE"],
+      "materials": ["lente de vidrio", "dispersión prismática", "canto refractado"],
+      "viewport": "Hero sobre la lente con el haz cruzando el titular, la palabra «qué estudiar» subrayada con el espectro, y el botón negro con la cáustica abajo.",
+      "risk": "El filete puede pasar desapercibido: si nadie lo ve, el botón es un rectángulo negro más y el prisma se pierde.",
+      "comp": "http://127.0.0.1:5599/cta2-caustic.png"
+    },
+    {
+      "id": "terracotta",
+      "kind": "grounded",
+      "label": "B · Terracota + cáustica",
+      "lineage": "botón terracota con la luz refractando debajo",
+      "thesis": "El color de marca mantiene su fuerza y el prisma se suma como el gesto que premia mirar dos veces. El más cercano a la referencia original.",
+      "palette": ["#C9C2B2", "#16181A", "#D9542B", "#F59E0B"],
+      "materials": ["lente de vidrio", "dispersión prismática", "terracota de marca"],
+      "viewport": "El mismo hero con el botón terracota y la cáustica espectral bajo el canto.",
+      "risk": "Dos sistemas cromáticos a la vez —terracota y espectro— pueden leerse como dos idiomas, o como un adorno pegado después.",
+      "comp": "http://127.0.0.1:5599/cta2-caustic-terra.png"
+    },
+    {
+      "id": "spectrum",
+      "kind": "grounded",
+      "label": "C · Espectro + cáustica",
+      "lineage": "el botón hecho de luz, con el espectro por dentro y por fuera",
+      "thesis": "El botón no está pintado de luz: está hecho de luz. Es el punto más saturado de la página y el único donde el prisma es material y no detalle.",
+      "palette": ["#C9C2B2", "#16181A", "#D9542B", "#2563EB"],
+      "materials": ["lente de vidrio", "dispersión prismática", "botín espectral"],
+      "viewport": "El mismo hero con el botón relleno de espectro y la cáustica sumándole el derrame bajo el borde.",
+      "risk": "Es el más llamativo y el más difícil de sostener: si el botón es un arcoíris, el resto de la página tiene que hablar más bajo todavía.",
+      "comp": "http://127.0.0.1:5599/cta2-caustic-spec.png"
+    },
+    {
+      "id": "challenger-azulejo",
+      "kind": "challenger",
+      "catalogId": "architecture-places-azulejo-station-hall",
+      "label": "La sala de azulejos",
+      "verdict": "declined",
+      "lineage": "azulejos de estación: cobalto sobre blanco leche",
+      "thesis": "Cada sección como un panel de azulejos enmarcado.",
+      "palette": ["#F8F4E9", "#1B3FA0", "#2A56C4", "#D8A521"],
+      "materials": ["vidriado estañado", "junta de lechada"],
+      "case": "Descartado: el registro popular manda. La disciplina de los paneles enmarcados sí queda adoptables.",
+      "kept": "Cada sección es un panel enmarcado con su propia costura.",
+      "hero": "https://impeccable.style/worlds/cards/architecture-places-azulejo-station-hall-hero.webp"
+    },
+    {
+      "id": "challenger-split-flap",
+      "kind": "challenger",
+      "catalogId": "signals-instruments-split-flap-concourse",
+      "label": "El tablero de aletas",
+      "verdict": "declined",
+      "lineage": "tableros de aletas en andenes",
+      "thesis": "El análisis como un tablero vivo que se reordena.",
+      "palette": ["#0B0B0D", "#2A2D31", "#FBB000", "#F2F2F2"],
+      "materials": ["acero cepillado", "flap mate"],
+      "case": "Descartado: el registro de artefacto no es el brief. La cascada sí queda adoptables como forma de mostrar el progreso.",
+      "kept": "La máquina se ve trabajar: el progreso se anima renglón por renglón, sin spinner.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp"
+    },
+    {
+      "id": "challenger-boarding-pass",
+      "kind": "challenger",
+      "catalogId": "vernacular-ephemera-boarding-pass-and-gate-board",
+      "label": "El pasaje y la bandeja",
+      "verdict": "declined",
+      "lineage": "pasaje de embarque segmentado y bandeja de salidas",
+      "thesis": "Cada etapa del análisis como un segmento del pasaje.",
+      "palette": ["#F1F1EE", "#1A1B1D", "#D8442E", "#1F7A5C"],
+      "materials": ["papel segmentado", "código monoespaciado"],
+      "case": "Descartado: el registro de artefacto no es el brief. El código monoespaciado sí queda adoptables.",
+      "kept": "Un solo color de alerta, reservado a los cambios.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-boarding-pass-and-gate-board-hero.webp"
+    },
+    {
+      "id": "challenger-ice-press",
+      "kind": "challenger",
+      "catalogId": "graphic-worlds-publishing-expedition-ice-press",
+      "label": "La imprenta de hielo",
+      "verdict": "declined",
+      "lineage": "imprenta Polar: una tinta sobre papel rag",
+      "thesis": "El plan como un número impreso con las erratas a la vista.",
+      "palette": ["#E8E2D6", "#1A1A1A", "#8A8578"],
+      "materials": ["papel rag húmedo", "tinta única"],
+      "case": "Descartado: el registro de artefacto no es el brief. La errata visible sí queda adoptables.",
+      "kept": "Lo que no se sabe queda a la vista: las brechas no se esconden.",
+      "hero": "https://impeccable.style/worlds/cards/graphic-worlds-publishing-expedition-ice-press-hero.webp"
+    },
+    {
+      "id": "challenger-color-chord",
+      "kind": "challenger",
+      "catalogId": "generative-art-computational-color-chord-counterpoint",
+      "label": "El contrapunto de color",
+      "verdict": "declined",
+      "lineage": "pabellón de sedas traslúcidas",
+      "thesis": "El ecosistema como el acorde que surge donde las bandas se cruzan.",
+      "palette": ["#F5F2EC", "#3A3F8F", "#9B4A3C", "#D9A227"],
+      "materials": ["seda traslúcida", "color calculado"],
+      "case": "Descartado: el registro de artefacto no es el brief. El solapamiento como tercer significado es exactamente lo que hace el prisma, y queda en el sistema.",
+      "kept": "El solapamiento produce un tercer significado, y los estados se nombran en texto.",
+      "hero": "https://impeccable.style/worlds/cards/generative-art-computational-color-chord-counterpoint-hero.webp"
+    },
+    {
+      "id": "challenger-webgl-portal",
+      "kind": "challenger",
+      "catalogId": "webgl-shader-portal",
+      "label": "El portal de shader",
+      "verdict": "declined",
+      "lineage": "portal WebGL a pantalla completa",
+      "thesis": "La portada como un campo continuo que la data modula.",
+      "palette": ["#0B0B14", "#1E1E30", "#F5F0E6"],
+      "materials": ["grano de película", "píxel vivo"],
+      "case": "Descartado: es el costume del sitio de IA. El prisma es la versión física y acotada de lo mismo, y funciona mejor.",
+      "kept": "El fondo es un campo continuo que la data modula.",
+      "hero": "https://impeccable.style/worlds/cards/webgl-shader-portal-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "comp",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría siempre entrega, ejecutado con oficio: titular grande, captura del producto, tres tarjetas de beneficios, testimonios y un botón azul.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["rejilla limpia", "fotografía de producto"],
+    "viewport": "La disposición que el visitante espera, a pleno oficio.",
+    "risk": "Indistinguible de la competencia, por diseño.",
+    "comp": "http://127.0.0.1:5599/canon.png"
+  },
+  "steer": true
+}

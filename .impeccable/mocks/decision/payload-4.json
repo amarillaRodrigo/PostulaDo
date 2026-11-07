@@ -1,0 +1,146 @@
+{
+  "title": "Elegí la base · PostulaDo",
+  "question": "El prisma ya está en las tres. Ahora elegí sobre qué ground se apoya la lente.",
+  "options": [
+    {
+      "id": "assigned",
+      "kind": "assigned",
+      "label": "Papel + prisma",
+      "kicker": "THE ROLL",
+      "lineage": "papel cálido, tinta profunda, y una dispersión prismática como acento",
+      "thesis": "El acento del producto es el espectro: el lote entra como luz blanca y sale descompuesto en los temas que lo cubren. La landing es la lente donde esa luz se dispersa.",
+      "palette": ["#C9C2B2", "#16181A", "#D9542B", "#2563EB"],
+      "materials": ["lente de vidrio", "dispersión prismática", "papel cálido"],
+      "viewport": "Hero sobre una lente gris-cálida con rejilla óptica, el haz atravesando el titular de dos líneas, y la palabra «plan» pintada con el propio espectro.",
+      "risk": "El prisma es un gesto visual potente y puede pasarse: si la lente queda demasiado oscura, el hero se vuelve una foto de producto en vez de una página.",
+      "comp": "http://127.0.0.1:5599/beam-papel.png"
+    },
+    {
+      "id": "marea",
+      "kind": "grounded",
+      "label": "Marea + prisma",
+      "lineage": "casi-negro, el haz encendido por dentro",
+      "thesis": "La misma dispersión sobre un casi-negro: el espectro brilla por contraste de pantalla y el producto se ve como una herramienta de luz.",
+      "palette": ["#0C0D10", "#F4F4F2", "#7A5AF8", "#22D3EE"],
+      "materials": ["casi-negro", "haz encendido", "superficies translúcidas"],
+      "viewport": "Hero sobre negro con el abanico de rayos cruzando el titular y el resto de la página en secciones oscuras y claras alternadas.",
+      "risk": "El casi-negro con violeta sigue siendo el look de producto de IA de 2026; el prisma lo distingue, pero no lo rescata solo. Y de noche, un sitio casi-negro para alguien que busca trabajo es másTracky de lo que parece.",
+      "comp": "http://127.0.0.1:5599/beam-marea.png"
+    },
+    {
+      "id": "tinta",
+      "kind": "grounded",
+      "label": "Tinta + prisma",
+      "lineage": "blanco y tinta, con la dispersión sobre una lente fría",
+      "thesis": "El prisma sobre una lente gris-fría: la lectura más corporativa de las tres, con el espectro como único elemento de color en toda la página.",
+      "palette": ["#BFC5CE", "#111318", "#2563EB", "#F59E0B"],
+      "materials": ["lente fría", "espectro limpio", "blanco clínico"],
+      "viewport": "Hero sobre un gris frío con el haz de colores cruzando y el resto de la página en blanco con bandas celestes.",
+      "risk": "Blanco y azul con un prisma encima puede quedar en dos idiomas: el SaaS corporativo y el gesto poético. Si no se decide, se nota.",
+      "comp": "http://127.0.0.1:5599/beam-tinta.png"
+    },
+    {
+      "id": "challenger-azulejo",
+      "kind": "challenger",
+      "catalogId": "architecture-places-azulejo-station-hall",
+      "label": "La sala de azulejos",
+      "verdict": "declined",
+      "lineage": "azulejos de estación: cobalto sobre blanco leche",
+      "thesis": "Cada sección como un panel de azulejos enmarcado.",
+      "palette": ["#F8F4E9", "#1B3FA0", "#2A56C4", "#D8A521"],
+      "materials": ["vidriado estañado", "junta de lechada"],
+      "case": "Descartado: el brief pide el registro popular y este es un mundo de artefacto. La disciplina de los paneles enmarcados sí queda adoptables.",
+      "kept": "Cada sección es un panel enmarcado con su propia costura.",
+      "hero": "https://impeccable.style/worlds/cards/architecture-places-azulejo-station-hall-hero.webp"
+    },
+    {
+      "id": "challenger-split-flap",
+      "kind": "challenger",
+      "catalogId": "signals-instruments-split-flap-concourse",
+      "label": "El tablero de aletas",
+      "verdict": "declined",
+      "lineage": "tableros de aletas en andenes",
+      "thesis": "El análisis como un tablero vivo que se reordena.",
+      "palette": ["#0B0B0D", "#2A2D31", "#FBB000", "#F2F2F2"],
+      "materials": ["acero cepillado", "flap mate"],
+      "case": "Descartado: el registro de artefacto no es el brief. La cascada sí queda adoptables como forma de mostrar el progreso.",
+      "kept": "La máquina se ve trabajar: el progreso se anima renglón por renglón, sin spinner.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp"
+    },
+    {
+      "id": "challenger-boarding-pass",
+      "kind": "challenger",
+      "catalogId": "vernacular-ephemera-boarding-pass-and-gate-board",
+      "label": "El pasaje y la bandeja",
+      "verdict": "declined",
+      "lineage": "pasaje de embarque segmentado y bandeja de salidas",
+      "thesis": "Cada etapa del análisis como un segmento del pasaje.",
+      "palette": ["#F1F1EE", "#1A1B1D", "#D8442E", "#1F7A5C"],
+      "materials": ["papel segmentado", "código monoespaciado"],
+      "case": "Descartado: el registro de artefacto no es el brief. El código monoespaciado del bloque escaneable sí queda adoptables.",
+      "kept": "Un solo color de alerta, reservado a los cambios.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-boarding-pass-and-gate-board-hero.webp"
+    },
+    {
+      "id": "challenger-ice-press",
+      "kind": "challenger",
+      "catalogId": "graphic-worlds-publishing-expedition-ice-press",
+      "label": "La imprenta de hielo",
+      "verdict": "declined",
+      "lineage": "imprenta Polar: una tinta sobre papel rag",
+      "thesis": "El plan como un número impreso con las erratas a la vista.",
+      "palette": ["#E8E2D6", "#1A1A1A", "#8A8578"],
+      "materials": ["papel rag húmedo", "tinta única"],
+      "case": "Descartado: el registro de artefacto no es el brief. La errata visible sí queda adoptables.",
+      "kept": "Lo que no se sabe queda a la vista: las brechas no se esconden.",
+      "hero": "https://impeccable.style/worlds/cards/graphic-worlds-publishing-expedition-ice-press-hero.webp"
+    },
+    {
+      "id": "challenger-color-chord",
+      "kind": "challenger",
+      "catalogId": "generative-art-computational-color-chord-counterpoint",
+      "label": "El contrapunto de color",
+      "verdict": "declined",
+      "lineage": "pabellón de sedas traslúcidas",
+      "thesis": "El ecosistema como el acorde que surge donde las bandas se cruzan.",
+      "palette": ["#F5F2EC", "#3A3F8F", "#9B4A3C", "#D9A227"],
+      "materials": ["seda traslúcida", "color calculado"],
+      "case": "Descartado: el registro de artefacto no es el brief. El solapamiento como tercer significado sí queda adoptables — es lo que hace el prisma.",
+      "kept": "El solapamiento produce un tercer significado, y los estados se nombran en texto.",
+      "hero": "https://impeccable.style/worlds/cards/generative-art-computational-color-chord-counterpoint-hero.webp"
+    },
+    {
+      "id": "challenger-webgl-portal",
+      "kind": "challenger",
+      "catalogId": "webgl-shader-portal",
+      "label": "El portal de shader",
+      "verdict": "declined",
+      "lineage": "portal WebGL a pantalla completa",
+      "thesis": "La portada como un campo continuo que la data modula.",
+      "palette": ["#0B0B14", "#1E1E30", "#F5F0E6"],
+      "materials": ["grano de película", "píxel vivo"],
+      "case": "Descartado: es el costume del sitio de IA. El prisma es la versión física y acotada de lo mismo, y funciona mejor.",
+      "kept": "El fondo es un campo continuo que la data modula.",
+      "hero": "https://impeccable.style/worlds/cards/webgl-shader-portal-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "comp",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría siempre entrega, ejecutado con oficio: titular grande, captura del producto, tres tarjetas de beneficios, testimonios y un botón azul.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["rejilla limpia", "fotografía de producto"],
+    "viewport": "La disposición que el visitante espera, a pleno oficio.",
+    "risk": "Indistinguible de la competencia, por diseño.",
+    "comp": "http://127.0.0.1:5599/canon.png"
+  },
+  "steer": true
+}

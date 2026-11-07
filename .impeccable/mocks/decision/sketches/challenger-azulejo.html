@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — Azulejo</title>
+<style>
+  :root{ --milk:#F8F4E9; --cobalt:#1B3FA0; --cobaltM:#2A56C4; --wash:#93A9DC; --mustard:#D8A521; --ink:#13285F; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;height:900px;overflow:hidden;background:var(--milk);color:var(--ink);
+    font-family:"Bodoni MT","Didot","Bodoni 72",Georgia,"Times New Roman",serif;
+    background-image:linear-gradient(rgba(27,63,160,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(27,63,160,.10) 1px,transparent 1px);
+    background-size:88px 88px}
+  .caps{font-family:Georgia,serif;font-size:11px;letter-spacing:.26em;text-transform:uppercase}
+  nav{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 44px;
+    border-bottom:2px solid var(--cobalt);background:var(--milk)}
+  .mark{font-size:20px;letter-spacing:.24em;text-transform:uppercase;font-weight:700}
+  .links{display:flex;gap:26px;align-items:center}
+  .links a{font-size:12px;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;color:var(--ink)}
+  .cta{border:1px solid var(--cobalt);padding:9px 20px;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+  .panel{position:relative;background:var(--milk);border:2px solid var(--cobalt);padding:44px 48px}
+  .panel .mustard{position:absolute;inset:6px;border:1px solid var(--mustard);pointer-events:none}
+  .panel .flourish{position:absolute;width:34px;height:34px;border:2px solid var(--cobalt);border-radius:50%;display:none}
+  .hero{display:grid;grid-template-columns:1fr 560px;gap:34px;padding:34px 44px 0;align-items:stretch}
+  h1{font-size:66px;line-height:.98;font-weight:400;letter-spacing:-.01em;margin:18px 0 20px}
+  h1 .wash{color:var(--cobaltM)}
+  .lede{font-size:17px;line-height:1.55;max-width:520px;color:var(--ink)}
+  .field{margin-top:26px;border:1px solid var(--cobalt);background:rgba(255,255,255,.55);padding:0 0 16px}
+  .field .fh{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--cobalt);margin-bottom:10px}
+  .field .u{font-family:Georgia,serif;font-size:13.5px;padding:2px 14px}
+  .field .ff{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 0;margin-top:8px;border-top:1px solid rgba(27,63,160,.3)}
+  .go{background:var(--cobalt);color:var(--milk);padding:13px 26px;font-size:13px;letter-spacing:.2em;text-transform:uppercase;
+    border:1px solid var(--mustard)}
+  .tiles{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:1fr;border:2px solid var(--cobalt);background:var(--milk)}
+  .tile{padding:20px;border-bottom:1px solid rgba(27,63,160,.22);border-right:1px solid rgba(27,63,160,.22)}
+  .tile:nth-child(2n){border-right:0}
+  .tile .t{font-size:21px;line-height:1.1}
+  .tile .c{margin-top:6px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--cobaltM)}
+  .tile .p{margin-top:10px;font-size:13px;color:var(--ink);font-family:Georgia,serif}
+  .tile.eco{background:var(--cobalt);color:var(--milk);grid-column:span 2}
+  .tile.eco .c{color:var(--mustard)}
+  .tile.eco .t{font-size:30px}
+  .tile.blank{background:repeating-linear-gradient(45deg,rgba(27,63,160,.05) 0 2px,transparent 2px 8px);color:rgba(19,40,95,.32);
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:16px}
+  .tile.blank .t{font-size:15px;line-height:1.35}
+</style>
+</head>
+<body>
+<nav>
+  <div class="mark">PostulaDo</div>
+  <div class="links"><a href="#">Producto</a><a href="#">Cómo funciona</a><a href="#">Precios</a><span class="cta">Entrar</span></div>
+</nav>
+
+<div class="hero">
+  <div class="panel">
+    <div class="mustard"></div>
+    <div class="caps">Vía de análisis · Hall 01 · Cloud Engineering</div>
+    <h1>Cinco ofertas.<br>Un solo <span class="wash">plan</span>.</h1>
+    <p class="lede">PostulaDo lee el lote que vos elegiste, encuentra el tipo de trabajo que las cinco comparten y te dice qué temas hay que cubrir — y con qué alternativas podés entrar a cada uno.</p>
+    <div class="field">
+      <div class="fh"><span class="caps">Ofertas (URL)</span><span class="caps">5 líneas</span></div>
+      <div class="u">01 &nbsp; example.com/jobs/cloud-sre</div>
+      <div class="u">02 &nbsp; example.com/jobs/platform-eng</div>
+      <div class="u">03 &nbsp; example.com/jobs/aws-cloud</div>
+      <div class="u">04 &nbsp; example.com/jobs/devops-lead</div>
+      <div class="u">05 &nbsp; example.com/jobs/k8s-infra</div>
+      <div class="ff"><span style="font-size:13px">Las cinco apuntan al mismo ecosistema.</span><span class="go">Analizar el lote</span></div>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="t">Pruebas automatizadas</div><div class="c">5 de 5 · 100%</div><div class="p">JUnit · Vitest · Playwright</div></div>
+    <div class="tile"><div class="t">Integración y entrega</div><div class="c">4 de 5 · 80%</div><div class="p">GitHub Actions · GitLab CI</div></div>
+    <div class="tile"><div class="t">Despliegue en la nube</div><div class="c">3 de 5 · 60%</div><div class="p">AWS · Azure · GCP</div></div>
+    <div class="tile"><div class="t">Observabilidad</div><div class="c">2 de 5 · 40%</div><div class="p">OpenTelemetry · Grafana</div></div>
+    <div class="tile eco"><div class="caps">Tipo de trabajo detectado</div><div class="t">Cloud Engineering</div><div class="c">5 de 5 ofertas · denominador siempre a la vista</div></div>
+    <div class="tile blank"><div class="t">El sexto puesto lo vas a llenar vos<br>cuando agregues otra oferta</div></div>
+  </div>
+</div>
+</body>
+</html>

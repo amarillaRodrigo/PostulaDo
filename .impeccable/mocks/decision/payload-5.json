@@ -1,0 +1,146 @@
+{
+  "title": "Elegí el CTA · PostulaDo",
+  "question": "La lente y el prisma están resueltos. Falta una cosa: dónde vive el color.",
+  "options": [
+    {
+      "id": "assigned",
+      "kind": "assigned",
+      "label": "A · Espectro",
+      "kicker": "THE ROLL",
+      "lineage": "papel cálido, tinta profunda, y una dispersión prismática como acento",
+      "thesis": "El botón es el único punto saturado de la página. El haz queda arriba como luz de fondo, y el ojo no tiene por dónde escaparse.",
+      "palette": ["#C9C2B2", "#16181A", "#D9542B", "#2563EB"],
+      "materials": ["lente de vidrio", "dispersión prismática", "botín espectral"],
+      "viewport": "Hero sobre la lente con el haz cruzando el titular, y el botón del lote pintado con el espectro completo.",
+      "risk": "Es el más llamativo y también el menos discreto: un botón arcoíris puede sentirse menos serio que la promesa que viene a sostener.",
+      "comp": "http://127.0.0.1:5599/cta-spec.png"
+    },
+    {
+      "id": "ink",
+      "kind": "grounded",
+      "label": "B · Tinta + filete",
+      "lineage": "botón de tinta con un filete espectral debajo",
+      "thesis": "El botón es negro y serio; el espectro aparece recién en el filete, cuando lo mirás de cerca. El color premia la atención, no la exige.",
+      "palette": ["#C9C2B2", "#16181A", "#D9542B", "#22D3EE"],
+      "materials": ["lente de vidrio", "dispersión prismática", "filete espectral"],
+      "viewport": "El mismo hero con el botón de tinta y el filete del espectro asomando abajo.",
+      "risk": "El filete puede pasar desapercibido: si nadie lo ve, la página pierde el prisma y queda en un botón negro más.",
+      "comp": "http://127.0.0.1:5599/cta-ink.png"
+    },
+    {
+      "id": "terracotta",
+      "kind": "grounded",
+      "label": "C · Terracota + filete",
+      "lineage": "botón terracota, el espectro como filete",
+      "thesis": "El botón conserva el color terracota de siempre —el de marca— y el prisma queda como el detalle que premia mirar dos veces. Es el más cercano a la referencia original.",
+      "palette": ["#C9C2B2", "#16181A", "#D9542B", "#F59E0B"],
+      "materials": ["lente de vidrio", "dispersión prismática", "terracota de marca"],
+      "viewport": "El mismo hero con el botón terracota y el filete espectral debajo.",
+      "risk": "Dos sistemas cromáticos a la vez —terracota y espectro— pueden leerse como dosylon distintos, o como que el prisma es un adorno pegado después.",
+      "comp": "http://127.0.0.1:5599/cta-terracotta.png"
+    },
+    {
+      "id": "challenger-azulejo",
+      "kind": "challenger",
+      "catalogId": "architecture-places-azulejo-station-hall",
+      "label": "La sala de azulejos",
+      "verdict": "declined",
+      "lineage": "azulejos de estación: cobalto sobre blanco leche",
+      "thesis": "Cada sección como un panel de azulejos enmarcado.",
+      "palette": ["#F8F4E9", "#1B3FA0", "#2A56C4", "#D8A521"],
+      "materials": ["vidriado estañado", "junta de lechada"],
+      "case": "Descartado: el registro popular manda. La disciplina de los paneles enmarcados sí queda adoptables.",
+      "kept": "Cada sección es un panel enmarcado con su propia costura.",
+      "hero": "https://impeccable.style/worlds/cards/architecture-places-azulejo-station-hall-hero.webp"
+    },
+    {
+      "id": "challenger-split-flap",
+      "kind": "challenger",
+      "catalogId": "signals-instruments-split-flap-concourse",
+      "label": "El tablero de aletas",
+      "verdict": "declined",
+      "lineage": "tableros de aletas en andenes",
+      "thesis": "El análisis como un tablero vivo que se reordena.",
+      "palette": ["#0B0B0D", "#2A2D31", "#FBB000", "#F2F2F2"],
+      "materials": ["acero cepillado", "flap mate"],
+      "case": "Descartado: el registro de artefacto no es el brief. La cascada sí queda adoptables como forma de mostrar el progreso.",
+      "kept": "La máquina se ve trabajar: el progreso se anima renglón por renglón, sin spinner.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp"
+    },
+    {
+      "id": "challenger-boarding-pass",
+      "kind": "challenger",
+      "catalogId": "vernacular-ephemera-boarding-pass-and-gate-board",
+      "label": "El pasaje y la bandeja",
+      "verdict": "declined",
+      "lineage": "pasaje de embarque segmentado y bandeja de salidas",
+      "thesis": "Cada etapa del análisis como un segmento del pasaje.",
+      "palette": ["#F1F1EE", "#1A1B1D", "#D8442E", "#1F7A5C"],
+      "materials": ["papel segmentado", "código monoespaciado"],
+      "case": "Descartado: el registro de artefacto no es el brief. El código monoespaciado sí queda adoptables.",
+      "kept": "Un solo color de alerta, reservado a los cambios.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-boarding-pass-and-gate-board-hero.webp"
+    },
+    {
+      "id": "challenger-ice-press",
+      "kind": "challenger",
+      "catalogId": "graphic-worlds-publishing-expedition-ice-press",
+      "label": "La imprenta de hielo",
+      "verdict": "declined",
+      "lineage": "imprenta Polar: una tinta sobre papel rag",
+      "thesis": "El plan como un número impreso con las erratas a la vista.",
+      "palette": ["#E8E2D6", "#1A1A1A", "#8A8578"],
+      "materials": ["papel rag húmedo", "tinta única"],
+      "case": "Descartado: el registro de artefacto no es el brief. La errata visible sí queda adoptables.",
+      "kept": "Lo que no se sabe queda a la vista: las brechas no se esconden.",
+      "hero": "https://impeccable.style/worlds/cards/graphic-worlds-publishing-expedition-ice-press-hero.webp"
+    },
+    {
+      "id": "challenger-color-chord",
+      "kind": "challenger",
+      "catalogId": "generative-art-computational-color-chord-counterpoint",
+      "label": "El contrapunto de color",
+      "verdict": "declined",
+      "lineage": "pabellón de sedas traslúcidas",
+      "thesis": "El ecosistema como el acorde que surge donde las bandas se cruzan.",
+      "palette": ["#F5F2EC", "#3A3F8F", "#9B4A3C", "#D9A227"],
+      "materials": ["seda traslúcida", "color calculado"],
+      "case": "Descartado: el registro de artefacto no es el brief. El solapamiento como tercer significado es exactamente lo que hace el prisma, y queda en el sistema.",
+      "kept": "El solapamiento produce un tercer significado, y los estados se nombran en texto.",
+      "hero": "https://impeccable.style/worlds/cards/generative-art-computational-color-chord-counterpoint-hero.webp"
+    },
+    {
+      "id": "challenger-webgl-portal",
+      "kind": "challenger",
+      "catalogId": "webgl-shader-portal",
+      "label": "El portal de shader",
+      "verdict": "declined",
+      "lineage": "portal WebGL a pantalla completa",
+      "thesis": "La portada como un campo continuo que la data modula.",
+      "palette": ["#0B0B14", "#1E1E30", "#F5F0E6"],
+      "materials": ["grano de película", "píxel vivo"],
+      "case": "Descartado: es el costume del sitio de IA. El prisma es la versión física y acotada de lo mismo, y funciona mejor.",
+      "kept": "El fondo es un campo continuo que la data modula.",
+      "hero": "https://impeccable.style/worlds/cards/webgl-shader-portal-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "comp",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría siempre entrega, ejecutado con oficio: titular grande, captura del producto, tres tarjetas de beneficios, testimonios y un botón azul.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["rejilla limpia", "fotografía de producto"],
+    "viewport": "La disposición que el visitante espera, a pleno oficio.",
+    "risk": "Indistinguible de la competencia, por diseño.",
+    "comp": "http://127.0.0.1:5599/canon.png"
+  },
+  "steer": true
+}

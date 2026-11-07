@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="es" data-p="papel">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — Plan de estudio desde tu lote de ofertas</title>
+<script>const p=new URLSearchParams(location.search).get('p');if(p)document.documentElement.setAttribute('data-p',p);</script>
+<style>
+  :root{
+    --bg:#F5F3EE; --bg2:#FFFFFF; --bg3:#16181A; --ink:#16181A; --muted:#61656B;
+    --accent:#D9542B; --accent-soft:#FBEDE6; --band:#CFE0C9; --band2:#DCDFF2;
+    --card:#FFFFFF; --line:rgba(22,24,26,.10); --line2:rgba(255,255,255,.12);
+    --shadow:0 1px 2px rgba(22,24,26,.04),0 8px 24px rgba(22,24,26,.06);
+    --big:0 18px 48px rgba(22,24,26,.12);
+    --radius:14px;
+  }
+  html[data-p="marea"]{
+    --bg:#0C0D10; --bg2:#141519; --bg3:#0A0B0D; --ink:#F4F4F2; --muted:#969AA1;
+    --accent:#7A5AF8; --accent-soft:#1B1633; --band:#1B1730; --band2:#12271F;
+    --card:#16181C; --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.10);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.4);
+    --big:0 18px 48px rgba(0,0,0,.55);
+  }
+  html[data-p="tinta"]{
+    --bg:#FFFFFF; --bg2:#F6F7F9; --bg3:#111318; --ink:#111318; --muted:#62666E;
+    --accent:#2563EB; --accent-soft:#EAF0FF; --band:#EAF0FF; --band2:#F1F5F4;
+    --card:#FFFFFF; --line:rgba(17,19,24,.10); --line2:rgba(255,255,255,.12);
+    --shadow:0 1px 2px rgba(17,19,24,.04),0 8px 24px rgba(17,19,24,.06);
+    --big:0 18px 48px rgba(17,19,24,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .muted{color:var(--muted)}
+  .accent{color:var(--accent)}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 86%,transparent);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .navin{height:68px;display:flex;align-items:center;justify-content:space-between;gap:32px}
+  .logo{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .navlinks{display:flex;gap:28px;font-size:14px;color:var(--muted)}
+  .navlinks a{color:inherit;text-decoration:none}
+  .navcta{display:flex;gap:10px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:10px 18px;font-size:14px;
+    font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer}
+  .btn-ghost{border-color:var(--line);color:var(--ink);background:transparent}
+  .btn-solid{background:var(--ink);color:var(--bg)}
+  .btn-accent{background:var(--accent);color:#fff}
+
+  /* HERO */
+  .hero{padding:74px 0 0;text-align:center}
+  .chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
+  .chip{border:1px solid var(--line);background:var(--bg2);border-radius:999px;padding:6px 14px;font-size:13px;
+    color:var(--muted)}
+  h1{font-size:74px;line-height:1.0;font-weight:800;letter-spacing:-.04em;max-width:900px;margin:0 auto}
+  .sub{font-size:19px;line-height:1.55;color:var(--muted);max-width:620px;margin:24px auto 0}
+  .ingest{margin:32px auto 0;max-width:720px;text-align:left;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .ingest .ih{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);
+    font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .ingest .ib{padding:12px 16px}
+  .ingest .u{font-family:ui-monospace,Consolas,monospace;font-size:13.5px;padding:3px 0;color:var(--ink);opacity:.9}
+  .ingest .u i{font-style:normal;color:var(--muted);margin-right:10px}
+  .ingest .if{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 16px;
+    border-top:1px solid var(--line);background:var(--bg2)}
+  .ingest .if small{color:var(--muted);font-size:13px}
+  .micro{margin-top:18px;font-size:13px;color:var(--muted)}
+  .shotcard{margin:56px auto 0;max-width:1080px;background:var(--card);border:1px solid var(--line);
+    border-radius:18px;box-shadow:var(--big);overflow:hidden;text-align:left}
+  .shotbar{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg2)}
+  .shotbar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+  .shotbody{display:grid;grid-template-columns:250px 1fr;min-height:340px}
+  .shotnav{padding:18px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+  .shotnav a{padding:8px 10px;border-radius:8px;font-size:13.5px;color:var(--muted);text-decoration:none}
+  .shotnav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .shotmain{padding:20px 24px}
+  .shotmain h3{font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .shotmain .sm{font-size:13px;color:var(--muted);margin-top:4px;margin-bottom:16px}
+  .srow{display:grid;grid-template-columns:1fr 92px 150px;gap:14px;align-items:center;padding:11px 0;
+    border-bottom:1px solid var(--line);font-size:14.5px}
+  .srow:last-child{border-bottom:0}
+  .srow .pct{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--accent);text-align:right;font-weight:600}
+  .srow .alt{font-size:12.5px;color:var(--muted);text-align:right}
+  .bar{height:7px;border-radius:4px;background:var(--line);position:relative;margin-top:5px;overflow:hidden}
+  .bar i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:4px}
+
+  /* TECNOLOGIAS */
+  .strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:26px 0;margin-top:76px}
+  .strip p{text-align:center;font-size:13px;color:var(--muted);margin-bottom:16px}
+  .techrow{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+  .tech{border:1px solid var(--line);background:var(--bg2);border-radius:8px;padding:6px 11px;
+    font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:var(--muted)}
+
+  /* SECCIONES */
+  section.band{padding:84px 0}
+  .sechead{text-align:center;max-width:720px;margin:0 auto 44px}
+  .sechead h2{font-size:46px;line-height:1.06;font-weight:800;letter-spacing:-.035em;margin:14px 0 0}
+  .sechead p{font-size:17px;line-height:1.55;color:var(--muted);margin:18px 0 0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+  .ico{width:40px;height:40px;border-radius:11px;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700}
+  .card h3{font-size:19px;font-weight:700;letter-spacing:-.015em;margin:16px 0 8px}
+  .card p{font-size:14.5px;line-height:1.6;color:var(--muted)}
+  .card .n{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--accent);font-weight:700}
+
+  /* DARK */
+  .dark{background:var(--bg3);color:#F4F4F2}
+  .dark .muted{color:#A0A4AA}
+  .dark .sechead h2{color:#F4F4F2}
+  .dark .card{background:rgba(255,255,255,.04);border-color:var(--line2)}
+  .dark .card p{color:#A0A4AA}
+  .dark .ico{background:rgba(255,255,255,.08);color:#fff}
+  .dark .srow{border-color:var(--line2)}
+  .dark .srow .alt{color:#A0A4AA}
+  .converge{display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:center;margin-top:48px}
+  .post{display:flex;flex-direction:column}
+  .post .r{display:grid;grid-template-columns:30px 1fr 130px 116px;gap:14px;align-items:center;padding:13px 0;
+    border-bottom:1px solid var(--line2);font-size:15px}
+  .post .r .i{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#7B7F86}
+  .post .r .co{font-size:12.5px;color:#A0A4AA}
+  .post .r .st{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:var(--accent);text-align:right}
+  .eco{border:1px solid var(--line2);border-radius:var(--radius);padding:26px;background:rgba(255,255,255,.04)}
+  .eco .lab{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .eco h3{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:10px 0 12px}
+  .eco p{font-size:14px;line-height:1.6;color:#A0A4AA}
+
+  /* PLAN */
+  .planrow{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .plan{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .plan .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .plan h4{font-size:18px;font-weight:700}
+  .plan .pctv{font-family:ui-monospace,Consolas,monospace;font-size:14px;color:var(--accent);font-weight:700}
+  .plan .why{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+  .alts{display:flex;flex-wrap:wrap;gap:8px}
+  .alts span{border:1px solid var(--line);border-radius:7px;padding:5px 10px;font-size:12.5px;color:var(--muted);
+    font-family:ui-monospace,Consolas,monospace}
+
+  /* STATS */
+  .stats{background:var(--band);padding:64px 0}
+  .statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center}
+  .statgrid>div{padding:0 30px;border-left:1px solid rgba(22,24,26,.12)}
+  .statgrid>div:first-child{border-left:0}
+  .statgrid b{display:block;font-size:68px;font-weight:800;letter-spacing:-.05em;line-height:1}
+  .statgrid span{display:block;margin-top:10px;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .statgrid p{margin-top:10px;font-size:13.5px;color:var(--muted);line-height:1.5}
+  html[data-p="marea"] .statgrid>div{border-color:var(--line2)}
+  html[data-p="marea"] .statgrid p{color:#A0A4AA}
+
+  /* CTA BAND */
+  .ctaband{background:var(--band2);padding:78px 0;text-align:center}
+  .ctaband h2{font-size:50px;line-height:1.04;font-weight:800;letter-spacing:-.035em;max-width:760px;margin:0 auto}
+  .ctaband p{font-size:17px;color:var(--muted);margin:18px auto 28px;max-width:560px}
+
+  /* FAQ */
+  .faq{display:grid;grid-template-columns:420px 1fr;gap:64px}
+  .faq h2{font-size:40px;line-height:1.06;font-weight:800;letter-spacing:-.03em;margin:14px 0 0}
+  .q{border-top:1px solid var(--line);padding:20px 0}
+  .q:last-child{border-bottom:1px solid var(--line)}
+  .q b{font-size:17px;font-weight:700}
+  .q p{font-size:14.5px;line-height:1.6;color:var(--muted);margin-top:8px}
+
+  /* FOOTER */
+  footer{background:var(--bg3);color:#F4F4F2;padding:58px 0 30px}
+  .footmark{font-size:96px;line-height:.9;font-weight:800;letter-spacing:-.045em;color:transparent;
+    -webkit-text-stroke:1.5px rgba(255,255,255,.34);text-align:center}
+  .footcols{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;border-top:1px solid var(--line2);
+    margin-top:40px;padding-top:26px}
+  .footcols h5{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#868A91;margin-bottom:12px}
+  .footcols a{display:block;font-size:14px;color:#C6C8CC;text-decoration:none;padding:4px 0}
+  .footbar{display:flex;justify-content:space-between;border-top:1px solid var(--line2);margin-top:30px;padding-top:18px;
+    font-size:12.5px;color:#868A91}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap navin">
+    <div class="logo">PostulaDo</div>
+    <div class="navlinks"><a href="#">Producto</a><a href="#">Cómo funciona</a><a href="#">Ejemplo real</a><a href="#">Precios</a></div>
+    <div class="navcta"><span class="btn btn-ghost">Entrar</span><span class="btn btn-accent">Analizar mi lote</span></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="chips">
+      <span class="chip">Lote de ofertas</span><span class="chip">Ecosistema de trabajo</span><span class="chip">Temas con cobertura</span>
+    </div>
+    <h1>Cinco ofertas.<br>Un solo <span class="accent">plan</span>.</h1>
+    <p class="sub">Pegá las ofertas que estás mirando. PostulaDo encuentra el tipo de trabajo que comparten y te dice qué temas hay que cubrir primero — con las alternativas de cada uno, para no quedarte atado a una herramienta.</p>
+
+    <div class="ingest">
+      <div class="ih"><span>Ofertas (URL)</span><span>5 líneas · ejemplo</span></div>
+      <div class="ib">
+        <div class="u"><i>01</i>https://example.com/jobs/cloud-sre</div>
+        <div class="u"><i>02</i>https://example.com/jobs/platform-eng</div>
+        <div class="u"><i>03</i>https://example.com/jobs/aws-cloud</div>
+        <div class="u"><i>04</i>https://example.com/jobs/devops-lead</div>
+        <div class="u"><i>05</i>https://example.com/jobs/k8s-infra</div>
+      </div>
+      <div class="if">
+        <small>Las cinco apuntan al mismo ecosistema de trabajo.</small>
+        <span class="btn btn-accent">Analizar el lote</span>
+      </div>
+    </div>
+    <div class="micro">Sin cuenta para probar · El análisis corre en background mientras seguís buscando</div>
+
+    <div class="shotcard">
+      <div class="shotbar"><i></i><i></i><i></i></div>
+      <div class="shotbody">
+        <div class="shotnav">
+          <a class="on" href="#">Mi plan</a><a href="#">Ofertas (5)</a><a href="#">Temas</a><a href="#">Alternativas</a><a href="#">Brechas</a>
+        </div>
+        <div class="shotmain">
+          <h3>Plan de estudio</h3>
+          <div class="sm">Lote de 5 ofertas · Cloud Engineering · analizado el 06.11.2026</div>
+          <div class="srow"><div><div>Pruebas automatizadas</div><div class="bar"><i style="width:100%"></i></div></div><div class="pct">100%</div><div class="alt">JUnit · Vitest</div></div>
+          <div class="srow"><div><div>Integración y entrega continua</div><div class="bar"><i style="width:80%"></i></div></div><div class="pct">80%</div><div class="alt">GH Actions · GitLab</div></div>
+          <div class="srow"><div><div>Despliegue en la nube</div><div class="bar"><i style="width:60%"></i></div></div><div class="pct">60%</div><div class="alt">AWS · Azure</div></div>
+          <div class="srow"><div><div>Observabilidad</div><div class="bar"><i style="width:40%"></i></div></div><div class="pct">40%</div><div class="alt">OTel · Grafana</div></div>
+          <div class="srow"><div><div>Orquestación</div><div class="bar"><i style="width:20%"></i></div></div><div class="pct">20%</div><div class="alt">K8s · ECS</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- TECNOLOGIAS -->
+<div class="strip">
+  <div class="wrap">
+    <p>Reconoce 35 tecnologías y las agrupa en el oficio al que apuntan — no solo en el nombre del producto:</p>
+    <div class="techrow">
+      <span class="tech">React</span><span class="tech">NestJS</span><span class="tech">TypeScript</span><span class="tech">PostgreSQL</span>
+      <span class="tech">Redis</span><span class="tech">Docker</span><span class="tech">Kubernetes</span><span class="tech">AWS</span>
+      <span class="tech">Azure</span><span class="tech">GCP</span><span class="tech">GraphQL</span><span class="tech">CI/CD</span>
+      <span class="tech">Python</span><span class="tech">Django</span><span class="tech">FastAPI</span><span class="tech">Golang</span>
+      <span class="tech">Rust</span><span class="tech">Java</span><span class="tech">Spring Boot</span><span class="tech">MySQL</span>
+      <span class="tech">MongoDB</span><span class="tech">Tailwind</span><span class="tech">Jest</span><span class="tech">Cypress</span>
+      <span class="tech">Next.js</span><span class="tech">Vue</span><span class="tech">Angular</span><span class="tech">Node.js</span>
+      <span class="tech">Git</span><span class="tech">REST</span><span class="tech">PHP</span><span class="tech">Ruby</span>
+    </div>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<section class="band">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow">Cómo funciona</div>
+      <h2>Tres pasos y un denominador<br>siempre a la vista</h2>
+      <p>El trabajo pesado —leer, extraer, agrupar, contar— ocurre en el servidor mientras seguís buscando ofertas.</p>
+    </div>
+    <div class="grid3">
+      <div class="card"><div class="n">01</div><div class="ico">↳</div><h3>Juntá el lote</h3><p>Pegá las URLs de las ofertas que te interesan. Cinco, diez, las que tengas: no hace falta ordenarlas.</p></div>
+      <div class="card"><div class="n">02</div><div class="ico">◎</div><h3>Dejá que lo lea</h3><p>PostulaDo scrapea cada posting, extrae los requisitos y agrupa el lote por ecosistema de trabajo.</p></div>
+      <div class="card"><div class="n">03</div><div class="ico">▤</div><h3>Recibe el plan</h3><p>Los temas con su cobertura y sus alternativas. Guardá el plan y compará el próximo lote contra este.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- EL PATRON -->
+<section class="band dark">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow">Paso 01 · El patrón</div>
+      <h2>No comparten herramientas.<br>Comparten <span class="accent">ecosistema</span>.</h2>
+      <p>Cinco ofertas de cinco empresas piden React, Go, Terraform y Kubernetes. Leídas por separado son cuatro planes distintos. Leídas juntas, son un solo tipo de trabajo.</p>
+    </div>
+    <div class="converge">
+      <div class="post">
+        <div class="r"><span class="i">01</span><span>Site Reliability Engineer</span><span class="co">Norte fintech</span><span class="st">4 temas</span></div>
+        <div class="r"><span class="i">02</span><span>Platform Engineer</span><span class="co">Pampa SaaS</span><span class="st">4 temas</span></div>
+        <div class="r"><span class="i">03</span><span>Cloud Infrastructure Engineer</span><span class="co">Delta Sur</span><span class="st">3 temas</span></div>
+        <div class="r"><span class="i">04</span><span>DevOps Lead</span><span class="co">Taller Norte</span><span class="st">3 temas</span></div>
+        <div class="r"><span class="i">05</span><span>Infrastructure Developer</span><span class="co">Kobalto</span><span class="st">2 temas</span></div>
+      </div>
+      <div class="eco">
+        <div class="lab">Tipo de trabajo detectado</div>
+        <h3>Cloud Engineering</h3>
+        <p>El agrupamiento no se basa en coincidencias de stacks: se basa en <span class="accent">hacia dónde apuntan</span>. Las cinco postings describen el mismo oficio, con cinco vocabularios técnicos encima.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOS TEMAS -->
+<section class="band">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow">Paso 02 · Los temas</div>
+      <h2>Lo que las cinco<br>ofertas tienen en común</h2>
+      <p>No tools sueltas. Los temas que el lote pide en común, ordenados por la parte del oficio que cubren — con el porcentaje de ofertas que los piden a la vista.</p>
+    </div>
+    <div class="planrow">
+      <div class="plan"><div class="ph"><h4>Pruebas automatizadas</h4><div class="pctv">5 de 5 · 100%</div></div><div class="why">Verificar el comportamiento, no compilarlo.</div><div class="alts"><span>JUnit</span><span>Vitest</span><span>Playwright</span><span>Pytest</span></div></div>
+      <div class="plan"><div class="ph"><h4>Integración y entrega continua</h4><div class="pctv">4 de 5 · 80%</div></div><div class="why">El camino del commit a producción.</div><div class="alts"><span>GitHub Actions</span><span>GitLab CI</span><span>Jenkins</span></div></div>
+      <div class="plan"><div class="ph"><h4>Despliegue en la nube</h4><div class="pctv">3 de 5 · 60%</div></div><div class="why">Levantar, versionar y revertir.</div><div class="alts"><span>AWS</span><span>Azure</span><span>GCP</span><span>Cloudflare</span></div></div>
+      <div class="plan"><div class="ph"><h4>Observabilidad</h4><div class="pctv">2 de 5 · 40%</div></div><div class="why">Saber qué está pasando cuando falla.</div><div class="alts"><span>OpenTelemetry</span><span>Datadog</span><span>Grafana</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="wrap statgrid">
+    <div><b>5</b><span>Ofertas en el lote</span><p>El denominador de todos los porcentajes. Nunca implícito.</p></div>
+    <div><b>4</b><span>Temas cubren el 80%</span><p>Cuatro temas, no treinta y cinco herramientas.</p></div>
+    <div><b>0</b><span>Vendor obligatorio</span><p>Cada tema trae alternativas. La única decisión es por cuál entrás.</p></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="ctaband">
+  <div class="wrap">
+    <h2>Pegá cinco ofertas.<br>Salí con un plan.</h2>
+    <p>Sin cuenta para probar. El análisis corre en background y te avisa cuando está.</p>
+    <span class="btn btn-accent">Analizar mi lote</span>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="band">
+  <div class="wrap faq">
+    <div>
+      <div class="eyebrow">Notas</div>
+      <h2>Lo que la correlación<br>no dice</h2>
+      <p class="muted" style="font-size:16px;line-height:1.6;margin-top:16px">Un plan sale de lo que el mercado pidió, no de lo que va a pedir. PostulaDo te muestra de dónde viene cada porcentaje y deja las brechas a la vista.</p>
+    </div>
+    <div>
+      <div class="q"><b>¿Esto reemplaza saber una herramienta concreta?</b><p>No. Te dice qué temas cubren más ofertas y, por cada tema, las alternativas que existen. Con eso elegís por dónde entrar según lo que tu trabajo ya tiene.</p></div>
+      <div class="q"><b>¿De dónde salen los porcentajes?</b><p>De tu lote. Cada cobertura cuenta cuántas de las ofertas que pegaste piden ese tema. El lote siempre está a la vista, porque un porcentaje sin denominador no significa nada.</p></div>
+      <div class="q"><b>¿Y si dos postings piden temas contradictorios?</b><p>Quedan a la vista. Si el 40% pide AWS y el 40% pide Azure, no escondemos ninguna: el tema es uno solo, la alternativa es decisión tuya.</p></div>
+      <div class="q"><b>¿Puedo empezar con pocas ofertas?</b><p>Sí. Con cinco ya se ve un patrón. El lote crece y los porcentajes se recalculan; cada plan queda guardado para comparar contra el siguiente.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footmark">PostulaDo</div>
+    <div class="footcols">
+      <div><h5>Producto</h5><a href="#">Cómo funciona</a><a href="#">Precios</a><a href="#">Changelog</a></div>
+      <div><h5>Recursos</h5><a href="#">Guía de campos</a><a href="#">Cómo leer un plan</a><a href="#">FAQ</a></div>
+      <div><h5>Empresa</h5><a href="#">Sobre el proyecto</a><a href="#">Privacidad</a><a href="#">Contacto</a></div>
+      <div><h5>Estado</h5><a href="#">SGLang: operativo</a><a href="#">Colas: sin retraso</a><a href="#">Ejemplo: 5 ofertas</a></div>
+    </div>
+    <div class="footbar"><span>© 2026 PostulaDo</span><span>Hecho para quienes necesitan ganarse un sueldo</span><span>Español · AR</span></div>
+  </div>
+</footer>
+
+</body>
+</html>

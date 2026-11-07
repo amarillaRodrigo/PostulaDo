@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — La ficha técnica</title>
+<style>
+  :root{ --paper:#FFFFFF; --ink:#111214; --ink2:#585A5F; --ink3:#8A8C91; --line:#D8D9DC; --accent:#0B6E6E; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;height:900px;overflow:hidden;background:#F4F5F6;color:var(--ink);
+    font-family:"Segoe UI",system-ui,Arial,sans-serif}
+  .mono{font-family:Consolas,"Courier New",monospace}
+  .lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600}
+  nav{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 52px;
+    background:#fff;border-bottom:1px solid var(--line)}
+  .mark{font-size:20px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+  .links{display:flex;gap:28px;align-items:center}
+  .links a{font-size:12.5px;color:var(--ink2);text-decoration:none}
+  .btn{border:1px solid var(--ink);padding:8px 16px;font-size:12.5px;font-weight:600}
+  .wrap{display:grid;grid-template-columns:1fr 560px;gap:44px;padding:44px 52px}
+  .eyebrow{color:var(--accent);display:flex;align-items:center;gap:9px}
+  .eyebrow .sq{width:9px;height:9px;background:var(--accent)}
+  h1{font-size:52px;line-height:1.04;font-weight:700;letter-spacing:-.025em;margin:14px 0 16px}
+  h1 em{font-style:normal;color:var(--accent)}
+  .lede{font-size:16.5px;line-height:1.55;color:var(--ink2);max-width:520px}
+  .fields{margin-top:26px;background:#fff;border:1px solid var(--line)}
+  .fields .fh{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;
+    border-bottom:1px solid var(--line);background:#FAFAFB}
+  .fields .fb{padding:11px 14px}
+  .fields .u{font-family:Consolas,monospace;font-size:13px;padding:2px 0}
+  .fields .u i{color:var(--ink3);font-style:normal;margin-right:9px}
+  .fields .ff{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-top:1px solid var(--line)}
+  .cta{background:var(--accent);color:#fff;padding:13px 26px;font-size:13.5px;font-weight:700;letter-spacing:.03em}
+  .stats{display:flex;gap:0;margin-top:22px;border-top:1px solid var(--line)}
+  .stats div{flex:1;padding:14px 18px 0 0;border-right:1px solid var(--line)}
+  .stats div:last-child{border-right:0;padding-left:18px}
+  .stats div:nth-child(2){padding-left:18px}
+  .stats b{display:block;font-size:30px;font-weight:700;letter-spacing:-.02em}
+  .stats span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+  .datasheet{background:#fff;border:1px solid var(--line);height:790px;display:flex;flex-direction:column}
+  .dshead{padding:20px 24px 16px;border-bottom:2px solid var(--ink)}
+  .dshead .lbl{color:var(--ink3)}
+  .dshead h2{font-size:26px;font-weight:700;letter-spacing:-.01em;margin:6px 0 3px}
+  .dshead p{font-size:12.5px;color:var(--ink2)}
+  .block{padding:16px 24px;border-bottom:1px solid var(--line)}
+  .block h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);margin-bottom:11px}
+  .feature{display:grid;grid-template-columns:230px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid #EEEFF0;font-size:13px}
+  .feature:last-child{border-bottom:0}
+  .feature b{font-weight:600}
+  .feature .v{text-align:right;color:var(--ink2);font-family:Consolas,monospace;font-size:12px}
+  .feature .v.hot{color:var(--accent);font-weight:700}
+  .alts2{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .alts2 span{border:1px solid var(--line);padding:3px 9px;font-size:11.5px;font-family:Consolas,monospace;color:var(--ink2)}
+  .dsfoot{margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--ink)}
+  .dsfoot div{padding:9px 12px;border-right:1px solid var(--line);font-size:10.5px}
+  .dsfoot div:last-child{border-right:0}
+  .dsfoot b{display:block;font-family:Consolas,monospace;font-size:12px;margin-top:3px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="mark">PostulaDo</div>
+  <div class="links"><a href="#">Producto</a><a href="#">Cómo funciona</a><a href="#">Precios</a><span class="btn">Entrar</span></div>
+</nav>
+
+<div class="wrap">
+  <div>
+    <div class="eyebrow lbl"><span class="sq"></span>Ficha técnica del ecosistema</div>
+    <h1>Cinco ofertas.<br>Un <em>plan</em> de estudio.</h1>
+    <p class="lede">PostulaDo lee el lote de ofertas que vos elegiste, encuentra el tipo de trabajo que comparten y te dice qué temas hay que cubrir — con las alternativas de cada uno, para no quedarte atado a un vendor.</p>
+    <div class="fields">
+      <div class="fh"><span class="lbl">Ofertas (URL)</span><span class="mono" style="font-size:11px;color:var(--ink3)">5 líneas</span></div>
+      <div class="fb">
+        <div class="u"><i>01</i>https://example.com/jobs/cloud-sre</div>
+        <div class="u"><i>02</i>https://example.com/jobs/platform-eng</div>
+        <div class="u"><i>03</i>https://example.com/jobs/aws-cloud</div>
+        <div class="u"><i>04</i>https://example.com/jobs/devops-lead</div>
+        <div class="u"><i>05</i>https://example.com/jobs/k8s-infra</div>
+      </div>
+      <div class="ff"><span style="font-size:12px;color:var(--ink2)">Las cinco apuntan al mismo ecosistema.</span><span class="cta">Analizar el lote</span></div>
+    </div>
+    <div class="stats">
+      <div><b>5</b><span>Ofertas del lote</span></div>
+      <div><b>4</b><span>Temas principales</span></div>
+      <div><b>80%</b><span>Cobertura</span></div>
+    </div>
+  </div>
+
+  <div class="datasheet">
+    <div class="dshead">
+      <span class="lbl">Documento 1 de 1 · Emitido el 06.11.2026</span>
+      <h2>Cloud Engineering</h2>
+      <p>Tipo de trabajo detectado en 5 de 5 ofertas del lote · PLAN-2026-11 rev. A</p>
+    </div>
+    <div class="block">
+      <h3>Cobertura por tema</h3>
+      <div class="feature"><b>Pruebas automatizadas</b><span class="v hot">5 de 5 · 100%</span></div>
+      <div class="feature"><b>Integración y entrega continua</b><span class="v hot">4 de 5 · 80%</span></div>
+      <div class="feature"><b>Despliegue en la nube</b><span class="v hot">3 de 5 · 60%</span></div>
+      <div class="feature"><b>Observabilidad</b><span class="v">2 de 5 · 40%</span></div>
+      <div class="feature"><b>Orquestación</b><span class="v">1 de 5 · 20%</span></div>
+    </div>
+    <div class="block">
+      <h3>Alternativas por tema</h3>
+      <div class="feature" style="grid-template-columns:230px 1fr"><b>Despliegue en la nube</b>
+        <span class="alts2"><span>AWS</span><span>Azure</span><span>GCP</span><span>Cloudflare</span></span></div>
+      <div class="feature" style="grid-template-columns:230px 1fr"><b>Integración y entrega</b>
+        <span class="alts2"><span>GitHub Actions</span><span>GitLab CI</span><span>Jenkins</span></span></div>
+    </div>
+    <div class="dsfoot">
+      <div>DOCUMENTO<b>PLAN-2026-11</b></div>
+      <div>HOJA<b>01 / 01</b></div>
+      <div>REVISIÓN<b>A</b></div>
+      <div>DENOMINADOR<b>5 OFERTAS</b></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+{
+  "title": "Elegí el mundo visual",
+  "question": "El roll asignó «El formato de evaluación». Quedátelo, tomá una alternativa o pedí otra mano.",
+  "options": [
+    {
+      "id": "assigned",
+      "kind": "assigned",
+      "label": "El formato de evaluación",
+      "kicker": "THE ROLL",
+      "lineage": "rúbricas de contratación impresas, hojas de puntaje, instrumentos de evaluación en papel",
+      "thesis": "El producto no es un chat: es un instrumento que evalúa tu postulación, y la landing es ese instrumento — la oferta a la izquierda, tu perfil a la derecha, y la máquina marca en tinta las casillas que coinciden.",
+      "palette": ["#e6e9ea", "#16181a", "#d7ee4e", "#8e2b2b"],
+      "materials": ["papel de formularios", "tinta de máquina", "marcador fluorescente", "sello de goma"],
+      "viewport": "La hoja de evaluación completa, con el campo OFERTA (URL) en la cabecera y las casillas de coincidencia ya marcadas a mano.",
+      "risk": "Una tabla rayada sobre papel pálido se lee como dashboard de analítica genérico si la anatomía del formulario —etiquetas, casillas, sellos, notas al margen— no es literal; y el fluorescente parece tendencia en vez de burocracia si se usa en más de unas pocas filas.",
+      "raised": [
+        {
+          "from": "challenger-phosphor-terminal",
+          "raise": "La máquina narra su propio avance en tinta: el progreso del análisis se imprime como renglones en la hoja, sin spinner ni cromo de interfaz."
+        },
+        {
+          "from": "challenger-risograph",
+          "raise": "La sobreimpresión: dos condiciones superpuestas producen un tercer significado —requisito ∩ perfil = coincidencia— pintado donde se cruzan."
+        },
+        {
+          "from": "challenger-cephalopod",
+          "raise": "El estado como señal material: cada etapa del pipeline tiene su propia marca —barrido, sello, tachón— en vez de un color de interfaz."
+        },
+        {
+          "from": "challenger-pickling",
+          "raise": "El reloj visible: cuánto lleva abierta cada etapa se lee en el papel, con la antigüedad impresa en el sello, no con un timestamp de base de datos."
+        },
+        {
+          "from": "challenger-cabaret-bill",
+          "raise": "El tachón duro: un estado resuelto se marca con una raya atravesada, no con un desvanecimiento."
+        },
+        {
+          "from": "challenger-reference-setting",
+          "raise": "El riel de la extracción: un canal central y literal donde la oferta se desarma en campos antes de que los artefactos se separen."
+        }
+      ],
+      "comp": ".impeccable/mocks/decision/assigned.png",
+      "html": ".impeccable/mocks/decision/sketches/assigned.html"
+    },
+    {
+      "id": "model-pick",
+      "kind": "pick",
+      "label": "La solicitud de empleo",
+      "kicker": "IMPECCABLE'S PICK",
+      "lineage": "formularios de solicitud preimpresos, triplicados al carbón, rellenados a máquina",
+      "thesis": "El producto es el trámite que el candidato nunca puede terminar solo: una solicitud preimpresa que la máquina completa por él, con el duplicado al carbón asomando como prueba visible de lo que se generó.",
+      "palette": ["#edeeea", "#1b1b1b", "#3c3f6b", "#b03a2e"],
+      "materials": ["papel autocopiativo", "perforación tractor-feed", "máquina de escribir"],
+      "viewport": "El formulario visto desde arriba, con sus campos ya escritos en tipografía de máquina y el duplicado al carbón asomando por debajo.",
+      "risk": "Es la lectura literal del nombre —el formulario de empleo es lo que cualquiera imaginaría—, y si la forma se dibuja demasiado literal el sitio parece un formulario imprimible en vez de un producto.",
+      "comp": ".impeccable/mocks/decision/model-pick.png",
+      "html": ".impeccable/mocks/decision/sketches/model-pick.html"
+    },
+    {
+      "id": "challenger-cabaret-bill",
+      "kind": "challenger",
+      "catalogId": "posters-covers-sleeves-weimar-cabaret-bill",
+      "label": "El cartel de cabaret",
+      "verdict": "competitive",
+      "lineage": "carteles de cabaret de Weimar, dos tintas duras, sin medios tonos",
+      "thesis": "El pipeline como un programa ordenado de actos: cada postulación es un número del programa y las ya resueltas quedan tachadas.",
+      "palette": ["#f5d64c", "#000000"],
+      "materials": ["cartel litografiado", "tinta sin medios tonos"],
+      "viewport": "Un cartel de una sola tinta sobre negro, con el programa a la derecha y el estado de cada número marcado con un tachón.",
+      "case": "Encaja: el pipeline es una lista ordenada y el estado resuelto se tacha; pierde en identificación de audiencia —el cartel de cabaret no es el idioma de un profesional evaluándose— y empuja la página hacia el póster pintado en vez de hacia una página que funciona.",
+      "risk": "Con letra tímida se vuelve nostalgia; el mundo exige tipografía extrema y el producto exige seriedad.",
+      "comp": ".impeccable/mocks/decision/challenger-cabaret-bill.png",
+      "html": ".impeccable/mocks/decision/sketches/challenger-cabaret-bill.html",
+      "hero": "https://impeccable.style/worlds/cards/posters-covers-sleeves-weimar-cabaret-bill-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/posters-covers-sleeves-weimar-cabaret-bill.webp"
+    },
+    {
+      "id": "challenger-reference-setting",
+      "kind": "challenger",
+      "catalogId": "rw-centre-rail-reference-setting",
+      "label": "La página de referencia",
+      "verdict": "competitive",
+      "lineage": "ediciones de consulta de margen ancho, riel central de teclas, reglas dibujadas a 1px",
+      "thesis": "La oferta y tu perfil como dos columnas densas alrededor de un riel central, con las reglas dibujadas en vivo sobre las cajas reales de la página.",
+      "palette": ["#f3eee3", "#1a1a1a", "#c23a2a"],
+      "materials": ["papel hueso", "motor de rayado a 1px"],
+      "viewport": "Dos columnas de texto denso flanqueando un riel vertical de teclas rojas, con la anotación del evaluador en el margen.",
+      "case": "Se fusiona con fuerza: dos columnas —oferta y perfil— alrededor de un riel, y las reglas dibujadas sobre cajas reales hacen literal la extracción; pierde por poco en ambos ejes: el idioma del libro de consulta es el del profesional, no el del candidato, y el riel codifica nuestra arquitectura interna más que el valor que el usuario busca.",
+      "risk": "Se lee como documentación técnica de lujo antes que como la herramienta de quien necesita ganarse un sueldo.",
+      "comp": ".impeccable/mocks/decision/challenger-reference-setting.png",
+      "html": ".impeccable/mocks/decision/sketches/challenger-reference-setting.html",
+      "hero": "https://impeccable.style/worlds/cards/rw-centre-rail-reference-setting-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/rw-centre-rail-reference-setting.webp"
+    },
+    {
+      "id": "challenger-phosphor-terminal",
+      "kind": "challenger",
+      "catalogId": "signals-instruments-phosphor-terminal-midnight",
+      "label": "El terminal de fósforo",
+      "verdict": "declined",
+      "lineage": "terminales de fósforo verde en salas de máquinas a medianoche",
+      "thesis": "La página como la transcripción viva del análisis, línea a línea, como una máquina de escribir que anota tu postulación.",
+      "palette": ["#0a0d0c", "#33ff77"],
+      "materials": ["vidrio curvado", "brillo de fósforo"],
+      "case": "No se fusiona bien: es el idioma del chat de IA y del programador, justo el riesgo que marcamos —parecer un chatbot genérico—; y el producto es un profesional en búsqueda activa, no un desarrollador.",
+      "kept": "La máquina narra su propio avance en tinta: el progreso se imprime en el soporte, sin spinner ni cromo.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-phosphor-terminal-midnight-hero.webp"
+    },
+    {
+      "id": "challenger-risograph",
+      "kind": "challenger",
+      "catalogId": "risograph-web-system",
+      "label": "El sistema Risograph",
+      "verdict": "declined",
+      "lineage": "impresiones Riso de dos o tres tintas spot que se desregistran sobre papel rugoso",
+      "thesis": "Las capas del producto impresas en tintas spot que se desplazan apenas al pasar el cursor.",
+      "palette": ["#f0e9dc", "#ff4f9a", "#2f5ad0"],
+      "materials": ["papel rugoso", "halftone"],
+      "case": "No se fusiona: es la estética de un estudio de diseño, no de quien está buscando trabajo; el riesgo de que la landing parezca una revista de arte es alto.",
+      "kept": "La sobreimpresión: dos condiciones superpuestas producen un tercer significado.",
+      "hero": "https://impeccable.style/worlds/cards/risograph-web-system.webp"
+    },
+    {
+      "id": "challenger-cephalopod",
+      "kind": "challenger",
+      "catalogId": "reefs-bioluminescent-nocturnal-chromatophore-skin-language",
+      "label": "La piel de cefalópodo",
+      "verdict": "declined",
+      "lineage": "cromatóforos de cefalópodos bioluminiscentes, señal pintada sobre la piel",
+      "thesis": "Los requisitos de la oferta como cromatóforos que se expanden y se contraen según cuánto encaja tu perfil.",
+      "palette": ["#efe6d8", "#8a3b2a", "#2f8f7a"],
+      "materials": ["piel viva", "iridiscencia"],
+      "case": "No se fusiona: el mundo es un animal, no un documento; nadie en búsqueda activa se identifica con una piel de cefalópodo, y el producto pide papel, no tinta viva.",
+      "kept": "Los estados como señal material, no como cromo de interfaz.",
+      "hero": "https://impeccable.style/worlds/cards/reefs-bioluminescent-nocturnal-chromatophore-skin-language-hero.webp"
+    },
+    {
+      "id": "challenger-pickling",
+      "kind": "challenger",
+      "catalogId": "food-fermentation-culinary-theater-pickling-brine-calendar",
+      "label": "El calendario de salmuera",
+      "verdict": "declined",
+      "lineage": "conservas en frascos, cada lote madurando por estación",
+      "thesis": "Cada postulación madurando en su tarro hasta llegar a su propio momento.",
+      "palette": ["#e8e2d6", "#d9714f", "#5c7a4a"],
+      "materials": ["vidrio", "salmuera"],
+      "case": "No se fusiona: la maduración de alimentos no dice nada sobre una carta de presentación, y el frasco acabaría justo donde la seriedad del oficio no puede.",
+      "kept": "El reloj visible —cuánto lleva abierta cada etapa— como parte de la lectura del papel.",
+      "hero": "https://impeccable.style/worlds/cards/food-fermentation-culinary-theater-pickling-brine-calendar-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "El estándar de la categoría",
+    "thesis": "Lo que esta categoría siempre entrega, ejecutado con oficio: titular grande, captura del producto, tres tarjetas de beneficios, testimonios y un botón azul.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["rejilla limpia", "fotografía de producto"],
+    "viewport": "La disposición que el visitante espera, a pleno oficio.",
+    "risk": "Indistinguible de la competencia, por diseño.",
+    "comp": ".impeccable/mocks/decision/canon.png",
+    "html": ".impeccable/mocks/decision/sketches/canon.html"
+  },
+  "steer": true
+}

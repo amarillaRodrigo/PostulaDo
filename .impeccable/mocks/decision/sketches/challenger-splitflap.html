@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — Split-flap</title>
+<style>
+  :root{ --flap:#0B0B0D; --steel:#2A2D31; --steelM:#5B5E63; --steelL:#7A7AA7; --white:#F2F2F2; --amber:#FBB000; --red:#C00020; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;height:900px;overflow:hidden;color:var(--white);
+    font-family:"Segoe UI",system-ui,Arial,sans-serif;
+    background:linear-gradient(160deg,#3A3E43 0%,#24272B 42%,#33373C 100%)}
+  .mono{font-family:Consolas,"Courier New",monospace}
+  .lbl{font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:600}
+  nav{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;
+    background:rgba(0,0,0,.42);border-bottom:1px solid #4A4E54}
+  .mark{font-size:20px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+  .links{display:flex;gap:26px;align-items:center}
+  .links a{font-size:12px;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;color:#C9CACE}
+  .cta{background:var(--amber);color:#111;padding:9px 18px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+  .frame{margin:22px 40px;border:1px solid #565A60;background:rgba(10,10,12,.72);display:grid;
+    grid-template-columns:1fr 660px;gap:0}
+  .left{padding:26px 28px;border-right:1px solid #4A4E54}
+  .flaprow{display:flex;gap:3px;margin:16px 0 22px;flex-wrap:wrap}
+  .flap{width:30px;height:40px;background:linear-gradient(#22252A 0 49%,#0C0C0E 50% 100%);
+    border:1px solid #3E4146;display:flex;align-items:center;justify-content:center;
+    font-family:Impact,"Haettenschweiler","Arial Narrow Bold",sans-serif;font-size:21px;color:#EDEDED}
+  .flap.sp{width:14px;background:none;border:0}
+  h1{font-family:Impact,"Haettenschweiler","Arial Narrow Bold",sans-serif;font-size:56px;line-height:.92;
+    text-transform:uppercase;letter-spacing:.005em;margin:6px 0 14px}
+  h1 .am{color:var(--amber)}
+  .lede{font-size:15.5px;line-height:1.5;color:#A7A9AE;max-width:520px}
+  .fields{margin-top:22px;border:1px solid #4A4E54;background:rgba(255,255,255,.03)}
+  .fields .fh{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #4A4E54}
+  .fields .u{font-family:Consolas,monospace;font-size:12.5px;color:#D6D7DA;padding:2px 12px}
+  .fields .ff{display:flex;justify-content:space-between;align-items:center;padding:12px;border-top:1px solid #4A4E54}
+  .right{padding:22px 24px}
+  .board{border:1px solid #4A4E54;background:#0A0A0C}
+  .board .bh{display:grid;grid-template-columns:44px 1fr 140px 132px;gap:10px;padding:9px 14px;
+    border-bottom:1px solid #3E4146;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#8A8C92}
+  .row{display:grid;grid-template-columns:44px 1fr 140px 132px;gap:10px;align-items:center;padding:12px 14px;
+    border-bottom:1px solid #26282C}
+  .row .i{font-family:Consolas,monospace;font-size:12px;color:#6E7076}
+  .row .ti{font-size:17px;letter-spacing:.02em}
+  .row .ti small{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#7C7E84;margin-top:3px}
+  .row .st{font-family:Consolas,monospace;font-size:13px;letter-spacing:.12em}
+  .row .st.am{color:var(--amber)}
+  .row .st.rd{color:var(--red)}
+  .row .pc{font-family:Consolas,monospace;font-size:13px;color:var(--steelL);text-align:right}
+  .row.hi{box-shadow:inset 0 0 0 1px var(--amber)}
+  .boardtitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .queue{margin-top:16px;border:1px solid #4A4E54;padding:12px 14px}
+  .queue .q{display:flex;gap:10px;align-items:center;font-family:Consolas,monospace;font-size:12px;color:#9A9CA2;padding:3px 0}
+  .queue .q b{color:var(--amber);font-weight:400}
+  .bar2{height:3px;background:#2A2D31;margin-top:9px}
+  .bar2 i{display:block;height:3px;background:var(--amber);width:62%}
+</style>
+</head>
+<body>
+<nav>
+  <div class="mark">PostulaDo</div>
+  <div class="links"><a href="#">Tablero</a><a href="#">Análisis</a><a href="#">Ayuda</a><span class="cta">Entrar</span></div>
+</nav>
+
+<div class="frame">
+  <div class="left">
+    <div class="lbl" style="color:#8A8C92">Tablero de análisis · Hoja 01</div>
+    <div class="flaprow">
+      <div class="flap">P</div><div class="flap">L</div><div class="flap">A</div><div class="flap">N</div>
+      <div class="flap sp"></div>
+      <div class="flap">D</div><div class="flap">E</div><div class="flap">E</div><div class="flap">S</div><div class="flap">T</div><div class="flap">U</div><div class="flap">D</div><div class="flap">I</div><div class="flap">O</div>
+    </div>
+    <h1>Cinco ofertas.<br>Un solo <span class="am">plan</span>.</h1>
+    <p class="lede">PostulaDo lee el lote que vos elegiste y arma el tablero: qué tipo de trabajo comparten las cinco, y qué temas hay que cubrir primero.</p>
+    <div class="fields">
+      <div class="fh"><span class="lbl" style="color:#8A8C92">Ofertas (URL)</span><span class="lbl" style="color:#8A8C92">5 líneas</span></div>
+      <div class="u">01 &nbsp; https://example.com/jobs/cloud-sre</div>
+      <div class="u">02 &nbsp; https://example.com/jobs/platform-eng</div>
+      <div class="u">03 &nbsp; https://example.com/jobs/aws-cloud</div>
+      <div class="u">04 &nbsp; https://example.com/jobs/devops-lead</div>
+      <div class="u">05 &nbsp; https://example.com/jobs/k8s-infra</div>
+      <div class="ff"><span style="font-size:12.5px;color:#9A9CA2">Las cinco apuntan al mismo ecosistema.</span><span class="cta">Analizar el lote</span></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="boardtitle">
+      <span class="lbl">Tablero de ofertas · lote de 5</span>
+      <span class="lbl" style="color:#8A8C92">en vivo</span>
+    </div>
+    <div class="board">
+      <div class="bh"><span>N°</span><span>Oferta</span><span>Temas</span><span>Cobertura</span></div>
+      <div class="row hi"><span class="i">01</span><span class="ti">Site Reliability Engineer<small>Norte fintech</small></span><span class="st am">4 temas</span><span class="pc">K8s · Go</span></div>
+      <div class="row"><span class="i">02</span><span class="ti">Platform Engineer<small>Pampa SaaS</small></span><span class="st am">4 temas</span><span class="pc">AWS · Terraform</span></div>
+      <div class="row"><span class="i">03</span><span class="ti">Cloud Infrastructure<small>Delta Sur</small></span><span class="st am">3 temas</span><span class="pc">GCP · Docker</span></div>
+      <div class="row"><span class="i">04</span><span class="ti">DevOps Lead<small>Taller Norte</small></span><span class="st rd">revisar</span><span class="pc">Azure · Helm</span></div>
+      <div class="row"><span class="i">05</span><span class="ti">Infrastructure Developer<small>Kobalto</small></span><span class="st">en cola</span><span class="pc">AWS · EKS</span></div>
+    </div>
+    <div class="queue">
+      <div class="q"><b>▸</b> Extrayendo requisitos — 3 de 5 ofertas listas</div>
+      <div class="q"><b>▸</b> Agrupando por ecosistema de trabajo</div>
+      <div class="q"><b>▸</b> Calculando cobertura por tema</div>
+      <div class="bar2"><i></i></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

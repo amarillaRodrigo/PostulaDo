@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — La solicitud de empleo</title>
+<style>
+  :root{ --paper:#edeeea; --ink:#1b1b1b; --carbon:#3c3f6b; --red:#b03a2e; --rule:rgba(27,27,27,.30); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;height:900px;overflow:hidden;background:var(--paper);color:var(--ink);
+    font-family:"Arial Narrow","Bahnschrift Condensed","Helvetica Neue Condensed",Arial,sans-serif}
+  .mono{font-family:"Courier New",Courier,monospace}
+  .lbl{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
+  nav{height:70px;border-bottom:1px solid var(--rule);display:flex;align-items:center;
+    justify-content:space-between;padding:0 36px}
+  .mark{font-size:26px;letter-spacing:.16em;font-weight:700;text-transform:uppercase}
+  .links{display:flex;gap:34px;align-items:center}
+  .links a{font-size:13px;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;color:var(--ink)}
+  .outline{border:1px solid var(--ink);padding:9px 20px;font-size:13px;letter-spacing:.18em;text-transform:uppercase}
+  .desk{position:relative;padding:24px 36px 0;height:830px;display:grid;
+    grid-template-columns:1030px 1fr;gap:38px;align-items:start}
+  .carbon{position:absolute;left:62px;top:50px;width:1030px;height:640px;border:1px solid var(--carbon);
+    background:rgba(60,63,107,.13);transform:translate(26px,26px)}
+  .carbon .cc{position:absolute;right:14px;bottom:9px;color:var(--carbon);font-size:11px;letter-spacing:.22em;
+    font-weight:700;text-transform:uppercase}
+  .sheet{position:relative;background:var(--paper);border:1px solid var(--rule);padding:0 0 0 46px;
+    width:1030px;height:640px;overflow:hidden}
+  .slipcol{display:flex;flex-direction:column;gap:14px;padding-top:96px}
+  .perf{position:absolute;left:18px;top:0;bottom:0;width:14px;border-right:1px dashed var(--rule)}
+  .perf i{position:absolute;left:0;width:13px;height:13px;border:1px solid var(--rule);border-radius:50%;background:var(--paper)}
+  .fhead{display:flex;justify-content:space-between;align-items:flex-start;padding:24px 28px 20px;
+    border-bottom:1px solid var(--rule)}
+  h1{font-size:29px;line-height:1.05;font-weight:700;letter-spacing:.02em;margin-top:8px}
+  .copymark{border:2px solid var(--red);color:var(--red);padding:6px 12px;font-size:13px;letter-spacing:.2em;
+    font-weight:700;transform:rotate(3deg);opacity:.9}
+  .sect{padding:18px 28px;border-bottom:1px solid var(--rule)}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:26px;margin-top:12px}
+  .grid3 .val{border-bottom:1px solid var(--rule);padding-bottom:7px;font-size:15px;color:var(--ink)}
+  .urlrow{display:flex;align-items:flex-end;gap:14px;margin-top:12px}
+  .fld{flex:1}
+  .fld .val{border:1px solid var(--rule);padding:11px 13px;font-size:14px;background:rgba(255,255,255,.5)}
+  .go{background:var(--red);color:#fff;padding:13px 30px;font-size:14px;letter-spacing:.18em;font-weight:700}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  thead th{text-align:left;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+    border-bottom:1px solid var(--rule);padding:0 0 7px}
+  thead th:not(:first-child),tbody td:not(:first-child){padding-left:20px}
+  tbody td{border-bottom:1px solid var(--rule);padding:12px 0;font-size:16px}
+  .reqs{display:flex;flex-wrap:wrap;gap:0 30px;margin-top:12px}
+  .reqs span{font-size:17px;padding:4px 0;border-bottom:1px solid var(--rule);margin-bottom:8px}
+  .slips{position:relative;width:100%;background:var(--paper);border:1px solid var(--rule);
+    padding:15px 17px;box-shadow:5px 6px 0 rgba(27,27,27,.10);transform:rotate(-1.4deg)}
+  .slips+.slips{transform:rotate(1.1deg)}
+  .slips h3{font-size:21px;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
+  .slips p{font-size:12.5px;line-height:1.5;color:rgba(27,27,27,.74);margin-top:7px}
+  .tagmini{font-size:10px;letter-spacing:.2em;color:rgba(27,27,27,.55)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="mark">PostulaDo</div>
+  <div class="links">
+    <a href="#">Producto</a><a href="#">Cómo funciona</a><a href="#">Precios</a>
+    <span class="outline">Entrar</span>
+  </div>
+</nav>
+
+<div class="desk">
+  <div class="carbon"><span class="cc">Copia 2</span></div>
+  <section class="sheet">
+    <div class="perf"><i style="top:40px"></i><i style="top:150px"></i><i style="top:260px"></i><i style="top:370px"></i><i style="top:480px"></i><i style="top:590px"></i></div>
+    <div class="fhead">
+      <div>
+        <div class="lbl">Solicitud de empleo · Formulario 01-A</div>
+        <h1>Postulación — Aurelia Fintech</h1>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center">
+        <span class="tagmini">Ejemplo</span>
+        <span class="copymark">Original</span>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="lbl">Datos del postulante</div>
+      <div class="grid3">
+        <div><div class="lbl" style="font-size:10px;color:rgba(27,27,27,.6)">Nombre</div><div class="val mono">Rodrigo A.</div></div>
+        <div><div class="lbl" style="font-size:10px;color:rgba(27,27,27,.6)">Correo</div><div class="val mono">r***@ejemplo.com</div></div>
+        <div><div class="lbl" style="font-size:10px;color:rgba(27,27,27,.6)">Teléfono</div><div class="val mono">+54 9 11 *****</div></div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="lbl">Datos de la oferta</div>
+      <div class="urlrow">
+        <div class="fld">
+          <div class="lbl" style="font-size:10px;color:rgba(27,27,27,.6);margin-bottom:7px">URL de la oferta</div>
+          <div class="val mono">https://example.com/jobs/nestjs-dev</div>
+        </div>
+        <div class="go">Evaluar</div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="lbl">Experiencia laboral</div>
+      <table>
+        <thead><tr><th style="width:110px">Años</th><th style="width:300px">Empresa</th><th>Puesto</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">2022 — 2026</td><td>Empresa del sector fintech</td><td>Desarrollador backend senior · TypeScript, NestJS</td></tr>
+          <tr><td class="mono">2020 — 2022</td><td>Consultora de software</td><td>Desarrollador full stack · React, PostgreSQL</td></tr>
+          <tr><td class="mono">2019 — 2020</td><td>Agencia de producto</td><td>Desarrollador junior · JavaScript, MySQL</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sect" style="border-bottom:0">
+      <div class="lbl">Requisitos solicitados</div>
+      <div class="reqs mono">
+        <span>TypeScript</span><span>NestJS</span><span>PostgreSQL</span><span>Redis</span><span>Docker</span><span>3 años de experiencia</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="slipcol">
+    <aside class="slips">
+      <div class="tagmini">Documento 02 de 03</div>
+      <h3>Carta de presentación</h3>
+      <p>Redactada en el tono detectado y con tus proyectos citados uno por uno, en el mismo orden que tu CV optimizado.</p>
+    </aside>
+    <aside class="slips">
+      <div class="tagmini">Documento 03 de 03</div>
+      <h3>CV optimizado</h3>
+      <p>Reordenado para los filtros automáticos: primero lo que la empresa pide, después lo que hiciste con eso.</p>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

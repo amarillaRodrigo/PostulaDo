@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PostulaDo — El formato de evaluación</title>
+<style>
+  :root{ --paper:#e6e9ea; --ink:#16181a; --mark:#d7ee4e; --stamp:#8e2b2b; --rule:rgba(22,24,26,.30); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:1440px;height:900px;overflow:hidden;background:var(--paper);color:var(--ink);
+    font-family:"Arial Narrow","Bahnschrift Condensed","Helvetica Neue Condensed",Arial,sans-serif}
+  .mono{font-family:"Courier New",Courier,monospace}
+  .hand{font-family:"Ink Free","Segoe Script","Bradley Hand",cursive}
+  .lbl{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
+  .sm{font-size:12px;letter-spacing:.06em}
+  nav{height:70px;border-bottom:1px solid var(--rule);display:flex;align-items:center;
+    justify-content:space-between;padding:0 36px}
+  .mark{font-size:26px;letter-spacing:.16em;font-weight:700;text-transform:uppercase}
+  .links{display:flex;gap:34px;align-items:center}
+  .links a{font-size:13px;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;color:var(--ink)}
+  .outline{border:1px solid var(--ink);padding:9px 20px;font-size:13px;letter-spacing:.18em;text-transform:uppercase}
+  main{display:grid;grid-template-columns:1fr 286px;gap:26px;padding:26px 36px 0}
+  .sheet{border:1px solid var(--rule);background:rgba(255,255,255,.28);padding:0}
+  .shead{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 26px 18px;
+    border-bottom:1px solid var(--rule)}
+  .tag{border:1px solid var(--ink);padding:4px 9px;font-size:11px;letter-spacing:.22em;font-weight:700}
+  h1{font-size:31px;line-height:1.06;font-weight:700;letter-spacing:.01em;margin-top:10px}
+  .sub{font-size:13px;color:rgba(22,24,26,.66);margin-top:7px}
+  .urlrow{display:flex;align-items:flex-end;gap:14px;padding:16px 26px;border-bottom:1px solid var(--rule)}
+  .fld{flex:1}
+  .fld .lbl{display:block;margin-bottom:7px}
+  .fld .val{border:1px solid var(--rule);padding:11px 13px;font-size:14px;background:rgba(255,255,255,.45)}
+  .go{background:var(--ink);color:var(--paper);padding:13px 30px;font-size:14px;letter-spacing:.18em;font-weight:700}
+  table{width:100%;border-collapse:collapse}
+  thead th{text-align:left;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;
+    padding:11px 26px;border-bottom:1px solid var(--rule);color:rgba(22,24,26,.62)}
+  tbody td{border-bottom:1px solid var(--rule);padding:13px 26px;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  .req{font-size:23px;font-weight:700;line-height:1.1}
+  .reqnote{font-size:12px;color:rgba(22,24,26,.62);margin-top:4px}
+  .ev{position:relative;min-height:46px}
+  .swipe{position:absolute;inset:4px -14px 4px -14px;background:var(--mark);opacity:.82;
+    transform:rotate(-1.2deg);z-index:0}
+  .swipe.b{transform:rotate(.8deg);top:8px;bottom:2px}
+  .evtxt{position:relative;z-index:1;font-size:15px}
+  .state{font-size:12px;letter-spacing:.16em;font-weight:700}
+  .state.ok{color:#4a5a20}
+  .state.no{color:var(--stamp)}
+  aside{border-left:1px solid var(--rule);padding-left:22px;display:flex;flex-direction:column;gap:16px}
+  .note{font-size:19px;line-height:1.35;transform:rotate(-1deg)}
+  .note+.note{margin-top:6px;transform:rotate(.7deg)}
+  .stampbox{margin-top:4px;border:1px solid var(--rule);padding:14px;display:flex;justify-content:center}
+  .stamp{border:3px solid var(--stamp);color:var(--stamp);padding:7px 15px;font-size:17px;letter-spacing:.14em;
+    font-weight:700;transform:rotate(-8deg);opacity:.88}
+  .clock{border:1px solid var(--rule);padding:13px 14px;margin-top:auto}
+  .clock .row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px dotted var(--rule)}
+  .clock .row:last-child{border-bottom:0}
+  .slips{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:22px 36px 0;border:1px solid var(--rule);
+    background:rgba(255,255,255,.22)}
+  .slip{padding:16px 22px;border-right:1px solid var(--rule)}
+  .slip:last-child{border-right:0}
+  .slip h3{font-size:22px;letter-spacing:.04em;text-transform:uppercase;font-weight:700}
+  .slip p{font-size:12.5px;line-height:1.5;color:rgba(22,24,26,.74);margin-top:8px}
+  .slip .tagmini{font-size:10px;letter-spacing:.2em;color:rgba(22,24,26,.55)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="mark">PostulaDo</div>
+  <div class="links">
+    <a href="#">Producto</a><a href="#">Cómo funciona</a><a href="#">Precios</a>
+    <span class="outline">Entrar</span>
+  </div>
+</nav>
+
+<main>
+  <section class="sheet">
+    <div class="shead">
+      <div>
+        <h1>Hoja de evaluación de postulación</h1>
+        <div class="sub mono">Postulado · Aurelia Fintech · 03/11/2026 · 14:22</div>
+      </div>
+      <span class="tag">Ejemplo</span>
+    </div>
+    <div class="urlrow">
+      <div class="fld">
+        <span class="lbl">Oferta (URL)</span>
+        <div class="val mono">https://example.com/jobs/nestjs-dev</div>
+      </div>
+      <div class="go">Evaluar</div>
+    </div>
+    <table>
+      <thead><tr><th style="width:300px">Requisito de la oferta</th><th>Evidencia en tu perfil</th><th style="width:150px">Estado</th></tr></thead>
+      <tbody>
+        <tr><td><div class="req">TypeScript</div><div class="reqnote">Requisito principal · 3 años</div></td>
+            <td class="ev"><div class="swipe"></div><div class="evtxt mono">5 años en producción · proyecto actual</div></td>
+            <td><span class="state ok">Cubierto</span></td></tr>
+        <tr><td><div class="req">NestJS</div><div class="reqnote">Framework backend</div></td>
+            <td class="ev"><div class="swipe b"></div><div class="evtxt mono">3 años · APIs en producción</div></td>
+            <td><span class="state ok">Cubierto</span></td></tr>
+        <tr><td><div class="req">PostgreSQL</div><div class="reqnote">Modelado relacional</div></td>
+            <td class="ev"><div class="swipe"></div><div class="evtxt mono">Prisma · migraciones propias</div></td>
+            <td><span class="state ok">Cubierto</span></td></tr>
+        <tr><td><div class="req">Redis</div><div class="reqnote">Caché y colas</div></td>
+            <td class="ev"><div class="evtxt mono">Sin evidencia declarada</div></td>
+            <td><span class="state no">Brecha</span></td></tr>
+        <tr><td><div class="req">Docker</div><div class="reqnote">Contenedores en CI</div></td>
+            <td class="ev"><div class="swipe b"></div><div class="evtxt mono">Compose · imagen multi-stage</div></td>
+            <td><span class="state ok">Cubierto</span></td></tr>
+        <tr><td><div class="req">Kubernetes</div><div class="reqnote">Orquestación</div></td>
+            <td class="ev"><div class="evtxt mono">Sin evidencia declarada</div></td>
+            <td><span class="state no">Brecha</span></td></tr>
+        <tr><td><div class="req">Tono de empresa</div><div class="reqnote">Cultura: profesional, dinámico</div></td>
+            <td class="ev"><div class="swipe"></div><div class="evtxt mono">Carta ajustada al tono detectado</div></td>
+            <td><span class="state ok">Cubierto</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <aside>
+    <div>
+      <div class="lbl" style="margin-bottom:12px">Notas del evaluador</div>
+      <div class="note hand">Arranca por TypeScript: es lo primero que van a leer.</div>
+      <div class="note hand">Redis y K8s: decí que estás aprendiendo.</div>
+    </div>
+    <div class="stampbox"><div class="stamp">Apto</div></div>
+    <div class="clock">
+      <div class="lbl" style="margin-bottom:8px">Reloj de la hoja</div>
+      <div class="row"><span>Enviado</span><span class="mono">hace 12 días</span></div>
+      <div class="row"><span>En entrevista</span><span class="mono">hace 4 días</span></div>
+      <div class="row"><span>Analizado</span><span class="mono">hace 12 días</span></div>
+    </div>
+  </aside>
+</main>
+
+<section class="slips">
+  <div class="slip"><div class="tagmini">Documento 01</div><h3>Análisis de enfoque</h3><p>Priorizá tu experiencia en TypeScript sobre el stack de infraestructura: la empresa separa explícitamente backend de plataforma en la oferta.</p></div>
+  <div class="slip"><div class="tagmini">Documento 02</div><h3>Carta de presentación</h3><p>Redactada en el tono detectado — profesional y dinámico — y abre nombrando el proyecto donde más peso tiene tu trabajo en TypeScript.</p></div>
+  <div class="slip"><div class="tagmini">Documento 03</div><h3>CV optimizado</h3><p>Reordenado para ATS: tus competencias de TypeScript primero, y la sección de infraestructura al final con el estado real de cada herramienta.</p></div>
+</section>
+</body>
+</html>
