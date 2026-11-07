@@ -43,6 +43,10 @@ const FAQ = [
     a: 'Para que el plan no viva solo en este navegador. La cuenta guarda tus lotes y te manda un correo para confirmar que la dirección es tuya; con eso podés abrir el mismo plan desde otra computadora o después de borrar los datos del navegador.',
   },
   {
+    q: '¿Y si me olvido la contraseña?',
+    a: 'En el paso de la cuenta elegí "Ya tengo cuenta: entrar" y después "¿Olvidaste tu contraseña?". Te mandamos un enlace para elegir una nueva: vence en 1 hora y sirve una sola vez. Si el correo no tiene cuenta, la respuesta es la misma, así el formulario no sirve para averiguar quién está registrado.',
+  },
+  {
     q: '¿Esto reemplaza saber una herramienta concreta?',
     a: 'No. Te dice qué temas cubren más ofertas y, por cada tema, las alternativas que existen. Con eso elegís por dónde entrar según lo que tu trabajo ya tiene.',
   },
