@@ -48,10 +48,25 @@ export function CuentaPanel({
   // refs para que el efecto de abajo corra una sola vez y no pida en loop.
   const onVerificadoRef = useRef(onVerificado);
   const confirmadoRef = useRef(sesion.emailVerificado);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     onVerificadoRef.current = onVerificado;
   }, [onVerificado]);
+
+  // "Entrar" del header cuando ya hay un plan a la vista: se abre Mi cuenta.
+  useEffect(() => {
+    function alEntrar() {
+      const panel = detailsRef.current;
+      if (!panel) return;
+
+      panel.open = true;
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    window.addEventListener('postulado:entrar', alEntrar);
+    return () => window.removeEventListener('postulado:entrar', alEntrar);
+  }, []);
 
   const refrescarPerfil = useCallback(async () => {
     const perfil = await miPerfil();
@@ -145,7 +160,7 @@ export function CuentaPanel({
   }
 
   return (
-    <details className="cuenta">
+    <details className="cuenta" ref={detailsRef}>
       <summary className="cuenta__sum">
         <span className="cuenta__mail">{sesion.email}</span>
         <span

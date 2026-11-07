@@ -11,6 +11,7 @@ import {
   entrarCuenta,
   guardarSesion,
   leerSesion,
+  listarLotes,
   olvidePassword,
   recuperarPlan,
   SIN_API,
@@ -108,7 +109,9 @@ function parseUrls(raw: string): string[] {
 export function LoteForm() {
   const [urls, setUrls] = useState('');
   const [state, setState] = useState<Estado>({ kind: 'idle' });
+  const [aviso, setAviso] = useState<string | null>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  const estadoRef = useRef<Estado>(state);
   const [recuperar, setRecuperar] = useState<{
     abierto: boolean;
     enviando: boolean;
@@ -145,11 +148,94 @@ export function LoteForm() {
     };
   }, []);
 
-  async function correr(
-    cuenta: Cuenta,
-    modo: Modo,
-    origen: 'lote' | 'cuenta' = 'lote',
-  ) {
+  // El estado actual sin volver a suscribir el listener en cada render.
+  useEffect(() => {
+    estadoRef.current = state;
+  }, [state]);
+
+  // "Entrar" del header. Si ya hay sesión no se pide la contraseña de nuevo:
+  // se abre el último lote guardado. Con un plan a la vista, el que se abre es
+  // el panel de Mi cuenta (lo escucha `CuentaPanel`).
+  useEffect(() => {
+    function alEntrar() {
+      const actual = estadoRef.current;
+
+      if (
+        actual.kind === 'done' ||
+        actual.kind === 'restoring' ||
+        actual.kind === 'working'
+      ) {
+        return;
+      }
+
+      setAviso(null);
+
+      if (!leerSesion()) {
+        // Si venía escribiendo el correo en el paso de cuenta, se conserva.
+        const cuenta =
+          actual.kind === 'needs-account' || actual.kind === 'account-error'
+            ? { ...actual.cuenta, password: '' }
+            : CUENTA_VACIA;
+
+        setState({ kind: 'needs-account', cuenta, modo: 'entrar' });
+        return;
+      }
+
+      void (async () => {
+        const lotes = await listarLotes();
+
+        if (lotes.length > 0) {
+          await abrir(lotes[0]);
+          return;
+        }
+
+        setState({ kind: 'idle' });
+        setAviso(
+          'Ya entraste. Tu cuenta todavía no tiene lotes guardados: pegá las ofertas y armamos el primero.',
+        );
+      })();
+    }
+
+    window.addEventListener('postulado:entrar', alEntrar);
+    return () => window.removeEventListener('postulado:entrar', alEntrar);
+  }, []);
+
+  /** Analiza el lote con la sesión ya guardada (sin volver a pedir cuenta). */
+  async function analizarConSesion(list: string[], emailEnviado?: boolean) {
+    setAviso(null);
+    setState({ kind: 'working', hechos: 0, total: list.length });
+    guardarUrlsPegadas(list);
+
+    try {
+      const { resultado, fallidas, sesion } = await analizarLote(
+        list,
+        (hechos, total) => setState({ kind: 'working', hechos, total }),
+      );
+
+      setState({
+        kind: 'done',
+        result: resultado,
+        sesion,
+        fallidas,
+        emailEnviado,
+      });
+    } catch (e) {
+      // Si la API rechazó la sesión, `pedirConSesion` ya la borró: se pide
+      // entrar en vez de dejar un error que no se arregla desde el formulario.
+      if (!leerSesion()) {
+        setState({ kind: 'needs-account', cuenta: CUENTA_VACIA, modo: 'entrar' });
+        return;
+      }
+
+      setState({
+        kind: 'error',
+        message:
+          e instanceof Error ? e.message : 'No pudimos analizar tus ofertas.',
+      });
+    }
+  }
+
+  async function correr(cuenta: Cuenta, modo: Modo) {
     const list = parseUrls(urls);
     if (list.length === 0) {
       setState({ kind: 'error', message: 'Pegá al menos una URL de oferta.' });
@@ -165,42 +251,67 @@ export function LoteForm() {
           ? await entrarCuenta(cuenta.email.trim(), cuenta.password)
           : await crearCuenta(cuenta);
 
-      const { resultado, fallidas, sesion } = await analizarLote(
-        list,
-        (hechos, total) => setState({ kind: 'working', hechos, total }),
-      );
-
-      setState({
-        kind: 'done',
-        result: resultado,
-        sesion,
-        fallidas,
-        emailEnviado: entrada.emailEnviado,
-      });
+      await analizarConSesion(list, entrada.emailEnviado);
     } catch (e) {
       const message =
         e instanceof Error ? e.message : 'No pudimos analizar tus ofertas.';
-      // Si el problema fue la cuenta, se vuelve al paso de la cuenta con lo
-      // que la persona ya había escrito, no al textarea vacío.
-      if (origen === 'cuenta') {
-        // Un correo que ya existe no es un error sin salida: se cambia a
-        // "entrar" con el mail ya cargado, en vez de dejar a la persona
-        // peleando con el formulario de registro.
-        const yaRegistrado =
-          modo === 'crear' && /ya est. registrado/i.test(message);
 
-        setState({
-          kind: 'account-error',
-          cuenta,
-          modo: yaRegistrado ? 'entrar' : modo,
-          message: yaRegistrado
-            ? 'Ese correo ya tiene cuenta. Entrá con tu contraseña.'
-            : message,
-        });
-      } else {
-        setState({ kind: 'error', message });
-      }
+      // Un correo que ya existe no es un error sin salida: se cambia a
+      // "entrar" con el mail ya cargado, en vez de dejar a la persona
+      // peleando con el formulario de registro.
+      const yaRegistrado =
+        modo === 'crear' && /ya est. registrado/i.test(message);
+
+      setState({
+        kind: 'account-error',
+        cuenta,
+        modo: yaRegistrado ? 'entrar' : modo,
+        message: yaRegistrado
+          ? 'Ese correo ya tiene cuenta. Entrá con tu contraseña.'
+          : message,
+      });
     }
+  }
+
+  /**
+   * Entra sin lote: abre el plan más reciente de la cuenta.
+   *
+   * Es el camino del "Entrar" del header. Si la cuenta todavía no tiene lotes,
+   * lo dice en vez de dejar una pantalla en blanco: la sesión queda abierta y
+   * el formulario listo para pegar las primeras ofertas.
+   */
+  async function entrarSolo(cuenta: Cuenta) {
+    if (!API_CONFIGURADA) {
+      setState({ kind: 'error', message: SIN_API });
+      return;
+    }
+
+    setAviso(null);
+    setState({ kind: 'restoring', texto: 'Entrando a tu cuenta…' });
+
+    try {
+      await entrarCuenta(cuenta.email.trim(), cuenta.password);
+    } catch (e) {
+      setState({
+        kind: 'account-error',
+        cuenta,
+        modo: 'entrar',
+        message: e instanceof Error ? e.message : 'No pudimos entrar.',
+      });
+      return;
+    }
+
+    const lotes = await listarLotes();
+
+    if (lotes.length === 0) {
+      setState({ kind: 'idle' });
+      setAviso(
+        'Entraste. Tu cuenta todavía no tiene lotes guardados: pegá las ofertas y armamos el primero.',
+      );
+      return;
+    }
+
+    await abrir(lotes[0]);
   }
 
   async function abrir(lote: LoteGuardado) {
@@ -411,32 +522,43 @@ export function LoteForm() {
     const { cuenta, modo } = state;
     const error = state.kind === 'account-error' ? state.message : null;
     const entrando = modo === 'entrar';
+    const hayUrls = parseUrls(urls).length > 0;
 
     return (
       <form className="ingest" onSubmit={(e) => {
         e.preventDefault();
         const form = new FormData(e.currentTarget);
-        correr(
-          {
-            nombre: String(form.get('nombre') ?? ''),
-            email: String(form.get('email') ?? ''),
-            password: String(form.get('password') ?? ''),
-            birthDate: String(form.get('birthDate') ?? ''),
-          },
-          modo,
-          'cuenta',
-        );
+        const cuenta: Cuenta = {
+          nombre: String(form.get('nombre') ?? ''),
+          email: String(form.get('email') ?? ''),
+          password: String(form.get('password') ?? ''),
+          birthDate: String(form.get('birthDate') ?? ''),
+        };
+
+        // Entrar sin ofertas pegadas: se abre el último plan de la cuenta.
+        if (entrando && parseUrls(urls).length === 0) {
+          void entrarSolo(cuenta);
+          return;
+        }
+
+        void correr(cuenta, modo);
       }}>
         <div className="ingest__head">
           <span>Cargamos tu lote</span>
           <span>
-            {entrando ? 'Entrá para verlo' : 'Creá una cuenta para guardarlo'}
+            {entrando
+              ? hayUrls
+                ? 'Entrá para verlo'
+                : 'Entrá a tu cuenta'
+              : 'Creá una cuenta para guardarlo'}
           </span>
         </div>
         <div className="ingest__account">
           <p className="ingest__account-lead">
             {entrando
-              ? 'Entrá con tu cuenta y abrimos el plan de este lote.'
+              ? hayUrls
+                ? 'Entrá con tu cuenta y abrimos el plan de este lote.'
+                : 'Entrá con tu cuenta y abrimos tu último plan guardado.'
               : 'Tu lote queda guardado en tu cuenta, así podés volver a mirarlo desde cualquier dispositivo.'}
           </p>
 
@@ -594,7 +716,18 @@ export function LoteForm() {
           setState({ kind: 'error', message: SIN_API });
           return;
         }
+        if (lista.length === 0) {
+          setState({ kind: 'error', message: 'Pegá al menos una URL de oferta.' });
+          return;
+        }
         guardarUrlsPegadas(lista);
+
+        // Si ya hay sesión, no se vuelve a pedir cuenta: se analiza directo.
+        if (leerSesion()) {
+          void analizarConSesion(lista);
+          return;
+        }
+
         setState({ kind: 'needs-account', cuenta: CUENTA_VACIA, modo: 'crear' });
       }}
     >
@@ -633,6 +766,11 @@ export function LoteForm() {
       {state.kind === 'working' ? (
         <p className="ingest__notice" role="status">
           Analizando {state.hechos} de {state.total}…
+        </p>
+      ) : null}
+      {aviso ? (
+        <p className="ingest__notice" role="status">
+          {aviso}
         </p>
       ) : null}
       {state.kind === 'error' ? (

@@ -186,6 +186,23 @@ input {
   align-items: center;
 }
 
+.nav__entrar {
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.nav__entrar:hover {
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
 /* ============================ BOTONES ============================ */
 
 .btn {
@@ -1738,14 +1755,21 @@ input {
   box-shadow: var(--shadow-sm);
 }
 
-.nav__menu-panel a {
+.nav__menu-panel a,
+.nav__menu-entrar {
   padding: 9px 11px;
+  border: 0;
   border-radius: 8px;
+  background: none;
+  font: inherit;
   font-size: 14px;
+  text-align: left;
   text-decoration: none;
+  cursor: pointer;
 }
 
-.nav__menu-panel a:hover {
+.nav__menu-panel a:hover,
+.nav__menu-entrar:hover {
   background: var(--accent-soft);
   color: var(--accent);
 }
@@ -1836,6 +1860,11 @@ input {
   }
 
   .nav__links {
+    display: none;
+  }
+
+  /* En móvil "Entrar" vive dentro del menú, no al lado del CTA. */
+  .nav__cta > .nav__entrar {
     display: none;
   }
 

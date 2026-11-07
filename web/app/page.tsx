@@ -1,4 +1,5 @@
 import { Lens } from '@/components/Lens';
+import { EntrarLink } from '@/components/EntrarLink';
 import { LoteForm } from '@/components/LoteForm';
 import { PrismDiagram } from '@/components/PrismDiagram';
 import {
@@ -78,6 +79,7 @@ export default function Page() {
             <a href="#dispersión">Ejemplo</a>
           </div>
           <div className="nav__cta">
+            <EntrarLink />
             <a className="btn btn--ink" href="#lote">
               Ver mi plan
             </a>
@@ -88,6 +90,7 @@ export default function Page() {
                 <a href="#como-funciona">Cómo funciona</a>
                 <a href="#dispersión">Ejemplo</a>
                 <a href="#lote">Ver mi plan</a>
+                <EntrarLink className="nav__menu-entrar" />
               </div>
             </details>
           </div>
