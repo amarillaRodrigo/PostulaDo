@@ -28,6 +28,11 @@ export class MailService {
     return configurada.replace(/\/+$/, '');
   }
 
+  /** `false` cuando no hay proveedor: ningún correo puede salir. */
+  get configurado(): boolean {
+    return Boolean(this.config.get<string>('RESEND_API_KEY')?.trim());
+  }
+
   enlaceVerificacion(token: string): string {
     return `${this.basePublica()}/verificar/?token=${encodeURIComponent(token)}`;
   }

@@ -33,6 +33,13 @@ describe('MailService', () => {
     );
   });
 
+  it('sabe si hay proveedor configurado', () => {
+    expect(new MailService(configCon({})).configurado).toBe(false);
+    expect(
+      new MailService(configCon({ RESEND_API_KEY: 're_test' })).configurado,
+    ).toBe(true);
+  });
+
   it('sin proveedor no manda nada y lo informa', async () => {
     const mail = new MailService(configCon({}));
     global.fetch = jest.fn();

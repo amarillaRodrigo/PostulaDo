@@ -249,7 +249,9 @@ export class AuthService {
     const user = await this.usuariosService.user({ email });
 
     if (!user) {
-      return { enviado: true };
+      // La misma respuesta que daría una cuenta real. Sin proveedor nadie
+      // puede recibir nada, así que también se dice que no se pudo enviar.
+      return { enviado: this.mail.configurado };
     }
 
     const desdeElUltimo = user.passwordResetSentAt
@@ -259,7 +261,7 @@ export class AuthService {
     // Un pedido por minuto: sin esto, cualquiera puede usar el formulario
     // para llenar de mails el buzón de otra persona.
     if (desdeElUltimo < ESPERA_REENVIO_MS) {
-      return { enviado: true };
+      return { enviado: this.mail.configurado };
     }
 
     const token = randomBytes(32).toString('hex');

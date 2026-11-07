@@ -52,6 +52,7 @@ describe('AuthService', () => {
   const mockMail = {
     enviarVerificacion: jest.fn(),
     enviarRecuperacion: jest.fn(),
+    configurado: true,
   };
 
   beforeEach(async () => {
@@ -60,6 +61,7 @@ describe('AuthService', () => {
     mockUsuariosService.updateUser.mockResolvedValue(mockUser);
     mockMail.enviarVerificacion.mockResolvedValue({ enviado: true });
     mockMail.enviarRecuperacion.mockResolvedValue({ enviado: true });
+    mockMail.configurado = true;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -397,6 +399,23 @@ describe('AuthService', () => {
       const result = await service.olvidePassword(mockUser.email);
 
       expect(result).toEqual({ enviado: false });
+    });
+
+    it('sin proveedor responde igual a una cuenta real y a una que no existe', async () => {
+      mockMail.configurado = false;
+      mockMail.enviarRecuperacion.mockResolvedValue({
+        enviado: false,
+        motivo: 'sin-proveedor',
+      });
+
+      mockUsuariosService.user.mockResolvedValueOnce(mockUser);
+      const conCuenta = await service.olvidePassword(mockUser.email);
+
+      mockUsuariosService.user.mockResolvedValueOnce(null);
+      const sinCuenta = await service.olvidePassword('nadie@example.com');
+
+      expect(conCuenta).toEqual({ enviado: false });
+      expect(sinCuenta).toEqual({ enviado: false });
     });
 
     it('no reutiliza el token anterior al pedir uno nuevo', async () => {
