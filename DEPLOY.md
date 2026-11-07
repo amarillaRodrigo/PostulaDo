@@ -56,9 +56,37 @@ esquema es `rediss://`.
 | `REDIS_URL` | La URL de Redis Cloud o Upstash |
 | `JWT_SECRET` | Lo genera Render solo |
 | `CORS_ORIGINS` | Ya viene con `https://rodrigoamarilla.tech` |
+| `RESEND_API_KEY` | La clave de Resend, para mandar el mail de confirmacion |
 
 4. Deploy. El contenedor corre `prisma migrate deploy` antes de levantar
    Nest, asi que la base queda migrada en el primer arranque.
+
+## 3.1 Correo de confirmacion (Resend)
+
+La cuenta se crea igual sin esto: la API no manda el mail, lo deja en el log y
+la landing avisa que no pudo enviarlo. Para que llegue de verdad:
+
+1. Crear cuenta gratis en <https://resend.com> (3.000 mails/mes, 100/dia).
+2. **Domains -> Add domain** con `rodrigoamarilla.tech`. Resend da tres
+   registros DNS (SPF, DKIM y, opcional, DMARC). Cargarlos en Cloudflare tal
+   cual los muestra; **no** los proxies (nube gris, no naranja).
+3. Esperar la verificacion del dominio (minutos, a veces una hora).
+4. **API Keys -> Create**, permiso *Sending access*, y copiar la clave.
+5. En Render: **Environment -> Add Environment Variable**
+   `RESEND_API_KEY = re_...` y despues **Manual Deploy -> Deploy latest commit**
+   (cambiar una variable no reinicia el servicio).
+
+Variables que ya trae `render.yaml`:
+
+| Variable | Valor |
+| --- | --- |
+| `APP_PUBLIC_URL` | `https://rodrigoamarilla.tech/postulado` (arma el enlace) |
+| `MAIL_FROM` | `PostulaDo <no-reply@rodrigoamarilla.tech>` |
+| `RESEND_API_KEY` | `sync: false`, se carga a mano |
+
+Sin dominio verificado, Resend rechaza el envio con `403` y la API lo registra
+como `Resend rechazo el envio`. La cuenta sigue funcionando; solo falta el
+mail.
 
 ## 4. Verificar
 

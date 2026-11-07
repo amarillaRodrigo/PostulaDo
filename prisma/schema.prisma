@@ -36,7 +36,32 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Verificación de correo: se guarda el hash del token, nunca el token.
+  emailVerifiedAt            DateTime?
+  emailVerificationToken     String?   @unique
+  emailVerificationSentAt    DateTime?
+  emailVerificationExpiresAt DateTime?
+
   postulaciones Postulacion[]
+  lotes         Lote[]
+}
+
+/// Un lote es "las ofertas que analicé juntas". Guarda los ids y el nombre
+/// que se le mostró a la persona, para poder reabrir el plan desde cualquier
+/// dispositivo.
+model Lote {
+  id     String @id @default(uuid())
+  userId String
+  nombre String?
+
+  /// Ids de Postulacion que forman el lote.
+  ids String[]
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model Postulacion {

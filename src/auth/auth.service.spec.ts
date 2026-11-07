@@ -1,10 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User, UserRole } from '@prisma/client';
 import { compare } from 'bcryptjs';
+import { createHash } from 'node:crypto';
 import { AuthService } from './auth.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
+import { MailService } from '../mail/mail.service';
 
 jest.mock('bcryptjs', () => ({
   compare: jest.fn(),
@@ -21,27 +27,41 @@ describe('AuthService', () => {
     role: UserRole.USER,
     birthDate: new Date('1995-05-15'),
     countryCode: 'AR',
+    profileText: null,
     createdAt: new Date(),
     updatedAt: new Date(),
+    emailVerifiedAt: null,
+    emailVerificationToken: null,
+    emailVerificationSentAt: null,
+    emailVerificationExpiresAt: null,
   };
 
   const mockUsuariosService = {
     user: jest.fn(),
     createUser: jest.fn(),
+    updateUser: jest.fn(),
   };
 
   const mockJwtService = {
     signAsync: jest.fn(),
   };
 
+  const mockMail = {
+    enviarVerificacion: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
+
+    mockUsuariosService.updateUser.mockResolvedValue(mockUser);
+    mockMail.enviarVerificacion.mockResolvedValue({ enviado: true });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UsuariosService, useValue: mockUsuariosService },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: MailService, useValue: mockMail },
       ],
     }).compile();
 
@@ -81,6 +101,7 @@ describe('AuthService', () => {
       // Debe retornar token y el usuario sin contraseña
       expect(result).toEqual({
         access_token: 'mock-jwt-token',
+        emailEnviado: true,
         user: {
           id: mockUser.id,
           email: mockUser.email,
@@ -88,11 +109,49 @@ describe('AuthService', () => {
           role: mockUser.role,
           birthDate: mockUser.birthDate,
           countryCode: mockUser.countryCode,
+          profileText: mockUser.profileText,
           createdAt: mockUser.createdAt,
           updatedAt: mockUser.updatedAt,
+          emailVerifiedAt: null,
         },
       });
       expect((result.user as any).password).toBeUndefined();
+      expect((result.user as any).emailVerificationToken).toBeUndefined();
+    });
+
+    it('guarda el hash del token, no el token que viaja por mail', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce(null);
+      mockUsuariosService.createUser.mockResolvedValueOnce(mockUser);
+      mockJwtService.signAsync.mockResolvedValueOnce('mock-jwt-token');
+
+      await service.register(registerDto);
+
+      const datos = mockUsuariosService.updateUser.mock.calls[0][0].data;
+      const tokenEnviado = mockMail.enviarVerificacion.mock.calls[0][2];
+
+      expect(datos.emailVerificationToken).toMatch(/^[a-f0-9]{64}$/);
+      expect(datos.emailVerificationToken).not.toBe(tokenEnviado);
+      expect(createHash('sha256').update(tokenEnviado).digest('hex')).toBe(
+        datos.emailVerificationToken,
+      );
+      expect(datos.emailVerificationExpiresAt.getTime()).toBeGreaterThan(
+        Date.now(),
+      );
+    });
+
+    it('no rompe el registro si el correo no se pudo enviar', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce(null);
+      mockUsuariosService.createUser.mockResolvedValueOnce(mockUser);
+      mockJwtService.signAsync.mockResolvedValueOnce('mock-jwt-token');
+      mockMail.enviarVerificacion.mockResolvedValueOnce({
+        enviado: false,
+        motivo: 'sin-proveedor',
+      });
+
+      const result = await service.register(registerDto);
+
+      expect(result.emailEnviado).toBe(false);
+      expect(result.access_token).toBe('mock-jwt-token');
     });
 
     it('debería lanzar ConflictException si el email ya existe', async () => {
@@ -160,11 +219,118 @@ describe('AuthService', () => {
           role: mockUser.role,
           birthDate: mockUser.birthDate,
           countryCode: mockUser.countryCode,
+          profileText: mockUser.profileText,
           createdAt: mockUser.createdAt,
           updatedAt: mockUser.updatedAt,
+          emailVerifiedAt: null,
         },
       });
       expect((result.user as any).password).toBeUndefined();
+      expect((result.user as any).emailVerificationToken).toBeUndefined();
+    });
+  });
+
+  describe('verificarEmail', () => {
+    const token = 'a'.repeat(64);
+    const hash = createHash('sha256').update(token).digest('hex');
+
+    it('marca el correo como verificado y borra el token', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        emailVerificationToken: hash,
+        emailVerificationExpiresAt: new Date(Date.now() + 60_000),
+      });
+
+      const result = await service.verificarEmail(token);
+
+      expect(mockUsuariosService.user).toHaveBeenCalledWith({
+        emailVerificationToken: hash,
+      });
+      expect(result).toEqual({
+        verificado: true,
+        email: mockUser.email,
+        yaEstaba: false,
+      });
+      expect(mockUsuariosService.updateUser).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
+        data: {
+          emailVerifiedAt: expect.any(Date),
+          emailVerificationToken: null,
+          emailVerificationExpiresAt: null,
+        },
+      });
+    });
+
+    it('es idempotente si el correo ya estaba verificado', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        emailVerifiedAt: new Date(),
+        emailVerificationToken: hash,
+      });
+
+      const result = await service.verificarEmail(token);
+
+      expect(result.yaEstaba).toBe(true);
+      expect(mockUsuariosService.updateUser).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un token que no existe', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce(null);
+
+      await expect(service.verificarEmail(token)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('rechaza un token vencido', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        emailVerificationToken: hash,
+        emailVerificationExpiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(service.verificarEmail(token)).rejects.toThrow(/venció/);
+      expect(mockUsuariosService.updateUser).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('reenviarVerificacion', () => {
+    it('no reenvía si el correo ya está verificado', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.reenviarVerificacion(mockUser.id);
+
+      expect(result).toEqual({ enviado: false, yaVerificado: true });
+      expect(mockMail.enviarVerificacion).not.toHaveBeenCalled();
+    });
+
+    it('espera 60 segundos entre envíos', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        emailVerificationSentAt: new Date(Date.now() - 10_000),
+      });
+
+      const result = await service.reenviarVerificacion(mockUser.id);
+
+      expect(result.yaVerificado).toBe(false);
+      expect(result.enviado).toBe(false);
+      expect(result.esperaSegundos).toBeGreaterThan(0);
+      expect(mockMail.enviarVerificacion).not.toHaveBeenCalled();
+    });
+
+    it('reenvía pasado el minuto de espera', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce({
+        ...mockUser,
+        emailVerificationSentAt: new Date(Date.now() - 120_000),
+      });
+
+      const result = await service.reenviarVerificacion(mockUser.id);
+
+      expect(result).toEqual({ enviado: true, yaVerificado: false });
+      expect(mockMail.enviarVerificacion).toHaveBeenCalledTimes(1);
     });
   });
 

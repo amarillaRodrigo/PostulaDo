@@ -640,6 +640,326 @@ input {
   font-weight: 600;
 }
 
+.ingest__restart {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.ingest__restart:hover {
+  color: var(--ink-soft);
+}
+
+.ingest__restart:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ============================ MI CUENTA ============================ */
+
+.cuenta {
+  border-top: 1px solid rgba(22, 24, 26, 0.1);
+  background: #fff;
+}
+
+.cuenta__sum {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 12.5px;
+}
+
+.cuenta__sum::-webkit-details-marker {
+  display: none;
+}
+
+.cuenta__sum:hover .cuenta__mail {
+  color: var(--ink);
+}
+
+.cuenta__mail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  color: var(--ink-soft);
+}
+
+.cuenta__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+
+.cuenta__badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cuenta__badge.is-pending {
+  color: #a16207;
+}
+
+.cuenta__badge.is-ok {
+  color: #15803d;
+}
+
+.cuenta__open {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cuenta[open] .cuenta__open {
+  visibility: hidden;
+}
+
+.cuenta__body {
+  padding: 4px 16px 14px;
+}
+
+.cuenta__pending {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(161, 98, 7, 0.25);
+  border-radius: 10px;
+  background: #fffbf2;
+}
+
+.cuenta__pending p {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.cuenta__pending b {
+  color: var(--ink);
+}
+
+.cuenta__aviso {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.cuenta__aviso.is-ok {
+  color: #15803d;
+}
+
+.cuenta__aviso.is-espera {
+  color: #a16207;
+}
+
+.cuenta__aviso.is-error {
+  color: #8c2f16;
+}
+
+.cuenta__lotes {
+  margin-top: 14px;
+}
+
+.cuenta__lotes-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.cuenta__lotes-head span:last-child {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.cuenta__empty {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.cuenta__lote {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.cuenta__lote:last-child {
+  border-bottom: 0;
+}
+
+.cuenta__lote-nombre {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cuenta__lote-meta {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.cuenta__lote .cuenta__action {
+  margin-left: auto;
+}
+
+.cuenta__action {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.cuenta__action:hover {
+  color: var(--ink-soft);
+}
+
+.cuenta__action:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.cuenta__action:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+.cuenta__foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.cuenta__switch {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.cuenta__switch:hover {
+  color: var(--ink);
+}
+
+.cuenta__switch:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ============================ CONFIRMAR CORREO ============================ */
+
+.verify {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px 20px;
+  background: var(--paper);
+}
+
+.verify__card {
+  width: 100%;
+  max-width: 520px;
+  padding: 40px 36px 44px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 50px rgba(22, 24, 26, 0.08);
+}
+
+.verify__mark {
+  display: inline-block;
+  margin-bottom: 28px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.verify__eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.verify h1 {
+  margin: 0 0 14px;
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.verify__text {
+  margin: 0 0 28px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.verify__text b {
+  color: var(--ink);
+}
+
+
 /* ============================ SECCIONES ============================ */
 
 .band {

@@ -33,11 +33,15 @@ const PASOS = [
   {
     titulo: 'Recibe el plan',
     texto:
-      'Los temas con su cobertura y sus alternativas. Tu lote queda guardado, así que podés volver a mirarlo cuando quieras.',
+      'Los temas con su cobertura y sus alternativas. El lote queda en tu cuenta: confirmás el correo y lo abrís desde cualquier dispositivo.',
   },
 ];
 
 const FAQ = [
+  {
+    q: '¿Para qué necesito una cuenta?',
+    a: 'Para que el plan no viva solo en este navegador. La cuenta guarda tus lotes y te manda un correo para confirmar que la dirección es tuya; con eso podés abrir el mismo plan desde otra computadora o después de borrar los datos del navegador.',
+  },
   {
     q: '¿Esto reemplaza saber una herramienta concreta?',
     a: 'No. Te dice qué temas cubren más ofertas y, por cada tema, las alternativas que existen. Con eso elegís por dónde entrar según lo que tu trabajo ya tiene.',
@@ -102,7 +106,8 @@ export default function Page() {
             <LoteForm />
           </div>
           <p className="hero__micro">
-            Tu lote queda guardado: podés volver a mirarlo cuando quieras
+            Tu lote queda guardado en tu cuenta: confirmás el correo y lo abrís
+            desde cualquier dispositivo
           </p>
         </div>
       </Lens>

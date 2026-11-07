@@ -24,3 +24,12 @@ services:
         value: 30d
       - key: CORS_ORIGINS
         value: https://rodrigoamarilla.tech,https://www.rodrigoamarilla.tech
+      # Base pública de la landing: se usa para armar el enlace de verificación.
+      - key: APP_PUBLIC_URL
+        value: https://rodrigoamarilla.tech/postulado
+      # Remitente del correo. El dominio tiene que estar verificado en Resend.
+      - key: MAIL_FROM
+        value: PostulaDo <no-reply@rodrigoamarilla.tech>
+      # Sin esta clave la API funciona igual: no manda el mail y lo dice.
+      - key: RESEND_API_KEY
+        sync: false

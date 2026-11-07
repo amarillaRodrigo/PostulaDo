@@ -31,12 +31,98 @@ export type Resultado = {
   sugerenciaAprendizaje: string;
 };
 
-type Credenciales = {
+export type Usuario = {
+  id: string;
+  email: string;
+  name: string | null;
+  emailVerifiedAt: string | null;
+};
+
+export type Sesion = {
+  token: string;
+  usuario: Usuario;
+  /** `false` cuando la API no pudo mandar el correo de confirmación. */
+  emailEnviado?: boolean;
+};
+
+export type LoteGuardado = {
+  id: string;
+  nombre: string | null;
+  ids: string[];
+  createdAt: string;
+};
+
+export type Credenciales = {
   nombre: string;
   email: string;
   password: string;
   birthDate: string;
 };
+
+/**
+ * Lo que se guarda en el navegador para sobrevivir a un F5.
+ *
+ * Es el token, no la contraseña: la sesión dura lo que dura el JWT (30 días)
+ * y se puede revocar del lado de la API. El plan se recalcula desde la API,
+ * así que lo guardado son los ids y el lote, no una foto vieja.
+ */
+export type SesionGuardada = {
+  token: string;
+  email: string;
+  emailVerificado: boolean;
+  ids: string[];
+  loteId: string | null;
+};
+
+const CLAVE_SESION = 'postulado.sesion';
+
+export function guardarSesion(sesion: SesionGuardada): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(CLAVE_SESION, JSON.stringify(sesion));
+  } catch {
+    // Modo privado o almacenamiento lleno: la demo sigue andando sin memoria.
+  }
+}
+
+export function borrarSesion(): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.removeItem(CLAVE_SESION);
+  } catch {
+    // Nada que hacer.
+  }
+}
+
+export function leerSesion(): SesionGuardada | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const crudo = window.localStorage.getItem(CLAVE_SESION);
+    if (!crudo) return null;
+
+    const datos = JSON.parse(crudo) as Partial<SesionGuardada>;
+    if (
+      typeof datos.token !== 'string' ||
+      !Array.isArray(datos.ids) ||
+      datos.ids.length === 0
+    ) {
+      return null;
+    }
+
+    return {
+      token: datos.token,
+      email: typeof datos.email === 'string' ? datos.email : '',
+      emailVerificado: datos.emailVerificado === true,
+      ids: datos.ids.filter((id): id is string => typeof id === 'string'),
+      loteId: typeof datos.loteId === 'string' ? datos.loteId : null,
+    };
+  } catch {
+    return null;
+  }
+}
 
 async function pedir<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
@@ -54,22 +140,18 @@ async function pedir<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body as T;
 }
 
-/** Login; si la cuenta no existe, la crea. */
-async function autenticar(cuenta: Credenciales): Promise<string> {
-  const login = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: cuenta.email, password: cuenta.password }),
-  });
+function autorizacion(token: string): HeadersInit {
+  return { Authorization: `Bearer ${token}` };
+}
 
-  if (login.ok) {
-    const body = await login.json();
-    return body.access_token as string;
-  }
-
-  const registro = await fetch(`${API_URL}/auth/register`, {
+/** Crea la cuenta. El correo de confirmación puede fallar sin romper nada. */
+export async function crearCuenta(cuenta: Credenciales): Promise<Sesion> {
+  const body = await pedir<{
+    access_token: string;
+    user: Usuario;
+    emailEnviado?: boolean;
+  }>('/auth/register', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       email: cuenta.email,
       password: cuenta.password,
@@ -79,14 +161,109 @@ async function autenticar(cuenta: Credenciales): Promise<string> {
     }),
   });
 
-  if (!registro.ok) {
-    throw new Error(
-      'No pudimos entrar con ese correo y esa contraseña. Revisá los datos o probá con otra contraseña.',
+  return {
+    token: body.access_token,
+    usuario: body.user,
+    emailEnviado: body.emailEnviado,
+  };
+}
+
+/** Entra con una cuenta existente. */
+export async function entrarCuenta(
+  email: string,
+  password: string,
+): Promise<Sesion> {
+  const body = await pedir<{ access_token: string; user: Usuario }>(
+    '/auth/login',
+    {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    },
+  );
+
+  return { token: body.access_token, usuario: body.user };
+}
+
+/** Relee el perfil: sirve para saber si el correo ya se confirmó. */
+export async function miPerfil(token: string): Promise<Usuario | null> {
+  try {
+    return await pedir<Usuario>('/auth/yo', { headers: autorizacion(token) });
+  } catch {
+    return null;
+  }
+}
+
+export async function verificarEmail(token: string): Promise<{
+  verificado: boolean;
+  email: string;
+  yaEstaba: boolean;
+}> {
+  return pedir('/auth/verificar', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function reenviarVerificacion(
+  token: string,
+): Promise<{ enviado: boolean; yaVerificado: boolean; esperaSegundos?: number }> {
+  return pedir('/auth/reenviar-verificacion', {
+    method: 'POST',
+    headers: autorizacion(token),
+  });
+}
+
+export async function listarLotes(token: string): Promise<LoteGuardado[]> {
+  try {
+    return await pedir<LoteGuardado[]>('/lotes', {
+      headers: autorizacion(token),
+    });
+  } catch {
+    return [];
+  }
+}
+
+/** Plan de un lote ya guardado en la cuenta. */
+export async function abrirLote(
+  token: string,
+  ids: string[],
+): Promise<Resultado | null> {
+  if (ids.length === 0) return null;
+
+  try {
+    const resultado = await pedir<Resultado>(
+      `/postulaciones/analisis-lote?ids=${encodeURIComponent(ids.join(','))}`,
+      { headers: autorizacion(token) },
     );
+
+    return resultado?.totalOfertasAnalizadas ? resultado : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Vuelve a pedir el plan del último lote guardado.
+ *
+ * Se recalcula en la API en vez de guardar el resultado: si los datos
+ * cambiaron, lo que se muestra es lo que hay hoy. Un token vencido borra la
+ * sesión y devuelve `null` para que la landing muestre el formulario.
+ */
+export async function recuperarPlan(): Promise<Resultado | null> {
+  const sesion = leerSesion();
+  if (!sesion || !API_CONFIGURADA) return null;
+
+  const resultado = await abrirLote(sesion.token, sesion.ids);
+
+  if (!resultado) {
+    // Antes de rendirse, comprobar si el token sigue siendo válido: si no,
+    // la sesión local es basura y conviene borrarla.
+    const perfil = await miPerfil(sesion.token);
+    if (!perfil) borrarSesion();
+    return null;
   }
 
-  const body = await registro.json();
-  return body.access_token as string;
+  return resultado;
 }
 
 /** Analiza una URL. Encola el trabajo y lo espera — el cliente hace el poll. */
@@ -97,7 +274,7 @@ async function analizar(
   const encolado = await pedir<{ jobId: string }>('/postulaciones/analizar', {
     method: 'POST',
     body: JSON.stringify({ url }),
-    headers: { Authorization: `Bearer ${token}` },
+    headers: autorizacion(token),
   });
 
   for (let intento = 0; intento < 60; intento += 1) {
@@ -107,7 +284,7 @@ async function analizar(
       status?: string;
       result?: { datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number } };
     }>(`/postulaciones/analizar/status/${encolado.jobId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: autorizacion(token),
     });
 
     if (estado.status === 'completed') return estado.result ?? {};
@@ -119,16 +296,24 @@ async function analizar(
   throw new Error('El análisis tardó demasiado. Probá con menos ofertas.');
 }
 
+export type ResultadoLote = {
+  resultado: Resultado;
+  ids: string[];
+  loteId: string | null;
+  /** Ofertas que no se pudieron leer. Se muestra, no se esconde. */
+  fallidas: number;
+};
+
 /**
- * El flujo completo: autenticar, analizar cada URL, guardarla y pedir el
- * analisis del lote. Todo desde el navegador, en paralelo.
+ * El flujo completo: analizar cada URL, guardarla, pedir el plan del lote y
+ * dejarlo guardado en la cuenta. Todo desde el navegador, en paralelo.
  */
 export async function analizarLote(
   urls: string[],
-  cuenta: Credenciales,
+  sesion: Sesion,
   alProgresar?: (hechos: number, total: number) => void,
-): Promise<Resultado> {
-  const token = await autenticar(cuenta);
+): Promise<ResultadoLote> {
+  const { token } = sesion;
 
   let hechos = 0;
 
@@ -143,7 +328,7 @@ export async function analizarLote(
             tecnologias: analisis.datosOferta?.tecnologias ?? [],
             aniosExperiencia: analisis.datosOferta?.aniosExperiencia,
           }),
-          headers: { Authorization: `Bearer ${token}` },
+          headers: autorizacion(token),
         });
         hechos += 1;
         alProgresar?.(hechos, urls.length);
@@ -159,8 +344,39 @@ export async function analizarLote(
     throw new Error('No pudimos analizar ninguna de tus ofertas.');
   }
 
-  return pedir<Resultado>(
+  const resultado = await pedir<Resultado>(
     `/postulaciones/analisis-lote?ids=${encodeURIComponent(guardados.join(','))}`,
-    { headers: { Authorization: `Bearer ${token}` } },
+    { headers: autorizacion(token) },
   );
+
+  // El lote se guarda en la cuenta: así el plan no vive solo en este navegador.
+  let loteId: string | null = null;
+  try {
+    const lote = await pedir<LoteGuardado>('/lotes', {
+      method: 'POST',
+      body: JSON.stringify({
+        ids: guardados,
+        nombre: resultado.ecosistema ?? undefined,
+      }),
+      headers: autorizacion(token),
+    });
+    loteId = lote.id;
+  } catch {
+    // Sin lote en la cuenta el plan igual se ve; solo no cruza dispositivos.
+  }
+
+  guardarSesion({
+    token,
+    email: sesion.usuario.email,
+    emailVerificado: Boolean(sesion.usuario.emailVerifiedAt),
+    ids: guardados,
+    loteId,
+  });
+
+  return {
+    resultado,
+    ids: guardados,
+    loteId,
+    fallidas: urls.length - guardados.length,
+  };
 }

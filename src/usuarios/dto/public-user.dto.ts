@@ -29,4 +29,11 @@ export class PublicUserDto {
 
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   updatedAt!: string;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    example: '2024-01-02T00:00:00.000Z',
+    description: 'null mientras el correo no esté confirmado',
+  })
+  emailVerifiedAt?: string | null;
 }
