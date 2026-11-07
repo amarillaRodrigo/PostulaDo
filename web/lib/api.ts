@@ -39,7 +39,12 @@ export type Usuario = {
 };
 
 export type Sesion = {
+  /** Token corto: viaja en cada request. */
   token: string;
+  /** Token largo: solo sirve para pedir un par nuevo. */
+  refreshToken: string;
+  /** Epoch ms en que vence `token`. */
+  expiraEn: number;
   usuario: Usuario;
   /** `false` cuando la API no pudo mandar el correo de confirmación. */
   emailEnviado?: boolean;
@@ -62,12 +67,17 @@ export type Credenciales = {
 /**
  * Lo que se guarda en el navegador para sobrevivir a un F5.
  *
- * Es el token, no la contraseña: la sesión dura lo que dura el JWT (30 días)
- * y se puede revocar del lado de la API. El plan se recalcula desde la API,
- * así que lo guardado son los ids y el lote, no una foto vieja.
+ * Son los dos tokens, no la contraseña. El access token dura 15 minutos; el
+ * refresh token 30 días y rota en cada uso, así que una sesión abierta no se
+ * cae cada cuarto de hora. El plan se recalcula desde la API, así que lo
+ * guardado son los ids y el lote, no una foto vieja.
  */
 export type SesionGuardada = {
   token: string;
+  /** `null` en sesiones anteriores a los refresh tokens. */
+  refreshToken: string | null;
+  /** Epoch ms de vencimiento del access token. `0` si no se sabe. */
+  expiraEn: number;
   email: string;
   emailVerificado: boolean;
   ids: string[];
@@ -75,6 +85,20 @@ export type SesionGuardada = {
 };
 
 const CLAVE_SESION = 'postulado.sesion';
+
+/** Antes de vencer, se renueva: evita que un request salga con un token muerto. */
+const MARGEN_REFRESCO_MS = 60 * 1000;
+
+/** Error de la API con el status HTTP: el 401 es el que dispara el refresco. */
+export class ErrorApi extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ErrorApi';
+    this.status = status;
+  }
+}
 
 export function guardarSesion(sesion: SesionGuardada): void {
   if (typeof window === 'undefined') return;
@@ -96,6 +120,22 @@ export function borrarSesion(): void {
   }
 }
 
+/** Lee `exp` del JWT. Sirve para sesiones guardadas antes de `expires_in`. */
+function vencimientoDeToken(token: string): number {
+  const payload = token.split('.')[1];
+  if (!payload) return 0;
+
+  try {
+    const datos = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
+    ) as { exp?: number };
+
+    return typeof datos.exp === 'number' ? datos.exp * 1000 : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export function leerSesion(): SesionGuardada | null {
   if (typeof window === 'undefined') return null;
 
@@ -104,16 +144,21 @@ export function leerSesion(): SesionGuardada | null {
     if (!crudo) return null;
 
     const datos = JSON.parse(crudo) as Partial<SesionGuardada>;
-    if (
-      typeof datos.token !== 'string' ||
-      !Array.isArray(datos.ids) ||
-      datos.ids.length === 0
-    ) {
+    if (typeof datos.token !== 'string' || !Array.isArray(datos.ids)) {
       return null;
     }
 
+    // `ids: []` es válido: la sesión existe y el lote todavía se está armando.
     return {
       token: datos.token,
+      refreshToken:
+        typeof datos.refreshToken === 'string' && datos.refreshToken
+          ? datos.refreshToken
+          : null,
+      expiraEn:
+        typeof datos.expiraEn === 'number' && datos.expiraEn > 0
+          ? datos.expiraEn
+          : vencimientoDeToken(datos.token),
       email: typeof datos.email === 'string' ? datos.email : '',
       emailVerificado: datos.emailVerificado === true,
       ids: datos.ids.filter((id): id is string => typeof id === 'string'),
@@ -135,7 +180,7 @@ async function pedir<T>(path: string, init: RequestInit = {}): Promise<T> {
       typeof body?.message === 'string'
         ? body.message
         : 'No pudimos completar la operacion.';
-    throw new Error(message);
+    throw new ErrorApi(message, res.status);
   }
   return body as T;
 }
@@ -144,13 +189,142 @@ function autorizacion(token: string): HeadersInit {
   return { Authorization: `Bearer ${token}` };
 }
 
+type RespuestaAuth = {
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+  user: Usuario;
+  emailEnviado?: boolean;
+};
+
+function aSesion(body: RespuestaAuth): Sesion {
+  return {
+    token: body.access_token,
+    refreshToken: body.refresh_token ?? '',
+    expiraEn:
+      body.expires_in && body.expires_in > 0
+        ? Date.now() + body.expires_in * 1000
+        : vencimientoDeToken(body.access_token),
+    usuario: body.user,
+    emailEnviado: body.emailEnviado,
+  };
+}
+
+/** Guarda la sesión apenas se entra: el lote se completa después. */
+function guardarDesdeSesion(
+  sesion: Sesion,
+  ids: string[],
+  loteId: string | null,
+): SesionGuardada {
+  const guardada: SesionGuardada = {
+    token: sesion.token,
+    refreshToken: sesion.refreshToken || null,
+    expiraEn: sesion.expiraEn,
+    email: sesion.usuario.email,
+    emailVerificado: Boolean(sesion.usuario.emailVerifiedAt),
+    ids,
+    loteId,
+  };
+
+  guardarSesion(guardada);
+  return guardada;
+}
+
+/**
+ * Cambia el refresh token por un par nuevo.
+ *
+ * Una sola promesa compartida: si dos partes de la app se quedan sin token a
+ * la vez, se hace un único refresh. Dos refresh en paralelo con el mismo
+ * token serían una carrera (la API tolera 30 s, pero no hace falta probarla).
+ */
+let refrescoEnCurso: Promise<SesionGuardada | null> | null = null;
+
+export async function refrescarSesion(): Promise<SesionGuardada | null> {
+  if (refrescoEnCurso) return refrescoEnCurso;
+
+  const guardada = leerSesion();
+
+  if (!guardada || !guardada.refreshToken || !API_CONFIGURADA) return null;
+
+  refrescoEnCurso = (async () => {
+    try {
+      const body = await pedir<RespuestaAuth>('/auth/refresh', {
+        method: 'POST',
+        body: JSON.stringify({ refresh_token: guardada.refreshToken }),
+      });
+
+      const actualizada: SesionGuardada = {
+        ...guardada,
+        token: body.access_token,
+        refreshToken: body.refresh_token ?? guardada.refreshToken,
+        expiraEn:
+          body.expires_in && body.expires_in > 0
+            ? Date.now() + body.expires_in * 1000
+            : vencimientoDeToken(body.access_token),
+        email: body.user?.email ?? guardada.email,
+        emailVerificado: Boolean(body.user?.emailVerifiedAt),
+      };
+
+      guardarSesion(actualizada);
+      return actualizada;
+    } catch (e) {
+      // Solo se borra si la API rechazó el token. Sin red o con la API
+      // dormida, lo guardado sigue sirviendo para el próximo intento.
+      if (e instanceof ErrorApi && e.status === 401) borrarSesion();
+      return null;
+    }
+  })();
+
+  try {
+    return await refrescoEnCurso;
+  } finally {
+    refrescoEnCurso = null;
+  }
+}
+
+/**
+ * Request autenticado.
+ *
+ * Antes de salir, si al access token le quedan menos de 60 s, se renueva. Si
+ * igual vuelve un 401 (el token venció mientras se usaba), se renueva y se
+ * reintenta una sola vez. Es lo que permite tener tokens de 15 minutos sin que
+ * la persona vea un "cerrá sesión" cada cuarto de hora.
+ */
+async function pedirConSesion<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  let sesion = leerSesion();
+
+  if (!sesion) {
+    throw new ErrorApi('Entrá de nuevo para continuar.', 401);
+  }
+
+  if (sesion.expiraEn > 0 && sesion.expiraEn - Date.now() < MARGEN_REFRESCO_MS) {
+    sesion = (await refrescarSesion()) ?? sesion;
+  }
+
+  try {
+    return await pedir<T>(path, {
+      ...init,
+      headers: { ...(init.headers ?? {}), ...autorizacion(sesion.token) },
+    });
+  } catch (e) {
+    if (!(e instanceof ErrorApi) || e.status !== 401) throw e;
+
+    const renovada = await refrescarSesion();
+    if (!renovada) throw e;
+
+    return pedir<T>(path, {
+      ...init,
+      headers: { ...(init.headers ?? {}), ...autorizacion(renovada.token) },
+    });
+  }
+}
+
 /** Crea la cuenta. El correo de confirmación puede fallar sin romper nada. */
 export async function crearCuenta(cuenta: Credenciales): Promise<Sesion> {
-  const body = await pedir<{
-    access_token: string;
-    user: Usuario;
-    emailEnviado?: boolean;
-  }>('/auth/register', {
+  const body = await pedir<RespuestaAuth>('/auth/register', {
     method: 'POST',
     body: JSON.stringify({
       email: cuenta.email,
@@ -161,11 +335,9 @@ export async function crearCuenta(cuenta: Credenciales): Promise<Sesion> {
     }),
   });
 
-  return {
-    token: body.access_token,
-    usuario: body.user,
-    emailEnviado: body.emailEnviado,
-  };
+  const sesion = aSesion(body);
+  guardarDesdeSesion(sesion, [], null);
+  return sesion;
 }
 
 /** Entra con una cuenta existente. */
@@ -173,21 +345,20 @@ export async function entrarCuenta(
   email: string,
   password: string,
 ): Promise<Sesion> {
-  const body = await pedir<{ access_token: string; user: Usuario }>(
-    '/auth/login',
-    {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    },
-  );
+  const body = await pedir<RespuestaAuth>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
 
-  return { token: body.access_token, usuario: body.user };
+  const sesion = aSesion(body);
+  guardarDesdeSesion(sesion, [], null);
+  return sesion;
 }
 
 /** Relee el perfil: sirve para saber si el correo ya se confirmó. */
-export async function miPerfil(token: string): Promise<Usuario | null> {
+export async function miPerfil(): Promise<Usuario | null> {
   try {
-    return await pedir<Usuario>('/auth/yo', { headers: autorizacion(token) });
+    return await pedirConSesion<Usuario>('/auth/yo');
   } catch {
     return null;
   }
@@ -204,13 +375,12 @@ export async function verificarEmail(token: string): Promise<{
   });
 }
 
-export async function reenviarVerificacion(
-  token: string,
-): Promise<{ enviado: boolean; yaVerificado: boolean; esperaSegundos?: number }> {
-  return pedir('/auth/reenviar-verificacion', {
-    method: 'POST',
-    headers: autorizacion(token),
-  });
+export async function reenviarVerificacion(): Promise<{
+  enviado: boolean;
+  yaVerificado: boolean;
+  esperaSegundos?: number;
+}> {
+  return pedirConSesion('/auth/reenviar-verificacion', { method: 'POST' });
 }
 
 /**
@@ -238,27 +408,43 @@ export async function resetPassword(
   });
 }
 
-export async function listarLotes(token: string): Promise<LoteGuardado[]> {
+/**
+ * Cierra la sesión en la API y borra lo guardado.
+ *
+ * Si la API no responde igual se borra local: nadie queda "adentro" por un
+ * timeout. El refresh token se revoca del lado del servidor cuando se puede.
+ */
+export async function cerrarSesion(): Promise<void> {
+  const sesion = leerSesion();
+  borrarSesion();
+
+  if (!sesion?.refreshToken || !API_CONFIGURADA) return;
+
   try {
-    return await pedir<LoteGuardado[]>('/lotes', {
-      headers: autorizacion(token),
+    await pedir('/auth/logout', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: sesion.refreshToken }),
     });
+  } catch {
+    // Sin red o sin API: la sesión local ya se borró.
+  }
+}
+
+export async function listarLotes(): Promise<LoteGuardado[]> {
+  try {
+    return await pedirConSesion<LoteGuardado[]>('/lotes');
   } catch {
     return [];
   }
 }
 
 /** Plan de un lote ya guardado en la cuenta. */
-export async function abrirLote(
-  token: string,
-  ids: string[],
-): Promise<Resultado | null> {
+export async function abrirLote(ids: string[]): Promise<Resultado | null> {
   if (ids.length === 0) return null;
 
   try {
-    const resultado = await pedir<Resultado>(
+    const resultado = await pedirConSesion<Resultado>(
       `/postulaciones/analisis-lote?ids=${encodeURIComponent(ids.join(','))}`,
-      { headers: autorizacion(token) },
     );
 
     return resultado?.totalOfertasAnalizadas ? resultado : null;
@@ -271,46 +457,48 @@ export async function abrirLote(
  * Vuelve a pedir el plan del último lote guardado.
  *
  * Se recalcula en la API en vez de guardar el resultado: si los datos
- * cambiaron, lo que se muestra es lo que hay hoy. Un token vencido borra la
- * sesión y devuelve `null` para que la landing muestre el formulario.
+ * cambiaron, lo que se muestra es lo que hay hoy. Solo se borra la sesión si
+ * la API la rechaza de verdad (401): con la API dormida o sin red, lo guardado
+ * sirve para el próximo intento.
  */
 export async function recuperarPlan(): Promise<Resultado | null> {
   const sesion = leerSesion();
   if (!sesion || !API_CONFIGURADA) return null;
 
-  const resultado = await abrirLote(sesion.token, sesion.ids);
+  // Una sesión sin ids es un lote a medio armar: no hay plan que recuperar.
+  if (sesion.ids.length === 0) return null;
 
-  if (!resultado) {
-    // Antes de rendirse, comprobar si el token sigue siendo válido: si no,
-    // la sesión local es basura y conviene borrarla.
-    const perfil = await miPerfil(sesion.token);
-    if (!perfil) borrarSesion();
+  try {
+    const resultado = await pedirConSesion<Resultado>(
+      `/postulaciones/analisis-lote?ids=${encodeURIComponent(sesion.ids.join(','))}`,
+    );
+
+    return resultado?.totalOfertasAnalizadas ? resultado : null;
+  } catch (e) {
+    if (e instanceof ErrorApi && e.status === 401) borrarSesion();
     return null;
   }
-
-  return resultado;
 }
 
 /** Analiza una URL. Encola el trabajo y lo espera — el cliente hace el poll. */
 async function analizar(
   url: string,
-  token: string,
 ): Promise<{ datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number } }> {
-  const encolado = await pedir<{ jobId: string }>('/postulaciones/analizar', {
-    method: 'POST',
-    body: JSON.stringify({ url }),
-    headers: autorizacion(token),
-  });
+  const encolado = await pedirConSesion<{ jobId: string }>(
+    '/postulaciones/analizar',
+    {
+      method: 'POST',
+      body: JSON.stringify({ url }),
+    },
+  );
 
   for (let intento = 0; intento < 60; intento += 1) {
     await new Promise((r) => setTimeout(r, 1500));
 
-    const estado = await pedir<{
+    const estado = await pedirConSesion<{
       status?: string;
       result?: { datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number } };
-    }>(`/postulaciones/analizar/status/${encolado.jobId}`, {
-      headers: autorizacion(token),
-    });
+    }>(`/postulaciones/analizar/status/${encolado.jobId}`);
 
     if (estado.status === 'completed') return estado.result ?? {};
     if (estado.status === 'failed') {
@@ -327,6 +515,8 @@ export type ResultadoLote = {
   loteId: string | null;
   /** Ofertas que no se pudieron leer. Se muestra, no se esconde. */
   fallidas: number;
+  /** La sesión ya con los ids y el lote guardados. */
+  sesion: SesionGuardada;
 };
 
 /**
@@ -335,30 +525,39 @@ export type ResultadoLote = {
  */
 export async function analizarLote(
   urls: string[],
-  sesion: Sesion,
   alProgresar?: (hechos: number, total: number) => void,
 ): Promise<ResultadoLote> {
-  const { token } = sesion;
+  const sesion = leerSesion();
+
+  if (!sesion) {
+    throw new ErrorApi('Entrá de nuevo para analizar el lote.', 401);
+  }
 
   let hechos = 0;
+  let rechazada = false;
 
   const ids = await Promise.all(
     urls.map(async (url) => {
       try {
-        const analisis = await analizar(url, token);
-        const guardada = await pedir<{ id: string }>('/postulaciones', {
-          method: 'POST',
-          body: JSON.stringify({
-            url,
-            tecnologias: analisis.datosOferta?.tecnologias ?? [],
-            aniosExperiencia: analisis.datosOferta?.aniosExperiencia,
-          }),
-          headers: autorizacion(token),
-        });
+        const analisis = await analizar(url);
+        const guardada = await pedirConSesion<{ id: string }>(
+          '/postulaciones',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              url,
+              tecnologias: analisis.datosOferta?.tecnologias ?? [],
+              aniosExperiencia: analisis.datosOferta?.aniosExperiencia,
+            }),
+          },
+        );
         hechos += 1;
         alProgresar?.(hechos, urls.length);
         return guardada.id;
-      } catch {
+      } catch (e) {
+        // Si el refresh tampoco sirvió, no es "la oferta no se pudo leer":
+        // es la sesión. Se avisa eso en vez de culpar a las URLs.
+        if (e instanceof ErrorApi && e.status === 401) rechazada = true;
         return null;
       }
     }),
@@ -366,42 +565,42 @@ export async function analizarLote(
 
   const guardados = ids.filter((id): id is string => typeof id === 'string');
   if (guardados.length === 0) {
-    throw new Error('No pudimos analizar ninguna de tus ofertas.');
+    throw new Error(
+      rechazada
+        ? 'Tu sesión venció. Entrá de nuevo y volvé a pegar las ofertas.'
+        : 'No pudimos analizar ninguna de tus ofertas.',
+    );
   }
 
-  const resultado = await pedir<Resultado>(
+  const resultado = await pedirConSesion<Resultado>(
     `/postulaciones/analisis-lote?ids=${encodeURIComponent(guardados.join(','))}`,
-    { headers: autorizacion(token) },
   );
 
   // El lote se guarda en la cuenta: así el plan no vive solo en este navegador.
   let loteId: string | null = null;
   try {
-    const lote = await pedir<LoteGuardado>('/lotes', {
+    const lote = await pedirConSesion<LoteGuardado>('/lotes', {
       method: 'POST',
       body: JSON.stringify({
         ids: guardados,
         nombre: resultado.ecosistema ?? undefined,
       }),
-      headers: autorizacion(token),
     });
     loteId = lote.id;
   } catch {
     // Sin lote en la cuenta el plan igual se ve; solo no cruza dispositivos.
   }
 
-  guardarSesion({
-    token,
-    email: sesion.usuario.email,
-    emailVerificado: Boolean(sesion.usuario.emailVerifiedAt),
-    ids: guardados,
-    loteId,
-  });
+  // Se relee por si el refresh cambió los tokens durante el análisis.
+  const actual = leerSesion() ?? sesion;
+  const actualizada: SesionGuardada = { ...actual, ids: guardados, loteId };
+  guardarSesion(actualizada);
 
   return {
     resultado,
     ids: guardados,
     loteId,
     fallidas: urls.length - guardados.length,
+    sesion: actualizada,
   };
 }

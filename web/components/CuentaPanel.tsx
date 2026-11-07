@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   listarLotes,
   miPerfil,
@@ -41,19 +41,31 @@ export function CuentaPanel({
   const [aviso, setAviso] = useState<Aviso>(null);
   const [enviando, setEnviando] = useState(false);
 
+  // Los callbacks del padre cambian de identidad en cada render. Se guardan en
+  // refs para que el efecto de abajo corra una sola vez y no pida en loop.
+  const onVerificadoRef = useRef(onVerificado);
+  const confirmadoRef = useRef(sesion.emailVerificado);
+
+  useEffect(() => {
+    onVerificadoRef.current = onVerificado;
+  }, [onVerificado]);
+
   const refrescarPerfil = useCallback(async () => {
-    const perfil = await miPerfil(sesion.token);
+    const perfil = await miPerfil();
     if (!perfil) return;
 
     const confirmado = Boolean(perfil.emailVerifiedAt);
+    if (confirmado === confirmadoRef.current) return;
+
+    confirmadoRef.current = confirmado;
     setVerificado(confirmado);
-    if (confirmado) onVerificado();
-  }, [sesion.token, onVerificado]);
+    if (confirmado) onVerificadoRef.current();
+  }, []);
 
   useEffect(() => {
     let vigente = true;
 
-    void listarLotes(sesion.token).then((lista) => {
+    void listarLotes().then((lista) => {
       if (vigente) setLotes(lista);
     });
 
@@ -67,14 +79,14 @@ export function CuentaPanel({
       vigente = false;
       window.removeEventListener('focus', alVolver);
     };
-  }, [sesion.token, refrescarPerfil]);
+  }, [refrescarPerfil]);
 
   async function reenviar() {
     setEnviando(true);
     setAviso(null);
 
     try {
-      const r = await reenviarVerificacion(sesion.token);
+      const r = await reenviarVerificacion();
 
       if (r.yaVerificado) {
         setVerificado(true);

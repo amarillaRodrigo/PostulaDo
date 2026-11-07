@@ -6,7 +6,7 @@ import {
   abrirLote,
   analizarLote,
   API_CONFIGURADA,
-  borrarSesion,
+  cerrarSesion,
   crearCuenta,
   entrarCuenta,
   guardarSesion,
@@ -16,7 +16,6 @@ import {
   SIN_API,
   type LoteGuardado,
   type Resultado,
-  type Sesion,
   type SesionGuardada,
 } from '@/lib/api';
 import { CuentaPanel } from '@/components/CuentaPanel';
@@ -106,16 +105,6 @@ function parseUrls(raw: string): string[] {
     .filter((u) => /^https?:\/\//i.test(u));
 }
 
-function aSesionGuardada(sesion: Sesion, ids: string[], loteId: string | null): SesionGuardada {
-  return {
-    token: sesion.token,
-    email: sesion.usuario.email,
-    emailVerificado: Boolean(sesion.usuario.emailVerifiedAt),
-    ids,
-    loteId,
-  };
-}
-
 export function LoteForm() {
   const [urls, setUrls] = useState('');
   const [state, setState] = useState<Estado>({ kind: 'idle' });
@@ -134,6 +123,10 @@ export function LoteForm() {
 
     const guardada = leerSesion();
     if (!guardada) return;
+
+    // Una sesión sin ids es un lote a medio armar (o recién entrado): no hay
+    // plan que recuperar, así que se muestra el formulario sin parpadeo.
+    if (guardada.ids.length === 0) return;
 
     let vigente = true;
     setState({ kind: 'restoring', texto: 'Recuperando tu último lote…' });
@@ -167,23 +160,22 @@ export function LoteForm() {
     guardarUrlsPegadas(list);
 
     try {
-      const sesion =
+      const entrada =
         modo === 'entrar'
           ? await entrarCuenta(cuenta.email.trim(), cuenta.password)
           : await crearCuenta(cuenta);
 
-      const { resultado, ids, loteId, fallidas } = await analizarLote(
+      const { resultado, fallidas, sesion } = await analizarLote(
         list,
-        sesion,
         (hechos, total) => setState({ kind: 'working', hechos, total }),
       );
 
       setState({
         kind: 'done',
         result: resultado,
-        sesion: aSesionGuardada(sesion, ids, loteId),
+        sesion,
         fallidas,
-        emailEnviado: sesion.emailEnviado,
+        emailEnviado: entrada.emailEnviado,
       });
     } catch (e) {
       const message =
@@ -220,7 +212,7 @@ export function LoteForm() {
 
     setState({ kind: 'restoring', texto: 'Abriendo ese lote…' });
 
-    const result = await abrirLote(guardada.token, lote.ids);
+    const result = await abrirLote(lote.ids);
 
     if (!result) {
       setState({
@@ -230,8 +222,10 @@ export function LoteForm() {
       return;
     }
 
+    // Se relee: el request pudo haber rotado los tokens por dentro.
+    const actual = leerSesion() ?? guardada;
     const actualizada: SesionGuardada = {
-      ...guardada,
+      ...actual,
       ids: lote.ids,
       loteId: lote.id,
     };
@@ -245,8 +239,10 @@ export function LoteForm() {
     });
   }
 
-  function salir() {
-    borrarSesion();
+  async function salir() {
+    // Revoca el refresh token en la API y borra lo guardado. Si la API no
+    // responde, `cerrarSesion` igual limpia el navegador.
+    await cerrarSesion();
     borrarUrlsPegadas();
     setUrls('');
     setState({ kind: 'idle' });
