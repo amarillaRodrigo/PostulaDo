@@ -184,7 +184,20 @@ export function LoteForm() {
       // Si el problema fue la cuenta, se vuelve al paso de la cuenta con lo
       // que la persona ya había escrito, no al textarea vacío.
       if (origen === 'cuenta') {
-        setState({ kind: 'account-error', cuenta, modo, message });
+        // Un correo que ya existe no es un error sin salida: se cambia a
+        // "entrar" con el mail ya cargado, en vez de dejar a la persona
+        // peleando con el formulario de registro.
+        const yaRegistrado =
+          modo === 'crear' && /ya est. registrado/i.test(message);
+
+        setState({
+          kind: 'account-error',
+          cuenta,
+          modo: yaRegistrado ? 'entrar' : modo,
+          message: yaRegistrado
+            ? 'Ese correo ya tiene cuenta. Entrá con tu contraseña.'
+            : message,
+        });
       } else {
         setState({ kind: 'error', message });
       }
