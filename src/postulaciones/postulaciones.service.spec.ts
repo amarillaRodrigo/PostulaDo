@@ -202,6 +202,51 @@ describe('PostulacionesService', () => {
       });
     });
 
+    it('relee el resultado cuando el trabajo completó sin valor', async () => {
+      const incompleto = {
+        id: jobId,
+        data: { userId },
+        getState: jest.fn().mockResolvedValueOnce('completed'),
+        returnvalue: null,
+      };
+      const completo = {
+        returnvalue: { datosOferta: { tecnologias: ['Go'] } },
+      };
+      mockQueue.getJob
+        .mockResolvedValueOnce(incompleto)
+        .mockResolvedValueOnce(completo);
+
+      const result = await service.getJobStatus(userId, jobId);
+
+      expect(mockQueue.getJob).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        jobId,
+        status: 'completed',
+        result: completo.returnvalue,
+      });
+    });
+
+    it('marca como fallido el trabajo que quedó sin resultado', async () => {
+      const incompleto = {
+        id: jobId,
+        data: { userId },
+        getState: jest.fn().mockResolvedValueOnce('completed'),
+        returnvalue: null,
+      };
+      mockQueue.getJob
+        .mockResolvedValueOnce(incompleto)
+        .mockResolvedValueOnce(incompleto);
+
+      const result = await service.getJobStatus(userId, jobId);
+
+      expect(result).toMatchObject({
+        jobId,
+        status: 'failed',
+        error: expect.stringContaining('sin resultado'),
+      });
+      expect(result).not.toHaveProperty('result');
+    });
+
     it('should return state status for active/waiting jobs', async () => {
       const mockJob = {
         id: jobId,

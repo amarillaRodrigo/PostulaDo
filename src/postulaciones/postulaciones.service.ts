@@ -75,10 +75,31 @@ export class PostulacionesService {
     const state = await job.getState();
 
     if (state === 'completed') {
+      let resultado = job.returnvalue;
+
+      // BullMQ puede marcar el trabajo como completado un instante antes de
+      // que el valor quede legible. Si llega vacío se relee una vez: devolver
+      // `null` haría que la landing guarde la oferta con cero tecnologías y
+      // ensucie los porcentajes sin avisar.
+      if (resultado === null || resultado === undefined) {
+        await new Promise((listo) => setTimeout(listo, 250));
+        const fresco = await this.queue.getJob(jobId);
+        resultado = fresco?.returnvalue;
+      }
+
+      if (resultado === null || resultado === undefined) {
+        return {
+          jobId: job.id,
+          status: 'failed',
+          error:
+            'El análisis terminó sin resultado. Probá de nuevo con esa oferta.',
+        };
+      }
+
       return {
         jobId: job.id,
         status: 'completed',
-        result: job.returnvalue,
+        result: resultado,
       };
     }
 
