@@ -311,7 +311,7 @@ export class PostulacionesService {
         : `Estos ${principales.length} temas`;
 
     const sugerenciaAprendizaje = principales.length
-      ? `${sujeto} ${verbo} el ${coberturaConjunta}% de las ${total} ofertas del lote. Empezá por ${primero.label.toLowerCase()} y entrá por ${alternativas}, según lo que ya tengas a mano.`
+      ? `${sujeto} ${verbo} el ${coberturaConjunta}% de las ${total} ofertas del lote. Empezá por el tema ${primero.label} y entrá por ${alternativas}, según lo que ya tengas a mano.`
       : `Este lote pide ${temas.length} oficios distintos y ninguno domina. Revisá las ${total} ofertas y elegí el tipo de trabajo que más te interese antes de armar un plan.`;
 
     return {
