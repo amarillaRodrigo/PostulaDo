@@ -161,6 +161,16 @@ export class ColaMantenimientoService implements OnModuleInit, OnModuleDestroy {
   private async barrer(): Promise<void> {
     try {
       const memoria = await this.medir();
+
+      if (memoria) {
+        const porcentaje = Math.round((memoria.usada / memoria.limite) * 100);
+        this.logger.log(
+          `Redis: ${(memoria.usada / MB).toFixed(1)} de ${(
+            memoria.limite / MB
+          ).toFixed(0)} MB (${porcentaje}%).`,
+        );
+      }
+
       const uso = memoria ? memoria.usada / memoria.limite : 0;
       await this.limpiar(
         uso >= UMBRAL_LIMPIEZA ? GRACIA_EMERGENCIA_MS : RETENCION_MS,
