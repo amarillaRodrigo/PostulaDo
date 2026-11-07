@@ -700,4 +700,26 @@ describe('AuthService', () => {
       expect(mockPrisma.refreshToken.updateMany).not.toHaveBeenCalled();
     });
   });
+
+  describe('cerrarTodasLasSesiones', () => {
+    it('revoca todos los refresh tokens de la cuenta', async () => {
+      mockPrisma.refreshToken.updateMany.mockResolvedValueOnce({ count: 3 });
+
+      const result = await service.cerrarTodasLasSesiones(mockUser.id);
+
+      expect(result).toEqual({ cerradas: 3 });
+      expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: { userId: mockUser.id, revokedAt: null },
+        data: { revokedAt: expect.any(Date) },
+      });
+    });
+
+    it('sin sesiones abiertas responde cero', async () => {
+      mockPrisma.refreshToken.updateMany.mockResolvedValueOnce({ count: 0 });
+
+      const result = await service.cerrarTodasLasSesiones(mockUser.id);
+
+      expect(result).toEqual({ cerradas: 0 });
+    });
+  });
 });

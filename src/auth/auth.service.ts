@@ -306,6 +306,22 @@ export class AuthService {
     return { cerrada: true };
   }
 
+  /**
+   * Cierra todas las sesiones de la cuenta.
+   *
+   * Sirve para "cerrar sesión en todos los dispositivos": revoca cada refresh
+   * token vivo, incluido el de este dispositivo. Los access tokens siguen
+   * siendo válidos hasta que vencen (15 min), pero ya no pueden renovarse.
+   */
+  async cerrarTodasLasSesiones(userId: string): Promise<{ cerradas: number }> {
+    const { count } = await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+
+    return { cerradas: count };
+  }
+
   private async revocarFamilia(familyId: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
       where: { familyId, revokedAt: null },

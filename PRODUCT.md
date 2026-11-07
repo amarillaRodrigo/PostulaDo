@@ -45,6 +45,7 @@ Confirmed API surface the UI is built on:
 | Register / login | `POST /auth/register`, `POST /auth/login` | Returns `access_token` (15m), `refresh_token`, `expires_in` + public user |
 | Renew session | `POST /auth/refresh` | Rotates the refresh token; the used one is revoked |
 | Log out | `POST /auth/logout` | Revokes the refresh token immediately; idempotent |
+| Log out everywhere | `POST /auth/logout-todos` | JWT required; revokes every refresh token of the account |
 | List / read / update users | `GET/PUT /usuarios`, `GET /usuarios/:id` | Role-gated (`ADMIN`) and ownership-gated |
 | Queue analysis | `POST /postulaciones/analizar` | One URL; returns `{ jobId, status: 'queued' }` immediately |
 | Poll analysis | `GET /postulaciones/analizar/status/:jobId` | `waiting \| active \| completed \| failed`; `result` on completion |

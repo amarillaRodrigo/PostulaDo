@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  cerrarTodasLasSesiones,
   listarLotes,
   miPerfil,
   reenviarVerificacion,
@@ -40,6 +41,8 @@ export function CuentaPanel({
   const [verificado, setVerificado] = useState(sesion.emailVerificado);
   const [aviso, setAviso] = useState<Aviso>(null);
   const [enviando, setEnviando] = useState(false);
+  const [confirmandoTodo, setConfirmandoTodo] = useState(false);
+  const [cerrandoTodo, setCerrandoTodo] = useState(false);
 
   // Los callbacks del padre cambian de identidad en cada render. Se guardan en
   // refs para que el efecto de abajo corra una sola vez y no pida en loop.
@@ -117,6 +120,28 @@ export function CuentaPanel({
     } finally {
       setEnviando(false);
     }
+  }
+
+  async function cerrarEnTodos() {
+    setCerrandoTodo(true);
+    setAviso(null);
+
+    const resultado = await cerrarTodasLasSesiones();
+    setCerrandoTodo(false);
+
+    if (!resultado) {
+      setAviso({
+        tipo: 'error',
+        texto:
+          'No pudimos cerrar las otras sesiones. Probá de nuevo en un rato; esta sesión sigue abierta.',
+      });
+      setConfirmandoTodo(false);
+      return;
+    }
+
+    // La sesión local ya se borró dentro de `cerrarTodasLasSesiones`; el padre
+    // limpia el estado de la pantalla.
+    onSalir();
   }
 
   return (
@@ -198,9 +223,42 @@ export function CuentaPanel({
         </div>
 
         <div className="cuenta__foot">
-          <button type="button" className="cuenta__action" onClick={onSalir}>
-            Cerrar sesión
-          </button>
+          {confirmandoTodo ? (
+            <>
+              <span className="cuenta__confirm" role="status">
+                ¿Cerrar también en tus otros dispositivos?
+              </span>
+              <button
+                type="button"
+                className="cuenta__action"
+                onClick={() => void cerrarEnTodos()}
+                disabled={cerrandoTodo}
+              >
+                {cerrandoTodo ? 'Cerrando…' : 'Sí, cerrar todas'}
+              </button>
+              <button
+                type="button"
+                className="cuenta__action"
+                onClick={() => setConfirmandoTodo(false)}
+                disabled={cerrandoTodo}
+              >
+                Cancelar
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="cuenta__action"
+                onClick={() => setConfirmandoTodo(true)}
+              >
+                Cerrar sesión en todos los dispositivos
+              </button>
+              <button type="button" className="cuenta__action" onClick={onSalir}>
+                Cerrar sesión
+              </button>
+            </>
+          )}
         </div>
       </div>
     </details>

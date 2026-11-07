@@ -104,4 +104,14 @@ export class AuthController {
   async logout(@Body() dto: CerrarSesionDto) {
     return this.authService.cerrarSesion(dto.refresh_token);
   }
+
+  @Post('logout-todos')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Revoke every refresh token of the account' })
+  @ApiOkResponse({ description: 'All sessions closed (including this one)' })
+  async logoutTodos(@Req() req: any) {
+    const userId = req.user?.sub ?? req.user?.id;
+    return this.authService.cerrarTodasLasSesiones(userId);
+  }
 }

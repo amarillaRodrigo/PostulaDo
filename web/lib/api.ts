@@ -430,6 +430,31 @@ export async function cerrarSesion(): Promise<void> {
   }
 }
 
+/**
+ * Cierra la sesión en todos los dispositivos.
+ *
+ * Revoca cada refresh token de la cuenta, incluido el de este navegador, y
+ * después limpia lo local. Devuelve cuántas sesiones cerró, o `null` si la API
+ * no pudo hacerlo: en ese caso la landing lo dice en vez de fingir.
+ */
+export async function cerrarTodasLasSesiones(): Promise<{
+  cerradas: number;
+} | null> {
+  try {
+    const resultado = await pedirConSesion<{ cerradas: number }>(
+      '/auth/logout-todos',
+      { method: 'POST' },
+    );
+
+    borrarSesion();
+    return resultado;
+  } catch {
+    // Sin respuesta no se puede afirmar que se cerraron las demás: se deja la
+    // sesión local como está y la persona decide reintentar.
+    return null;
+  }
+}
+
 export async function listarLotes(): Promise<LoteGuardado[]> {
   try {
     return await pedirConSesion<LoteGuardado[]>('/lotes');

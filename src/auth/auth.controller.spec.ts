@@ -33,6 +33,7 @@ describe('AuthController', () => {
     resetPassword: jest.fn(),
     refrescar: jest.fn(),
     cerrarSesion: jest.fn(),
+    cerrarTodasLasSesiones: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -145,6 +146,23 @@ describe('AuthController', () => {
 
       expect(mockAuthService.cerrarSesion).toHaveBeenCalledWith('r'.repeat(96));
       expect(result).toEqual({ cerrada: true });
+    });
+  });
+
+  describe('logoutTodos', () => {
+    it('debería revocar todas las sesiones del usuario autenticado', async () => {
+      mockAuthService.cerrarTodasLasSesiones.mockResolvedValueOnce({
+        cerradas: 2,
+      });
+
+      const result = await controller.logoutTodos({
+        user: { id: 'user-uuid' },
+      });
+
+      expect(mockAuthService.cerrarTodasLasSesiones).toHaveBeenCalledWith(
+        'user-uuid',
+      );
+      expect(result).toEqual({ cerradas: 2 });
     });
   });
 });

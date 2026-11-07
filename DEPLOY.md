@@ -107,6 +107,7 @@ y nace otro. Se guarda solo su SHA-256 en la tabla `RefreshToken`, junto a un
 | `POST /auth/login` | Devuelve `access_token`, `refresh_token` y `expires_in` (segundos) |
 | `POST /auth/refresh` | Cambia el refresh token por un par nuevo; el usado se revoca |
 | `POST /auth/logout` | Revoca el refresh token presentado; idempotente |
+| `POST /auth/logout-todos` | Requiere access token: revoca **todos** los refresh de la cuenta |
 
 Reglas que importan al operar:
 
@@ -117,6 +118,8 @@ Reglas que importan al operar:
   gracia: deja de servir en el acto (la ventana es solo para rotaciones).
 - `POST /auth/reset-password` revoca todos los refresh tokens de la cuenta: si
   alguien tenia uno robado, deja de servir.
+- `POST /auth/logout-todos` (con access token) hace lo mismo desde la landing:
+  es el boton "Cerrar sesion en todos los dispositivos".
 - Los access tokens emitidos antes de este cambio (30 dias) siguen siendo
   validos hasta vencer: no hay que forzar a nadie a entrar de nuevo.
 

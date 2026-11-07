@@ -218,6 +218,14 @@ Body:
 Revoca el token al instante. Es idempotente: sin token (o con uno ya revocado)
 responde lo mismo, para no revelar si existia.
 
+### Cerrar sesion en todos los dispositivos
+
+`POST /auth/logout-todos` (requiere `Authorization: Bearer <access_token>`)
+
+Revoca todos los refresh tokens de la cuenta, incluido el del dispositivo que
+hace la llamada. Devuelve `{ "cerradas": 2 }`. Los access tokens siguen
+valiendo hasta que vencen (15 minutos), pero ya no se pueden renovar.
+
 ## Endpoints principales
 
 ### Usuarios
