@@ -63,6 +63,9 @@ model RefreshToken {
   familyId  String
   expiresAt DateTime
   revokedAt DateTime?
+  /// `true` si se revocó por rotación (no por logout ni reset). Solo esos
+  /// toleran la ventana de gracia de dos pestañas.
+  rotated   Boolean  @default(false)
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

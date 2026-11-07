@@ -255,6 +255,14 @@ export class AuthService {
     }
 
     if (guardado.revokedAt) {
+      // Un token cerrado por logout o por cambio de contraseña no se toca:
+      // tiene que dejar de servir en el acto.
+      if (!guardado.rotated) {
+        throw new UnauthorizedException(
+          'La sesión ya no es válida. Entrá de nuevo.',
+        );
+      }
+
       const desdeRevocacion = Date.now() - guardado.revokedAt.getTime();
 
       if (desdeRevocacion > GRACIA_ROTACION_MS) {
@@ -277,7 +285,7 @@ export class AuthService {
 
     await this.prisma.refreshToken.update({
       where: { id: guardado.id },
-      data: { revokedAt: new Date() },
+      data: { revokedAt: new Date(), rotated: true },
     });
 
     return nueva;

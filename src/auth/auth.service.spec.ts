@@ -580,6 +580,7 @@ describe('AuthService', () => {
       familyId: 'fam-1',
       expiresAt: new Date(Date.now() + 60_000),
       revokedAt: null as Date | null,
+      rotated: false,
       createdAt: new Date(),
       user: mockUser,
     };
@@ -605,7 +606,7 @@ describe('AuthService', () => {
 
       expect(mockPrisma.refreshToken.update).toHaveBeenCalledWith({
         where: { id: 'rt-1' },
-        data: { revokedAt: expect.any(Date) },
+        data: { revokedAt: expect.any(Date), rotated: true },
       });
     });
 
@@ -628,9 +629,10 @@ describe('AuthService', () => {
       expect(mockPrisma.refreshToken.create).not.toHaveBeenCalled();
     });
 
-    it('si un token revocado reaparece fuera de la gracia, corta la familia', async () => {
+    it('si un token rotado reaparece fuera de la gracia, corta la familia', async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
         ...guardado,
+        rotated: true,
         revokedAt: new Date(Date.now() - 60_000),
       });
 
@@ -644,9 +646,25 @@ describe('AuthService', () => {
       expect(mockPrisma.refreshToken.create).not.toHaveBeenCalled();
     });
 
+    it('un token cerrado por logout no sirve ni un segundo después', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        ...guardado,
+        rotated: false,
+        revokedAt: new Date(Date.now() - 1_000),
+      });
+
+      await expect(service.refrescar(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(mockPrisma.refreshToken.create).not.toHaveBeenCalled();
+      // No es reuso de un token robado: la familia ya está cerrada.
+      expect(mockPrisma.refreshToken.updateMany).not.toHaveBeenCalled();
+    });
+
     it('tolera dos pestañas que rotan casi a la vez', async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
         ...guardado,
+        rotated: true,
         revokedAt: new Date(Date.now() - 2_000),
       });
 

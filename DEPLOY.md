@@ -113,6 +113,8 @@ Reglas que importan al operar:
 - Si un token **ya rotado** reaparece dentro de los **30 s** siguientes, se
   trata como dos pestanas que renovaron a la vez: se emite otro par y no se
   corta nada. Pasada esa ventana se asume robo y se revoca **toda la familia**.
+- Un token cerrado por `logout` o por cambio de contrasena **no** entra en esa
+  gracia: deja de servir en el acto (la ventana es solo para rotaciones).
 - `POST /auth/reset-password` revoca todos los refresh tokens de la cuenta: si
   alguien tenia uno robado, deja de servir.
 - Los access tokens emitidos antes de este cambio (30 dias) siguen siendo
