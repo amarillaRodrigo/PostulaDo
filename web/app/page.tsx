@@ -112,10 +112,6 @@ export default function Page() {
           <div id="lote">
             <LoteForm />
           </div>
-          <p className="hero__micro">
-            Tu lote queda guardado en tu cuenta: confirmás el correo y lo abrís
-            desde cualquier dispositivo
-          </p>
         </div>
       </Lens>
 

@@ -153,6 +153,17 @@ export function LoteForm() {
     estadoRef.current = state;
   }, [state]);
 
+  // Con un plan propio a la vista, la landing esconde el plan de ejemplo:
+  // dos tablas de cobertura distintas seguidas se leen como dos resultados.
+  useEffect(() => {
+    document.documentElement.dataset.plan =
+      state.kind === 'done' || state.kind === 'restoring' ? 'si' : 'no';
+
+    return () => {
+      delete document.documentElement.dataset.plan;
+    };
+  }, [state.kind]);
+
   // "Entrar" del header. Si ya hay sesión no se pide la contraseña de nuevo:
   // se abre el último lote guardado. Con un plan a la vista, el que se abre es
   // el panel de Mi cuenta (lo escucha `CuentaPanel`).
@@ -723,6 +734,7 @@ export function LoteForm() {
   const enCurso = state.kind === 'working';
 
   return (
+    <>
     <form
       className="ingest"
       onSubmit={(e) => {
@@ -794,5 +806,10 @@ export function LoteForm() {
         </p>
       ) : null}
     </form>
+    <p className="hero__micro">
+      Tu lote queda guardado en tu cuenta: confirmás el correo y lo abrís desde
+      cualquier dispositivo
+    </p>
+    </>
   );
 }

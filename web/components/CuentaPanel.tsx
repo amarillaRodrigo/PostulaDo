@@ -262,15 +262,15 @@ export function CuentaPanel({
             </>
           ) : (
             <>
+              <button type="button" className="cuenta__action" onClick={onSalir}>
+                Cerrar sesión en este dispositivo
+              </button>
               <button
                 type="button"
-                className="cuenta__action"
+                className="cuenta__action cuenta__action--soft"
                 onClick={() => setConfirmandoTodo(true)}
               >
-                Cerrar sesión en todos los dispositivos
-              </button>
-              <button type="button" className="cuenta__action" onClick={onSalir}>
-                Cerrar sesión
+                Cerrar sesión en todos
               </button>
             </>
           )}

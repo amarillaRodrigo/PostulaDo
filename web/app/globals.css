@@ -187,10 +187,10 @@ input {
 }
 
 .nav__entrar {
-  padding: 8px 10px;
-  border: 0;
+  padding: 7px 13px;
+  border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
-  background: none;
+  background: transparent;
   font: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -199,8 +199,9 @@ input {
 }
 
 .nav__entrar:hover {
-  color: var(--ink);
+  color: var(--accent);
   background: var(--accent-soft);
+  border-color: transparent;
 }
 
 /* ============================ BOTONES ============================ */
@@ -893,6 +894,17 @@ input {
   justify-content: flex-end;
   gap: 8px 18px;
   margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.cuenta__action--soft {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.cuenta__action--soft:hover {
+  color: var(--ink);
 }
 
 .cuenta__confirm {
@@ -1772,6 +1784,13 @@ input {
 .nav__menu-entrar:hover {
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+/* Con un plan real a la vista, el ejemplo deja de ser un ejemplo y pasa a
+   competir con el plan de la persona: se esconde, junto con sus anclas. */
+html[data-plan='si'] #producto,
+html[data-plan='si'] a[href='#producto'] {
+  display: none;
 }
 
 /* ============================ VARIOS ============================ */
