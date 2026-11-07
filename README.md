@@ -82,7 +82,7 @@ Crear un archivo `.env` dentro de `postulado/` con, al menos, estas variables:
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB"
 JWT_SECRET="una_clave_segura"
-JWT_EXPIRES_IN="60m"
+JWT_EXPIRES_IN="15m"
 PORT=3000
 
 # SGLang Inferencia
@@ -135,11 +135,19 @@ npm run test:integration
 
 ## Autenticacion
 
-La API usa JWT. El flujo habitual es:
+La API usa JWT de vida corta (`15m`) mas un refresh token de 30 dias que rota
+en cada uso. El flujo habitual es:
 
-1. Registrar un usuario con `POST /auth/register`.
-2. Iniciar sesion con `POST /auth/login`.
+1. Registrar un usuario con `POST /auth/register` (o entrar con `POST /auth/login`).
+2. Guardar el `access_token` y el `refresh_token` que devuelve la respuesta.
 3. Usar el `access_token` en el header `Authorization: Bearer <token>`.
+4. Cuando el access token vence, pedir un par nuevo con `POST /auth/refresh`.
+5. Al cerrar sesion, revocar el refresh token con `POST /auth/logout`.
+
+El refresh token se guarda hasheado (SHA-256) en la tabla `RefreshToken`, junto
+a un `familyId`: si un token ya rotado reaparece fuera de la ventana de gracia
+de 30 segundos, se revoca toda la familia. `POST /auth/reset-password` revoca
+todas las sesiones de la cuenta.
 
 Los endpoints protegidos rechazan solicitudes sin token valido.
 
@@ -175,12 +183,40 @@ Respuesta esperada:
 ```json
 {
 	"access_token": "...",
+	"refresh_token": "...",
+	"expires_in": 900,
 	"user": {
 		"id": "...",
 		"email": "..."
 	}
 }
 ```
+
+### Renovar la sesion
+
+`POST /auth/refresh`
+
+Body:
+
+```json
+{ "refresh_token": "..." }
+```
+
+Devuelve un `access_token`, un `refresh_token` nuevo y `expires_in`. El token
+enviado queda revocado.
+
+### Cerrar sesion
+
+`POST /auth/logout`
+
+Body:
+
+```json
+{ "refresh_token": "..." }
+```
+
+Revoca el token al instante. Es idempotente: sin token (o con uno ya revocado)
+responde lo mismo, para no revelar si existia.
 
 ## Endpoints principales
 
