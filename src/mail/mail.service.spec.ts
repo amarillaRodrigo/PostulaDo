@@ -74,7 +74,7 @@ describe('MailService', () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
       status: 403,
-      text: async () => 'domain is not verified',
+      text: () => Promise.resolve('domain is not verified'),
     });
 
     const resultado = await mail.enviarVerificacion('a@b.com', null, token);
