@@ -356,6 +356,21 @@ export function LoteForm() {
     await cerrarSesion();
     borrarUrlsPegadas();
     setUrls('');
+    setAviso(null);
+    setState({ kind: 'idle' });
+  }
+
+  /**
+   * Vuelve al formulario para armar otro lote sin cerrar la sesión.
+   *
+   * "Analizar otro lote" no es "cerrar sesión": la cuenta sigue abierta, así
+   * que al pegar las ofertas nuevas no se vuelve a pedir la contraseña. Cerrar
+   * sesión está en Mi cuenta.
+   */
+  function otroLote() {
+    borrarUrlsPegadas();
+    setUrls('');
+    setAviso(null);
     setState({ kind: 'idle' });
   }
 
@@ -507,7 +522,7 @@ export function LoteForm() {
               ? 'Entrá desde cualquier dispositivo y abrí este plan.'
               : 'Confirmá tu correo en Mi cuenta para abrirlo desde otro dispositivo.'}
           </span>
-          <button className="ingest__restart" type="button" onClick={salir}>
+          <button className="ingest__restart" type="button" onClick={otroLote}>
             Analizar otro lote
           </button>
         </div>
