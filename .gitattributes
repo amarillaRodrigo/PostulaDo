@@ -1,0 +1,5 @@
+# Los scripts que corre el contenedor no pueden tener CRLF: `sh` los lee y
+# falla con "not found" por el \r al final de cada linea.
+* text=auto
+*.sh text eol=lf
+Dockerfile text eol=lf
