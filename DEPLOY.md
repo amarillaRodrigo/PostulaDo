@@ -102,6 +102,28 @@ Commit y push del portfolio: Cloudflare Pages reconstruye `master` y publica
 > `NEXT_PUBLIC_API_URL` se graba en el bundle en tiempo de build. Si cambia la
 > URL de la API hay que volver a compilar y volver a copiar el export.
 
+## Si el deploy falla
+
+**`TypeError: Invalid URL` con `code: 'ERR_INVALID_URL'`.** La consola de Redis
+Cloud muestra el endpoint como comando (`redis-cli -u redis://default:...`).
+Si se pega entero, `REDIS_URL` no es una URL. La API ya limpia ese prefijo,
+pero igual conviene dejar en Render solo la URL:
+
+```
+redis://default:TU_CLAVE@megasoft-cake-tangelo-25984.db.redis.io:15509
+```
+
+Despues de corregir una variable hay que **Manual Deploy -> Deploy latest
+commit**: Render no reinicia solo porque cambie una env var.
+
+**La API arranca pero Redis no conecta** (`ECONNRESET`, `ETIMEDOUT`). El
+proveedor esta exigiendo TLS: cambiar el esquema a `rediss://` con el mismo
+host, puerto y credenciales.
+
+**`P1001` / `Can't reach database server`.** `DATABASE_URL` o `DIRECT_URL`
+mal copiadas, o Neon suspendido. La directa (sin `-pooler`) es la que usa
+`prisma migrate deploy`; el host del pooler es otro.
+
 ## Notas de operacion
 
 **Cold start.** Render free duerme el servicio. Si molesta, un cron gratis
