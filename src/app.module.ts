@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from './prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { BullModule } from '@nestjs/bullmq';
+import { redisConnection } from './common/redis.config';
 
 @Module({
   imports: [
@@ -16,10 +17,7 @@ import { BullModule } from '@nestjs/bullmq';
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get<string>('REDIS_HOST') || 'localhost',
-          port: parseInt(configService.get<string>('REDIS_PORT') || '6379', 10),
-        },
+        connection: redisConnection(configService),
       }),
       inject: [ConfigService],
     }),

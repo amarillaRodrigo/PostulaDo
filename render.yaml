@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: postulado-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Neon: la URL con "-pooler" para la app y la directa para migrar.
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      # Redis Cloud o Upstash: una sola URL, con TLS si es rediss://
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 30d
+      - key: CORS_ORIGINS
+        value: https://rodrigoamarilla.tech,https://www.rodrigoamarilla.tech
