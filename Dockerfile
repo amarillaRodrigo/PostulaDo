@@ -44,6 +44,7 @@ COPY prisma ./prisma
 RUN npx prisma generate
 
 COPY --from=build /usr/src/app/dist ./dist
+COPY scripts/start.sh ./scripts/start.sh
 
 USER node
 
@@ -51,4 +52,6 @@ EXPOSE 3000
 
 # Las migraciones corren al arrancar. Con una sola instancia alcanza; con
 # varias, moverlo a un paso previo al deploy.
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
+# `start.sh` reintenta la migracion con timeout: un cuelgue de red no deja el
+# deploy 15 minutos sin abrir el puerto.
+CMD ["sh", "scripts/start.sh"]

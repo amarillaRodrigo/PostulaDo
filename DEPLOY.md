@@ -217,6 +217,21 @@ host, puerto y credenciales.
 mal copiadas, o Neon suspendido. La directa (sin `-pooler`) es la que usa
 `prisma migrate deploy`; el host del pooler es otro.
 
+**`Port scan timeout reached, no open ports detected` (y el deploy tarda ~15
+min).** El contenedor nunca llego a abrir el puerto: se quedo en
+`prisma migrate deploy` esperando a Postgres. Casi siempre es transitorio
+(Neon despertando o una conexion que no se libera). `scripts/start.sh` ya
+reintenta la migracion 3 veces con un limite de 90 s por intento, asi que un
+bache de red se resuelve solo y un problema real falla en menos de 5 minutos en
+vez de 15. Si igual falla, mirar los **logs de aplicacion** (no los de build):
+ahi dice si fue la migracion o el arranque de Nest. Si la migracion es la que se
+cuelga, agregar `?connect_timeout=10` al final de `DIRECT_URL` (y de
+`DATABASE_URL`) para que el driver corte en 10 s.
+
+> Los logs utiles son los de **runtime/aplicacion**, los que empiezan en
+> `==> Deploying...`. Los de build solo muestran pasos de Docker y no dicen
+> nada del cuelgue.
+
 ## Memoria de Redis (plan free)
 
 El plan free de Redis Cloud son **30 MB**. BullMQ guarda cada trabajo, su
