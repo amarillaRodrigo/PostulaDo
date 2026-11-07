@@ -413,7 +413,6 @@ describe('Integracion postulaciones', () => {
       }
       await new Promise((resolve) => setTimeout(resolve, 300));
     }
-
     expect(jobStatus.status).toBe('completed');
     expect(jobStatus.result).toMatchObject({
       url: 'https://example.com/jobs/nestjs-dev',
@@ -432,5 +431,66 @@ describe('Integracion postulaciones', () => {
       coverLetter: expect.any(String),
       cvOptimizado: expect.any(String),
     });
+  });
+
+  it('analiza un lote con el denominador del lote, no del historial', async () => {
+    const owner = await registerAndLogin(`lote-${unique()}@test.com`);
+
+    const crear = async (tecnologias: string[]) => {
+      const res = await request(app.getHttpServer())
+        .post('/postulaciones')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .send({
+          url: `https://example.com/jobs/${unique()}`,
+          tecnologias: tecnologias,
+        })
+        .expect(201);
+      return res.body.id as string;
+    };
+
+    // Esta entra en el lote. Esta otra queda en el historial y NO cuenta.
+    const enElLote = await crear(['Docker', 'Kubernetes', 'AWS', 'CI/CD']);
+    await crear(['React']);
+
+    const lote = await request(app.getHttpServer())
+      .get(`/postulaciones/analisis-lote?ids=${enElLote}`)
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    expect(lote.body.totalOfertasAnalizadas).toBe(1);
+    expect(lote.body.ecosistema).toBeTruthy();
+    expect(lote.body.temas.length).toBeGreaterThan(0);
+    expect(lote.body.temas[0].alternativas.length).toBeGreaterThan(0);
+    expect(lote.body.sugerenciaAprendizaje).toEqual(expect.any(String));
+
+    // Frontend solo esta en el historial: si el denominador fuera el
+    // historial del usuario, apareceria aqui.
+    expect(
+      lote.body.temas.some(
+        (t: { label: string }) => t.label === 'Frontend y experiencia',
+      ),
+    ).toBe(false);
+  });
+
+  it('no deja que otro usuario lea el lote de otro', async () => {
+    const owner = await registerAndLogin(`lote-owner-${unique()}@test.com`);
+    const otro = await registerAndLogin(`lote-otro-${unique()}@test.com`);
+
+    const creada = await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({
+        url: `https://example.com/jobs/${unique()}`,
+        tecnologias: ['Docker', 'AWS'],
+      })
+      .expect(201);
+
+    const lote = await request(app.getHttpServer())
+      .get(`/postulaciones/analisis-lote?ids=${creada.body.id}`)
+      .set('Authorization', `Bearer ${otro.token}`)
+      .expect(200);
+
+    expect(lote.body.totalOfertasAnalizadas).toBe(0);
+    expect(lote.body.temas).toEqual([]);
   });
 });

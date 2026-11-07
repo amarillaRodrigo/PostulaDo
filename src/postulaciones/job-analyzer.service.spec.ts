@@ -177,13 +177,15 @@ describe('JobAnalyzerService', () => {
       expect(result.cvOptimizado).toBe('CV Optimizado...');
     });
 
-    it('debería recuperarse con fallback graceful si SGLang lanza un error de red o timeout', async () => {
+    it('debería recuperarse leyendo la oferta con el extractor local si SGLang falla', async () => {
       process.env.NODE_ENV = 'production';
       process.env.MOCK_SGLANG = 'false';
 
       jest
         .spyOn(service, 'scrapeUrl')
-        .mockResolvedValueOnce('Texto de la vacante');
+        .mockResolvedValueOnce(
+          'Buscamos Java, Spring Boot y Kubernetes. 5 años de experiencia.',
+        );
 
       // Simulamos fallo en SGLang
       mockCompletionsCreate.mockRejectedValueOnce(new Error('SGLang Timeout'));
@@ -199,11 +201,39 @@ describe('JobAnalyzerService', () => {
 
       // Debe haber advertido en consola del fallo
       expect(consoleWarnSpy).toHaveBeenCalled();
-      // Debe haber retornado el mock de resiliencia
-      expect(result).toHaveProperty('datosOferta');
+      // El fallback lee la oferta, no devuelve tecnologias fijas
+      expect(result.fuente).toBe('local');
       expect(result.datosOferta.tecnologias).toEqual(
-        expect.arrayContaining(['React', 'NestJS', 'Docker', 'PostgreSQL']),
+        expect.arrayContaining(['Java', 'Spring Boot', 'Kubernetes']),
       );
+      expect(result.datosOferta.aniosExperiencia).toBe(5);
+      expect(result.datosOferta.responsabilidades).toEqual([]);
+      expect(result.coverLetter).toContain('No generado');
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('no inventa tecnologías cuando el texto no menciona ninguna', async () => {
+      process.env.NODE_ENV = 'production';
+      process.env.MOCK_SGLANG = 'false';
+
+      jest
+        .spyOn(service, 'scrapeUrl')
+        .mockResolvedValueOnce('Buscamos una persona para nuestro equipo.');
+
+      mockCompletionsCreate.mockRejectedValueOnce(new Error('SGLang caido'));
+
+      const consoleWarnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+
+      const result = await service.analyzeJob(
+        'https://example.com/job/vacio',
+        'Mi perfil',
+      );
+
+      expect(result.datosOferta.tecnologias).toEqual([]);
+      expect(result.datosOferta.aniosExperiencia).toBeNull();
 
       consoleWarnSpy.mockRestore();
     });

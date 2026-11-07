@@ -3,6 +3,8 @@ import OpenAI from 'openai';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 
+import { extractTechnologies } from './helpers/technology-extractor.helper';
+
 export const JobAnalyzerSchema = {
   type: 'object',
   properties: {
@@ -23,13 +25,15 @@ export const JobAnalyzerSchema = {
 export interface JobAnalyzerResult {
   datosOferta: {
     tecnologias: string[];
-    aniosExperiencia: number;
+    aniosExperiencia: number | null;
     responsabilidades: string[];
     tonoEmpresa: string;
   };
   analisis: string;
   coverLetter: string;
   cvOptimizado: string;
+  /** De donde salio el analisis: el modelo o el extractor local. */
+  fuente: 'modelo' | 'local';
 }
 
 @Injectable()
@@ -163,14 +167,54 @@ export class JobAnalyzerService {
         cvOptimizado:
           cvRes.choices[0]?.message?.content ||
           'No se pudo generar el CV optimizado.',
+        fuente: 'modelo',
       };
     } catch (error) {
-      // Fallback a mock si el servidor SGLang real no está disponible o da error de conexión
+      // Sin modelo, la oferta se lee igual: el extractor local corre sobre el
+      // texto ya scrapeado. Determinista y sin inventar tecnologias.
       console.warn(
-        `⚠️ SGLang falló o no está conectado: ${error.message}. Utilizando fallback mock para desarrollo.`,
+        `⚠️ SGLang no respondió (${error.message}). Extraigo las tecnologías con el extractor local.`,
       );
-      return this.getMockResult(userProfile);
+      return this.analizarSinModelo(rawText);
     }
+  }
+
+  /**
+   * Analisis sin modelo de lenguaje.
+   *
+   * El producto solo necesita las tecnologias de cada oferta para armar el
+   * analisis del lote, y eso se puede leer del texto con el vocabulario de 36
+   * tecnologias. Lo que no se puede es inventar una carta de presentacion: si
+   * no hay modelo, esos campos quedan explicitamente vacios.
+   */
+  private analizarSinModelo(rawText: string): JobAnalyzerResult {
+    const tecnologias = extractTechnologies(rawText);
+    const aniosExperiencia = this.extraerAnios(rawText);
+
+    const detalle = tecnologias.length
+      ? `Detectamos ${tecnologias.length} tecnologías en la oferta: ${tecnologias.join(', ')}.`
+      : 'Leímos la oferta pero no reconocimos tecnologías del vocabulario.';
+
+    return {
+      datosOferta: {
+        tecnologias,
+        aniosExperiencia,
+        responsabilidades: [],
+        tonoEmpresa: 'No determinado',
+      },
+      analisis: `${detalle} Análisis local, sin modelo de lenguaje.`,
+      coverLetter: 'No generado: no hay un modelo de lenguaje configurado.',
+      cvOptimizado: 'No generado: no hay un modelo de lenguaje configurado.',
+      fuente: 'local',
+    };
+  }
+
+  private extraerAnios(text: string): number | null {
+    const match = text.match(/(\d{1,2})\s*\+?\s*(?:años|anos|years|yrs)/i);
+    if (!match) return null;
+
+    const anios = Number.parseInt(match[1], 10);
+    return anios > 0 && anios <= 40 ? anios : null;
   }
 
   private getMockResult(userProfile: string): JobAnalyzerResult {
@@ -188,6 +232,7 @@ export class JobAnalyzerService {
       analisis: `El perfil de usuario "${userProfile.slice(0, 50)}..." se alinea muy bien con la oferta. Prioridades recomendadas:\n1. Profundizar en las migraciones de Prisma.\n2. Repasar la arquitectura modular en NestJS.\n3. Practicar Docker compose para desarrollo local.`,
       coverLetter: `Estimado equipo de selección,\n\nMe pongo en contacto con ustedes en relación a la vacante. Basado en mi perfil (${userProfile.slice(0, 100)}...), me entusiasma mucho aportar valor utilizando mis conocimientos en NestJS y React...`,
       cvOptimizado: `[CV OPTIMIZADO PARA ATS]\n- Experiencia clave adaptada a los requerimientos de la vacante.\n- Tecnologías clave destacadas: NestJS, React, Docker.`,
+      fuente: 'local',
     };
   }
 }

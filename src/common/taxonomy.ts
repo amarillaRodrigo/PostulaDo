@@ -119,12 +119,9 @@ export const ECOSYSTEMS: Ecosystem[] = [
   { label: 'Cloud Engineering', signature: ['cloud', 'containers', 'ci'] },
   { label: 'Backend Engineering', signature: ['backend', 'data', 'cache'] },
   { label: 'Frontend Engineering', signature: ['frontend', 'testing'] },
-  { label: 'Ingeniería de Datos', signature: ['data', 'cache', 'backend'] },
-  { label: 'Ingeniería de Calidad', signature: ['testing', 'ci'] },
-  {
-    label: 'Ingeniería de Plataforma',
-    signature: ['containers', 'cloud', 'backend'],
-  },
+  { label: 'Ingeniería de Datos', signature: ['data'] },
+  { label: 'Ingeniería de Calidad', signature: ['testing'] },
+  { label: 'Ingeniería de Plataforma', signature: ['containers', 'ci'] },
 ];
 
 /** Convierte una lista de tecnologías en la lista de temas que implica. */
