@@ -1,6 +1,8 @@
 # PostulaDo
 
-Backend NestJS para gestionar usuarios y postulaciones laborales. La API combina autenticación JWT, control de acceso por roles, ownership guards, Prisma como capa de persistencia y un flujo de análisis de ofertas para capturar datos desde una URL antes de guardar una postulacion.
+Del lote de ofertas al plan de estudio. El backend combina autenticación JWT, control de acceso por roles, ownership guards y Prisma como capa de persistencia, y un flujo de análisis con IA que captura los requisitos de una URL antes de guardarla.
+
+El producto responde una pregunta: **de qué tengo que aprender primero**. El usuario pega un lote de ofertas, la API las agrupa por el tipo de trabajo que comparten, extrae los oficios que las cubren con su cobertura real sobre ese lote, y devuelve las alternativas de cada uno para no atar a nadie a un vendor.
 
 ## Resumen de la API
 
@@ -8,6 +10,8 @@ La aplicación expone actualmente estas capacidades:
 
 - Registro e inicio de sesion con JWT.
 - Gestion de usuarios con proteccion por autenticacion, rol administrador y validacion de ownership.
+- **Análisis por lote:** `GET /postulaciones/analisis-lote?ids=…` agrega **solo** las postulaciones indicadas, de modo que el denominador de cada porcentaje es el lote que el usuario pegó y no su historial entero.
+- **Taxonomía del oficio:** 36 tecnologías mapeadas a 8 oficios —pruebas, integración y entrega, nube, contenedores, datos, caché, backend, frontend— y por cada oficio, las alternativas que lo cubren.
 - **Análisis Inteligente y Estructurado (IA):** Análisis de ofertas mediante **SGLang (XGrammar + RadixAttention)** para extraer de forma estructurada tecnologías, responsabilidades, años de experiencia y tono empresarial, y generar en paralelo informes personalizados (análisis de enfoque, cover letter y CV optimizado).
 - Creacion, consulta y actualizacion de postulaciones del usuario autenticado.
 - Eliminacion de contraseñas en respuestas publicas mediante interceptor global.
@@ -15,6 +19,7 @@ La aplicación expone actualmente estas capacidades:
 ## Stack
 
 - NestJS
+- Next.js 16 (frontend estático)
 - TypeScript
 - Prisma
 - PostgreSQL
@@ -27,16 +32,40 @@ La aplicación expone actualmente estas capacidades:
 
 ## Estructura del proyecto
 
-El codigo de la API vive en `postulado/`.
-
 ```text
 PostulaDo/
 	README.md
-	docs/
-	postulado/
-		src/
+	PRODUCT.md          contexto del producto (qué es, para quién, qué promete)
+	DESIGN.md           sistema visual del frontend
+	docs/design/        referencia de la landing
+	.impeccable/        design system, surface brief y configuración
+	src/                API NestJS
 		prisma/
-		package.json
+		common/            taxonomía del oficio
+		postulaciones/     postulaciones, análisis y lote
+		usuarios/
+		auth/
+	web/                landing Next.js (export estático)
+	package.json
+```
+
+## El frontend
+
+`web/` es una app **Next.js 16** que exporta a HTML plano: la landing vive en
+`rodrigoamarilla.tech/postulado/`, publicada dentro del portfolio. No necesita
+servidor propio.
+
+El formulario habla directo con la API por CORS, asi que el análisis es asíncrono
+de verdad: encola, espera el trabajo, guarda cada oferta y pide el análisis del
+lote. Sin `NEXT_PUBLIC_API_URL` configurado, el formulario lo dice en vez de
+fingir que funciona.
+
+```bash
+cd web
+npm install
+npm run dev                       # :3001, contra la API en :3000
+
+STATIC_EXPORT=1 BASE_PATH=/postulado npm run build   # genera out/
 ```
 
 ## Requisitos
@@ -183,6 +212,13 @@ Respuesta esperada:
 - Requiere JWT y rol `ADMIN`.
 
 ### Postulaciones
+
+#### `GET /postulaciones/analisis-lote?ids=<id,id,...>`
+
+Analiza un lote concreto. El denominador de cada cobertura son las
+postulaciones indicadas, no el historial del usuario. Devuelve el tipo de
+trabajo detectado, los oficios que cubren con su porcentaje sobre el lote, las
+alternativas de cada uno y una sugerencia de por dónde empezar.
 
 `POST /postulaciones/analizar`
 
