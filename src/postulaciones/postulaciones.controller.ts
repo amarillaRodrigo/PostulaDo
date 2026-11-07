@@ -89,6 +89,25 @@ export class PostulacionesController {
     return this.service.getLearningAnalysis(userId);
   }
 
+  @Get('analisis-lote')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary:
+      'Analyze a specific batch of postulaciones (the denominator is the batch)',
+  })
+  @ApiResponse({
+    description: 'Batch analysis with themes, coverage and alternatives',
+  })
+  async getLoteAnalysis(@Req() req: any, @Query('ids') ids: string) {
+    const userId = req.user?.sub ?? req.user?.id;
+    const list = (ids ?? '')
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean);
+    return this.service.analisisDeLote(userId, list);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')

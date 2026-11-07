@@ -65,4 +65,21 @@ docs/manual-openapi-ci.md
 docs/sglang-integration/
 docs/preparacion-entrevista.md
 
+# Frontend (Next.js)
+web/node_modules
+web/.next
+web/out
+web/.env*
+web/next-env.d.ts
+
+# Impeccable: la evidencia visual es local, no fuente del proyecto
+.impeccable/review/
+.impeccable/questions/
+.impeccable/mocks/**/*.png
+.impeccable/hook.cache.json
+.impeccable/live/sessions/
+
+# Capturas de la landing: evidencia, no fuente
+docs/design/*.png
+
 
