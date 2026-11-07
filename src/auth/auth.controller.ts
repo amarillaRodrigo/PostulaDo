@@ -13,6 +13,8 @@ import { LoginDto } from './dto/login.dto';
 import { VerificarEmailDto } from './dto/verificar-email.dto';
 import { OlvidePasswordDto } from './dto/olvide-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { CerrarSesionDto } from './dto/cerrar-sesion.dto';
 import { AuthResultDto } from './dto/auth-result.dto';
 import { PublicUserDto } from '../usuarios/dto/public-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -84,5 +86,22 @@ export class AuthController {
   @ApiOkResponse({ description: 'Password updated' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.password);
+  }
+
+  @Post('refresh')
+  @ApiOperation({ summary: 'Exchange a refresh token for a new token pair' })
+  @ApiOkResponse({
+    description: 'New access and refresh tokens (the old one is revoked)',
+    type: AuthResultDto,
+  })
+  async refresh(@Body() dto: RefreshTokenDto): Promise<AuthResult> {
+    return this.authService.refrescar(dto.refresh_token);
+  }
+
+  @Post('logout')
+  @ApiOperation({ summary: 'Revoke a refresh token' })
+  @ApiOkResponse({ description: 'Session closed (idempotent)' })
+  async logout(@Body() dto: CerrarSesionDto) {
+    return this.authService.cerrarSesion(dto.refresh_token);
   }
 }

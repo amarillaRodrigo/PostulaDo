@@ -7,8 +7,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@prisma/client';
 import { compare } from 'bcryptjs';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { MailService } from '../mail/mail.service';
+import { PrismaService } from '../prisma.service';
 import { CreateUsuarioDto } from '../usuarios/dto/create-usuario.dto';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { LoginDto } from './dto/login.dto';
@@ -26,7 +27,12 @@ export type PublicUser = Omit<
 >;
 
 export type AuthResult = {
+  /** Token corto: viaja en cada request. */
   access_token: string;
+  /** Token largo: solo sirve para pedir un par nuevo. Se guarda hasheado. */
+  refresh_token: string;
+  /** Segundos que dura el access token. */
+  expires_in: number;
   user: PublicUser;
   /** `false` cuando no hay proveedor de correo configurado. */
   emailEnviado?: boolean;
@@ -36,6 +42,13 @@ const VIGENCIA_TOKEN_MS = 24 * 60 * 60 * 1000;
 /** El enlace de recuperación vive menos: una hora y una sola vez. */
 const VIGENCIA_RESET_MS = 60 * 60 * 1000;
 const ESPERA_REENVIO_MS = 60 * 1000;
+/** Un refresh token dura 30 días; cada uso lo rota. */
+const VIGENCIA_REFRESCO_MS = 30 * 24 * 60 * 60 * 1000;
+/**
+ * Ventana para rotaciones simultáneas (dos pestañas que renuevan a la vez).
+ * Pasado ese margen, un token ya rotado se considera robado.
+ */
+const GRACIA_ROTACION_MS = 30 * 1000;
 
 @Injectable()
 export class AuthService {
@@ -43,6 +56,7 @@ export class AuthService {
     private readonly usuariosService: UsuariosService,
     private readonly jwtService: JwtService,
     private readonly mail: MailService,
+    private readonly prisma: PrismaService,
   ) {}
 
   private toPublicUser(user: User): PublicUser {
@@ -114,7 +128,9 @@ export class AuthService {
     // avisa con `emailEnviado: false` en vez de romper el registro.
     const { enviado } = await this.emitirVerificacion(user);
 
-    return { ...(await this.login(user)), emailEnviado: enviado };
+    const sesion = await this.emitirSesion(user);
+
+    return { ...sesion, emailEnviado: enviado };
   }
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -133,7 +149,18 @@ export class AuthService {
     return user;
   }
 
-  async login(user: User): Promise<AuthResult> {
+  /**
+   * Emite un par de tokens.
+   *
+   * El access token es corto (15 min en producción). El refresh token es
+   * largo, se guarda hasheado y pertenece a una familia: cada refresh lo rota
+   * y, si un token ya rotado reaparece fuera de la ventana de gracia, se corta
+   * toda la familia.
+   */
+  private async emitirSesion(
+    user: User,
+    familiaId?: string,
+  ): Promise<AuthResult> {
     const payload = {
       sub: user.id,
       email: user.email,
@@ -141,16 +168,141 @@ export class AuthService {
     };
 
     const access_token = await this.jwtService.signAsync(payload);
+    const refresh_token = randomBytes(48).toString('hex');
+    const ahora = new Date();
+
+    // Limpieza oportunista: al abrir una sesión nueva se borran los tokens
+    // vencidos o revocados hace más de 30 días de esa persona.
+    if (!familiaId) {
+      await this.prisma.refreshToken.deleteMany({
+        where: {
+          userId: user.id,
+          OR: [
+            { expiresAt: { lt: ahora } },
+            {
+              revokedAt: {
+                lt: new Date(ahora.getTime() - VIGENCIA_REFRESCO_MS),
+              },
+            },
+          ],
+        },
+      });
+    }
+
+    await this.prisma.refreshToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: this.hashToken(refresh_token),
+        familyId: familiaId ?? randomUUID(),
+        expiresAt: new Date(ahora.getTime() + VIGENCIA_REFRESCO_MS),
+      },
+    });
 
     return {
       access_token,
+      refresh_token,
+      expires_in: this.segundosDeVida(access_token),
       user: this.toPublicUser(user),
     };
+  }
+
+  /** Lee `exp - iat` del JWT para informar cuánto dura el access token. */
+  private segundosDeVida(accessToken: string): number {
+    const payload = accessToken.split('.')[1];
+    if (!payload) return 0;
+
+    try {
+      const datos = JSON.parse(
+        Buffer.from(payload, 'base64url').toString('utf8'),
+      ) as { iat?: number; exp?: number };
+
+      if (typeof datos.iat !== 'number' || typeof datos.exp !== 'number') {
+        return 0;
+      }
+
+      return Math.max(0, datos.exp - datos.iat);
+    } catch {
+      return 0;
+    }
+  }
+
+  async login(user: User): Promise<AuthResult> {
+    return this.emitirSesion(user);
   }
 
   async loginWithCredentials(dto: LoginDto): Promise<AuthResult> {
     const user = await this.validateUser(dto.email, dto.password);
     return this.login(user);
+  }
+
+  /**
+   * Cambia un refresh token por un par nuevo.
+   *
+   * Rotación: el token usado se revoca y nace otro de la misma familia. Si
+   * alguien presenta un token revocado hace más de 30 s, se asume que fue
+   * robado y se revoca la familia completa.
+   */
+  async refrescar(refreshToken: string): Promise<AuthResult> {
+    const guardado = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash: this.hashToken(refreshToken) },
+      include: { user: true },
+    });
+
+    if (!guardado) {
+      throw new UnauthorizedException(
+        'La sesión ya no es válida. Entrá de nuevo.',
+      );
+    }
+
+    if (guardado.revokedAt) {
+      const desdeRevocacion = Date.now() - guardado.revokedAt.getTime();
+
+      if (desdeRevocacion > GRACIA_ROTACION_MS) {
+        await this.revocarFamilia(guardado.familyId);
+        throw new UnauthorizedException(
+          'La sesión ya no es válida. Entrá de nuevo.',
+        );
+      }
+
+      // Rotación simultánea: se emite otro par, pero no se extiende la
+      // ventana de gracia (no se vuelve a tocar `revokedAt`).
+      return this.emitirSesion(guardado.user, guardado.familyId);
+    }
+
+    if (guardado.expiresAt.getTime() < Date.now()) {
+      throw new UnauthorizedException('La sesión venció. Entrá de nuevo.');
+    }
+
+    const nueva = await this.emitirSesion(guardado.user, guardado.familyId);
+
+    await this.prisma.refreshToken.update({
+      where: { id: guardado.id },
+      data: { revokedAt: new Date() },
+    });
+
+    return nueva;
+  }
+
+  /** Cierra la sesión de ese token. Idempotente y sin revelar si existía. */
+  async cerrarSesion(refreshToken?: string): Promise<{ cerrada: true }> {
+    if (refreshToken) {
+      await this.prisma.refreshToken.updateMany({
+        where: {
+          tokenHash: this.hashToken(refreshToken),
+          revokedAt: null,
+        },
+        data: { revokedAt: new Date() },
+      });
+    }
+
+    return { cerrada: true };
+  }
+
+  private async revocarFamilia(familyId: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { familyId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
   }
 
   async perfil(userId: string): Promise<PublicUser> {
@@ -325,6 +477,13 @@ export class AuthService {
         passwordResetExpiresAt: null,
         ...(user.emailVerifiedAt ? {} : { emailVerifiedAt: new Date() }),
       },
+    });
+
+    // Cambiar la contraseña cierra todas las sesiones abiertas: si alguien
+    // tenía un token robado, deja de servirle.
+    await this.prisma.refreshToken.updateMany({
+      where: { userId: user.id, revokedAt: null },
+      data: { revokedAt: new Date() },
     });
 
     return { restablecida: true, email: user.email };

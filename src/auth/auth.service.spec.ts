@@ -11,10 +11,20 @@ import { createHash } from 'node:crypto';
 import { AuthService } from './auth.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { MailService } from '../mail/mail.service';
+import { PrismaService } from '../prisma.service';
 
 jest.mock('bcryptjs', () => ({
   compare: jest.fn(),
 }));
+
+/** JWT con forma real para que `expires_in` salga de `exp - iat`. */
+const TOKEN_ACCESO = (() => {
+  const payload = Buffer.from(
+    JSON.stringify({ sub: 'x', iat: 1000, exp: 1900 }),
+  ).toString('base64url');
+
+  return `header.${payload}.firma`;
+})();
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -55,6 +65,16 @@ describe('AuthService', () => {
     configurado: true,
   };
 
+  const mockPrisma = {
+    refreshToken: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -62,6 +82,11 @@ describe('AuthService', () => {
     mockMail.enviarVerificacion.mockResolvedValue({ enviado: true });
     mockMail.enviarRecuperacion.mockResolvedValue({ enviado: true });
     mockMail.configurado = true;
+    mockJwtService.signAsync.mockResolvedValue(TOKEN_ACCESO);
+    mockPrisma.refreshToken.create.mockResolvedValue({});
+    mockPrisma.refreshToken.update.mockResolvedValue({});
+    mockPrisma.refreshToken.updateMany.mockResolvedValue({ count: 0 });
+    mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 0 });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -69,6 +94,7 @@ describe('AuthService', () => {
         { provide: UsuariosService, useValue: mockUsuariosService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: MailService, useValue: mockMail },
+        { provide: PrismaService, useValue: mockPrisma },
       ],
     }).compile();
 
@@ -91,7 +117,6 @@ describe('AuthService', () => {
     it('debería registrar un nuevo usuario exitosamente y retornar token', async () => {
       mockUsuariosService.user.mockResolvedValueOnce(null);
       mockUsuariosService.createUser.mockResolvedValueOnce(mockUser);
-      mockJwtService.signAsync.mockResolvedValueOnce('mock-jwt-token');
 
       const result = await service.register(registerDto);
 
@@ -106,8 +131,9 @@ describe('AuthService', () => {
       });
 
       // Debe retornar token y el usuario sin contraseña
-      expect(result).toEqual({
-        access_token: 'mock-jwt-token',
+      expect(result).toMatchObject({
+        access_token: TOKEN_ACCESO,
+        expires_in: 900,
         emailEnviado: true,
         user: {
           id: mockUser.id,
@@ -122,14 +148,30 @@ describe('AuthService', () => {
           emailVerifiedAt: null,
         },
       });
+      expect(result.refresh_token).toMatch(/^[a-f0-9]{96}$/);
       expect((result.user as any).password).toBeUndefined();
       expect((result.user as any).emailVerificationToken).toBeUndefined();
+    });
+
+    it('guarda solo el hash del refresh token', async () => {
+      mockUsuariosService.user.mockResolvedValueOnce(null);
+      mockUsuariosService.createUser.mockResolvedValueOnce(mockUser);
+
+      const result = await service.register(registerDto);
+
+      const datos = mockPrisma.refreshToken.create.mock.calls[0][0].data;
+      expect(datos.tokenHash).toMatch(/^[a-f0-9]{64}$/);
+      expect(datos.tokenHash).not.toBe(result.refresh_token);
+      expect(
+        createHash('sha256').update(result.refresh_token).digest('hex'),
+      ).toBe(datos.tokenHash);
+      expect(datos.familyId).toMatch(/^[0-9a-f-]{36}$/);
+      expect(datos.expiresAt.getTime()).toBeGreaterThan(Date.now());
     });
 
     it('guarda el hash del token, no el token que viaja por mail', async () => {
       mockUsuariosService.user.mockResolvedValueOnce(null);
       mockUsuariosService.createUser.mockResolvedValueOnce(mockUser);
-      mockJwtService.signAsync.mockResolvedValueOnce('mock-jwt-token');
 
       await service.register(registerDto);
 
@@ -149,7 +191,6 @@ describe('AuthService', () => {
     it('no rompe el registro si el correo no se pudo enviar', async () => {
       mockUsuariosService.user.mockResolvedValueOnce(null);
       mockUsuariosService.createUser.mockResolvedValueOnce(mockUser);
-      mockJwtService.signAsync.mockResolvedValueOnce('mock-jwt-token');
       mockMail.enviarVerificacion.mockResolvedValueOnce({
         enviado: false,
         motivo: 'sin-proveedor',
@@ -158,7 +199,7 @@ describe('AuthService', () => {
       const result = await service.register(registerDto);
 
       expect(result.emailEnviado).toBe(false);
-      expect(result.access_token).toBe('mock-jwt-token');
+      expect(result.access_token).toBe(TOKEN_ACCESO);
     });
 
     it('debería lanzar ConflictException si el email ya existe', async () => {
@@ -208,8 +249,6 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('debería generar el token y retornar el usuario sin contraseña', async () => {
-      mockJwtService.signAsync.mockResolvedValueOnce('mock-jwt-token');
-
       const result = await service.login(mockUser);
 
       expect(mockJwtService.signAsync).toHaveBeenCalledWith({
@@ -217,8 +256,9 @@ describe('AuthService', () => {
         email: mockUser.email,
         role: mockUser.role,
       });
-      expect(result).toEqual({
-        access_token: 'mock-jwt-token',
+      expect(result).toMatchObject({
+        access_token: TOKEN_ACCESO,
+        expires_in: 900,
         user: {
           id: mockUser.id,
           email: mockUser.email,
@@ -232,6 +272,7 @@ describe('AuthService', () => {
           emailVerifiedAt: null,
         },
       });
+      expect(result.refresh_token).toMatch(/^[a-f0-9]{96}$/);
       expect((result.user as any).password).toBeUndefined();
       expect((result.user as any).emailVerificationToken).toBeUndefined();
     });
@@ -461,6 +502,11 @@ describe('AuthService', () => {
           emailVerifiedAt: expect.any(Date),
         },
       });
+      // Cambiar la contraseña cierra las sesiones abiertas.
+      expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: { userId: mockUser.id, revokedAt: null },
+        data: { revokedAt: expect.any(Date) },
+      });
     });
 
     it('no vuelve a confirmar un correo que ya estaba confirmado', async () => {
@@ -509,7 +555,6 @@ describe('AuthService', () => {
     it('debería validar y retornar login', async () => {
       mockUsuariosService.user.mockResolvedValueOnce(mockUser);
       (compare as jest.Mock).mockResolvedValueOnce(true);
-      mockJwtService.signAsync.mockResolvedValueOnce('mock-jwt-token');
 
       const result = await service.loginWithCredentials(loginDto);
 
@@ -518,8 +563,123 @@ describe('AuthService', () => {
         email: mockUser.email,
         role: mockUser.role,
       });
-      expect(result.access_token).toBe('mock-jwt-token');
+      expect(result.access_token).toBe(TOKEN_ACCESO);
+      expect(result.refresh_token).toMatch(/^[a-f0-9]{96}$/);
       expect(result.user.id).toBe(mockUser.id);
+    });
+  });
+
+  describe('refrescar', () => {
+    const refreshToken = 'd'.repeat(96);
+    const hash = createHash('sha256').update(refreshToken).digest('hex');
+
+    const guardado = {
+      id: 'rt-1',
+      userId: mockUser.id,
+      tokenHash: hash,
+      familyId: 'fam-1',
+      expiresAt: new Date(Date.now() + 60_000),
+      revokedAt: null as Date | null,
+      createdAt: new Date(),
+      user: mockUser,
+    };
+
+    it('rota el token: emite un par nuevo y revoca el usado', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce(guardado);
+
+      const result = await service.refrescar(refreshToken);
+
+      expect(mockPrisma.refreshToken.findUnique).toHaveBeenCalledWith({
+        where: { tokenHash: hash },
+        include: { user: true },
+      });
+      expect(result.access_token).toBe(TOKEN_ACCESO);
+      expect(result.refresh_token).toMatch(/^[a-f0-9]{96}$/);
+      expect(result.refresh_token).not.toBe(refreshToken);
+
+      const creado = mockPrisma.refreshToken.create.mock.calls[0][0].data;
+      expect(creado.familyId).toBe('fam-1');
+      expect(creado.tokenHash).toBe(
+        createHash('sha256').update(result.refresh_token).digest('hex'),
+      );
+
+      expect(mockPrisma.refreshToken.update).toHaveBeenCalledWith({
+        where: { id: 'rt-1' },
+        data: { revokedAt: expect.any(Date) },
+      });
+    });
+
+    it('rechaza un token que no existe', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce(null);
+
+      await expect(service.refrescar(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(mockPrisma.refreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un token vencido', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        ...guardado,
+        expiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(service.refrescar(refreshToken)).rejects.toThrow(/venció/);
+      expect(mockPrisma.refreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it('si un token revocado reaparece fuera de la gracia, corta la familia', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        ...guardado,
+        revokedAt: new Date(Date.now() - 60_000),
+      });
+
+      await expect(service.refrescar(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: { familyId: 'fam-1', revokedAt: null },
+        data: { revokedAt: expect.any(Date) },
+      });
+      expect(mockPrisma.refreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it('tolera dos pestañas que rotan casi a la vez', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        ...guardado,
+        revokedAt: new Date(Date.now() - 2_000),
+      });
+
+      const result = await service.refrescar(refreshToken);
+
+      expect(result.refresh_token).toMatch(/^[a-f0-9]{96}$/);
+      expect(mockPrisma.refreshToken.updateMany).not.toHaveBeenCalled();
+      // No se extiende la ventana de gracia.
+      expect(mockPrisma.refreshToken.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cerrarSesion', () => {
+    it('revoca el refresh token presentado', async () => {
+      const refreshToken = 'e'.repeat(96);
+
+      const result = await service.cerrarSesion(refreshToken);
+
+      expect(result).toEqual({ cerrada: true });
+      expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: {
+          tokenHash: createHash('sha256').update(refreshToken).digest('hex'),
+          revokedAt: null,
+        },
+        data: { revokedAt: expect.any(Date) },
+      });
+    });
+
+    it('sin token responde igual y no toca la base', async () => {
+      const result = await service.cerrarSesion();
+
+      expect(result).toEqual({ cerrada: true });
+      expect(mockPrisma.refreshToken.updateMany).not.toHaveBeenCalled();
     });
   });
 });

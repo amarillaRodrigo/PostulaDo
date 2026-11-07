@@ -49,6 +49,26 @@ model User {
 
   postulaciones Postulacion[]
   lotes         Lote[]
+  refreshTokens RefreshToken[]
+}
+
+/// Un refresh token emitido a un dispositivo.
+///
+/// Se guarda solo su hash. `familyId` agrupa la cadena de rotaciones: si un
+/// token ya rotado vuelve a aparecer, se corta toda la familia.
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  familyId  String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
 }
 
 /// Un lote es "las ofertas que analicé juntas". Guarda los ids y el nombre

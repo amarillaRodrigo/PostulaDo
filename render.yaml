@@ -21,7 +21,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
-        value: 30d
+        value: 15m
       - key: CORS_ORIGINS
         value: https://rodrigoamarilla.tech,https://www.rodrigoamarilla.tech
       # Base pública de la landing: se usa para armar el enlace de verificación.

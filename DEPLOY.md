@@ -95,6 +95,34 @@ respuesta de `olvide-password` es siempre la misma exista o no la cuenta, para
 no revelar que correos estan registrados; si no hay proveedor, la landing lo
 dice en vez de fingir que lo mando.
 
+## 3.2 Sesiones: access token corto + refresh token
+
+El access token dura **15 minutos** (`JWT_EXPIRES_IN=15m`). Al lado hay un
+refresh token de 30 dias que **rota en cada uso**: el que se usa queda revocado
+y nace otro. Se guarda solo su SHA-256 en la tabla `RefreshToken`, junto a un
+`familyId` que agrupa la cadena de rotaciones.
+
+| Endpoint | Que hace |
+| --- | --- |
+| `POST /auth/login` | Devuelve `access_token`, `refresh_token` y `expires_in` (segundos) |
+| `POST /auth/refresh` | Cambia el refresh token por un par nuevo; el usado se revoca |
+| `POST /auth/logout` | Revoca el refresh token presentado; idempotente |
+
+Reglas que importan al operar:
+
+- Si un token **ya rotado** reaparece dentro de los **30 s** siguientes, se
+  trata como dos pestanas que renovaron a la vez: se emite otro par y no se
+  corta nada. Pasada esa ventana se asume robo y se revoca **toda la familia**.
+- `POST /auth/reset-password` revoca todos los refresh tokens de la cuenta: si
+  alguien tenia uno robado, deja de servir.
+- Los access tokens emitidos antes de este cambio (30 dias) siguen siendo
+  validos hasta vencer: no hay que forzar a nadie a entrar de nuevo.
+
+> Cambiar `JWT_EXPIRES_IN` en Render **no reinicia** el servicio: hace falta
+> **Manual Deploy -> Deploy latest commit**. Y no bajar el access token a 15m
+> antes de publicar la landing con soporte de refresh, o las sesiones nuevas
+> se caen a los 15 minutos.
+
 ## 4. Verificar
 
 ```powershell
@@ -115,6 +143,31 @@ Invoke-WebRequest "$API/auth/register" -Method OPTIONS -Headers @{
 
 Despues, desde la landing local, un lote de 3 ofertas tiene que devolver
 temas con porcentajes y alternativas.
+
+Sesiones (usar una cuenta de prueba):
+
+```powershell
+$login = Invoke-RestMethod "$API/auth/login" -Method POST `
+  -ContentType "application/json" `
+  -Body '{"email":"prueba@ejemplo.com","password":"Password123!"}'
+
+$login.expires_in          # 900 con JWT_EXPIRES_IN=15m
+$login.refresh_token.Length # 96
+
+$par = Invoke-RestMethod "$API/auth/refresh" -Method POST `
+  -ContentType "application/json" `
+  -Body (@{ refresh_token = $login.refresh_token } | ConvertTo-Json)
+
+# El token usado ya no sirve: 401 (esperar mas de 30 s antes de probar)
+Invoke-WebRequest "$API/auth/refresh" -Method POST `
+  -ContentType "application/json" `
+  -Body (@{ refresh_token = $login.refresh_token } | ConvertTo-Json)
+
+# Logout revoca el par nuevo
+Invoke-RestMethod "$API/auth/logout" -Method POST `
+  -ContentType "application/json" `
+  -Body (@{ refresh_token = $par.refresh_token } | ConvertTo-Json)
+```
 
 ## 5. Publicar la landing contra la API
 

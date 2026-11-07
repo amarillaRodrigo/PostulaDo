@@ -10,6 +10,8 @@ describe('AuthController', () => {
 
   const mockAuthResult: AuthResult = {
     access_token: 'mock-jwt-token',
+    refresh_token: 'r'.repeat(96),
+    expires_in: 900,
     user: {
       id: 'user-uuid',
       email: 'test@example.com',
@@ -29,6 +31,8 @@ describe('AuthController', () => {
     loginWithCredentials: jest.fn(),
     olvidePassword: jest.fn(),
     resetPassword: jest.fn(),
+    refrescar: jest.fn(),
+    cerrarSesion: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -115,6 +119,32 @@ describe('AuthController', () => {
         'NuevaClave123',
       );
       expect(result.restablecida).toBe(true);
+    });
+  });
+
+  describe('refresh', () => {
+    it('debería cambiar el refresh token por un par nuevo', async () => {
+      mockAuthService.refrescar.mockResolvedValueOnce(mockAuthResult);
+
+      const result = await controller.refresh({
+        refresh_token: 'r'.repeat(96),
+      });
+
+      expect(mockAuthService.refrescar).toHaveBeenCalledWith('r'.repeat(96));
+      expect(result.refresh_token).toBe(mockAuthResult.refresh_token);
+    });
+  });
+
+  describe('logout', () => {
+    it('debería revocar el refresh token', async () => {
+      mockAuthService.cerrarSesion.mockResolvedValueOnce({ cerrada: true });
+
+      const result = await controller.logout({
+        refresh_token: 'r'.repeat(96),
+      });
+
+      expect(mockAuthService.cerrarSesion).toHaveBeenCalledWith('r'.repeat(96));
+      expect(result).toEqual({ cerrada: true });
     });
   });
 });
