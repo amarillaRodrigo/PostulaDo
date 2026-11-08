@@ -1,4 +1,4 @@
-import { armarRuta, FUENTES, PREREQUISITOS } from './ruta';
+import { armarRuta, FUENTES, PLAN, PREREQUISITOS } from './ruta';
 import { temaPorKey } from './taxonomy';
 
 describe('ruta (orden de estudio del oficio)', () => {
@@ -96,6 +96,48 @@ describe('ruta (orden de estudio del oficio)', () => {
       const data = ruta.nodos.find((n) => n.key === 'data');
       expect(data?.fuentes.length).toBeGreaterThan(0);
       expect(FUENTES.data).toEqual(data?.fuentes);
+    });
+
+    it('todo tema del grafo tiene plan con entregable y pasos concretos', () => {
+      expect(Object.keys(PLAN).sort()).toEqual(
+        Object.keys(PREREQUISITOS).sort(),
+      );
+      expect(Object.keys(PLAN).length).toBe(8);
+
+      for (const [key, plan] of Object.entries(PLAN)) {
+        expect(temaPorKey(key)).toBeDefined();
+        expect(plan.objetivo.length).toBeGreaterThan(20);
+        expect(plan.pasos.length).toBeGreaterThanOrEqual(4);
+        expect(plan.horas).toBeGreaterThan(0);
+        expect(plan.horas).toBeLessThanOrEqual(40);
+        expect(Number.isInteger(plan.horas)).toBe(true);
+
+        for (const paso of plan.pasos) {
+          // Cada paso es una acción, no un capítulo: tiene verbo imperativo
+          // de texto plano y cierta largura. Vacuumo cualquier link vacío.
+          expect(paso.length).toBeGreaterThan(30);
+        }
+      }
+    });
+
+    it('el nodo trae el plan curado de su tema', () => {
+      const conteo = new Map([['frontend', 4]]);
+
+      const ruta = armarRuta(conteo, 4, 'Frontend Engineering');
+
+      const frontend = ruta.nodos.find((n) => n.key === 'frontend');
+      expect(frontend?.plan).toEqual(PLAN.frontend);
+      expect(frontend?.plan.pasos.length).toBeGreaterThan(0);
+    });
+
+    it('también los nodos fantasma (0%) tienen plan: entran porque hacen falta', () => {
+      const conteo = new Map([['ci', 3]]);
+
+      const ruta = armarRuta(conteo, 3, 'Backend Engineering');
+
+      const testing = ruta.nodos.find((n) => n.key === 'testing');
+      expect(testing?.presenteEnCorpus).toBe(false);
+      expect(testing?.plan).toEqual(PLAN.testing);
     });
 
     it('con un corpus vacío, la ruta no promete nada', () => {
