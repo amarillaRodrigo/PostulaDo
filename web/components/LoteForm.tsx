@@ -359,6 +359,12 @@ export function LoteForm() {
       sesion: actualizada,
       fallidas: 0,
     });
+
+    // Abriste otro lote desde el panel, que queda abajo: el cambio se ve
+    // volviendo al plan, no esperando dónde está el panel.
+    document
+      .querySelector('#lote')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   async function salir() {

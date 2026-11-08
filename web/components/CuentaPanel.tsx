@@ -216,25 +216,38 @@ export function CuentaPanel({
             </p>
           ) : null}
 
-          {lotes?.map((lote) => (
-            <div key={lote.id} className="cuenta__lote">
-              <span className="cuenta__lote-nombre">
-                {lote.nombre ?? 'Lote sin nombre'}
-              </span>
-              <span className="cuenta__lote-meta">
-                {lote.ids.length}{' '}
-                {lote.ids.length === 1 ? 'oferta' : 'ofertas'} ·{' '}
-                {fecha(lote.createdAt)}
-              </span>
-              <button
-                type="button"
-                className="cuenta__action"
-                onClick={() => onAbrir(lote)}
-              >
-                Abrir plan
-              </button>
-            </div>
-          ))}
+          {lotes?.map((lote) => {
+            // El plan que ya está a la vista no se reabre: "Abrir plan" sobre
+            // el lote abierto repintaba el mismo resultado y se leía como
+            // recarga constante.
+            const abierto = sesion.loteId === lote.id;
+
+            return (
+              <div key={lote.id} className="cuenta__lote">
+                <span className="cuenta__lote-nombre">
+                  {lote.nombre ?? 'Lote sin nombre'}
+                </span>
+                <span className="cuenta__lote-meta">
+                  {lote.ids.length}{' '}
+                  {lote.ids.length === 1 ? 'oferta' : 'ofertas'} ·{' '}
+                  {fecha(lote.createdAt)}
+                </span>
+                {abierto ? (
+                  <span className="cuenta__lote-abierto">
+                    Viendo este plan
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    className="cuenta__action"
+                    onClick={() => onAbrir(lote)}
+                  >
+                    Abrir plan
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="cuenta__foot">
