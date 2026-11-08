@@ -8,6 +8,7 @@ import {
   API_CONFIGURADA,
   cerrarSesion,
   crearCuenta,
+  crearDesdeTexto,
   entrarCuenta,
   guardarSesion,
   leerSesion,
@@ -33,6 +34,17 @@ const EXAMPLE = [
 ].join('\n');
 
 const MAX_URLS = 20;
+
+/**
+ * Ejemplo del texto pegado: una oferta ficticia en el formato que llega al
+ * portal. Es referencial, no es un caso real.
+ */
+const EXAMPLE_TEXTO = [
+  'Backend Developer — acme.com',
+  '',
+  'Buscamos alguien con experiencia en TypeScript y NestJS construyendo APIs',
+  'en producción. Deseable Docker, PostgreSQL y AWS. Remoto.',
+].join('\n');
 
 type Cuenta = {
   nombre: string;
@@ -60,6 +72,7 @@ const ETIQUETA_ESTADO: Record<string, string> = {
 /** Sin título guardado, el dominio de la URL es lo más honesto que hay. */
 function tituloDe(oferta: OfertaResumen): string {
   if (oferta.title) return oferta.title;
+  if (!oferta.url) return 'Oferta pegada por texto';
 
   try {
     return new URL(oferta.url).host.replace(/^www\./, '');
@@ -68,13 +81,16 @@ function tituloDe(oferta: OfertaResumen): string {
   }
 }
 
+/** Cómo pegan la oferta: por URL, o el texto directo cuando no hay URL. */
+type Fuente = 'urls' | 'texto';
+
 type Estado =
   | { kind: 'idle' }
   | { kind: 'restoring'; texto: string }
   | { kind: 'working'; hechos: number; total: number }
   | { kind: 'error'; message: string }
-  | { kind: 'needs-account'; cuenta: Cuenta; modo: Modo }
-  | { kind: 'account-error'; cuenta: Cuenta; modo: Modo; message: string }
+  | { kind: 'needs-account'; cuenta: Cuenta; modo: Modo; fuente: Fuente }
+  | { kind: 'account-error'; cuenta: Cuenta; modo: Modo; fuente: Fuente; message: string }
   | {
       kind: 'done';
       result: Resultado;
@@ -136,6 +152,9 @@ function parseUrls(raw: string): string[] {
 
 export function LoteForm() {
   const [urls, setUrls] = useState('');
+  const [fuente, setFuente] = useState<Fuente>('urls');
+  const [texto, setTexto] = useState('');
+  const [tituloTexto, setTituloTexto] = useState('');
   const [state, setState] = useState<Estado>({ kind: 'idle' });
   const [aviso, setAviso] = useState<string | null>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -224,7 +243,12 @@ export function LoteForm() {
             ? { ...actual.cuenta, password: '' }
             : CUENTA_VACIA;
 
-        setState({ kind: 'needs-account', cuenta, modo: 'entrar' });
+        setState({
+          kind: 'needs-account',
+          cuenta,
+          modo: 'entrar',
+          fuente: 'urls',
+        });
         return;
       }
 
@@ -270,7 +294,12 @@ export function LoteForm() {
       // Si la API rechazó la sesión, `pedirConSesion` ya la borró: se pide
       // entrar en vez de dejar un error que no se arregla desde el formulario.
       if (!leerSesion()) {
-        setState({ kind: 'needs-account', cuenta: CUENTA_VACIA, modo: 'entrar' });
+        setState({
+          kind: 'needs-account',
+          cuenta: CUENTA_VACIA,
+          modo: 'entrar',
+          fuente: 'urls',
+        });
         return;
       }
 
@@ -282,7 +311,63 @@ export function LoteForm() {
     }
   }
 
-  async function correr(cuenta: Cuenta, modo: Modo) {
+  async function correr(cuenta: Cuenta, modo: Modo, fuenteStep: Fuente) {
+    if (fuenteStep === 'texto') {
+      setAviso(null);
+      setState({ kind: 'working', hechos: 0, total: 1 });
+
+      try {
+        const entrada =
+          modo === 'entrar'
+            ? await entrarCuenta(cuenta.email.trim(), cuenta.password)
+            : await crearCuenta(cuenta);
+
+        const { resultado, sesion } = await crearDesdeTexto(
+          texto.trim(),
+          tituloTexto.trim() || undefined,
+        );
+
+        setState({
+          kind: 'done',
+          result: resultado,
+          sesion,
+          fallidas: 0,
+          emailEnviado: entrada.emailEnviado,
+        });
+      } catch (e) {
+        // Si la API rechazó la sesión, `pedirConSesion` ya la borró: se pide
+        // entrar en vez de dejar un error que no se arregla desde el formulario.
+        if (!leerSesion()) {
+          setState({
+            kind: 'needs-account',
+            cuenta: CUENTA_VACIA,
+            modo: 'entrar',
+            fuente: fuenteStep,
+          });
+          return;
+        }
+
+        const message =
+          e instanceof Error ? e.message : 'No pudimos guardar esa oferta.';
+
+        // Un correo que ya existe no es un error sin salida: se cambia a
+        // "entrar" con el mail ya cargado.
+        const yaRegistrado =
+          modo === 'crear' && /ya est. registrado/i.test(message);
+
+        setState({
+          kind: 'account-error',
+          cuenta,
+          modo: yaRegistrado ? 'entrar' : modo,
+          fuente: fuenteStep,
+          message: yaRegistrado
+            ? 'Ese correo ya tiene cuenta. Entrá con tu contraseña.'
+            : message,
+        });
+      }
+      return;
+    }
+
     const list = parseUrls(urls);
     if (list.length === 0) {
       setState({ kind: 'error', message: 'Pegá al menos una URL de oferta.' });
@@ -313,6 +398,7 @@ export function LoteForm() {
         kind: 'account-error',
         cuenta,
         modo: yaRegistrado ? 'entrar' : modo,
+        fuente: fuenteStep,
         message: yaRegistrado
           ? 'Ese correo ya tiene cuenta. Entrá con tu contraseña.'
           : message,
@@ -343,6 +429,7 @@ export function LoteForm() {
         kind: 'account-error',
         cuenta,
         modo: 'entrar',
+        fuente: 'urls',
         message: e instanceof Error ? e.message : 'No pudimos entrar.',
       });
       return;
@@ -482,6 +569,9 @@ export function LoteForm() {
   function otroLote() {
     borrarUrlsPegadas();
     setUrls('');
+    setTexto('');
+    setTituloTexto('');
+    setFuente('urls');
     setAviso(null);
     setState({ kind: 'idle' });
   }
@@ -631,9 +721,13 @@ export function LoteForm() {
                   <div key={oferta.id} className="lote-detalle__fila">
                     <div className="lote-detalle__top">
                       <span className="lote-detalle__titulo">
-                        <a href={oferta.url} target="_blank" rel="noreferrer">
-                          {tituloDe(oferta)}
-                        </a>
+                        {oferta.url ? (
+                          <a href={oferta.url} target="_blank" rel="noreferrer">
+                            {tituloDe(oferta)}
+                          </a>
+                        ) : (
+                          tituloDe(oferta)
+                        )}
                       </span>
                       <select
                         className="lote-detalle__select"
@@ -723,10 +817,13 @@ export function LoteForm() {
   /* Paso de cuenta                                                    */
   /* ---------------------------------------------------------------- */
   if (state.kind === 'needs-account' || state.kind === 'account-error') {
-    const { cuenta, modo } = state;
+    const { cuenta, modo, fuente: fuenteStep } = state;
     const error = state.kind === 'account-error' ? state.message : null;
     const entrando = modo === 'entrar';
-    const hayUrls = parseUrls(urls).length > 0;
+    const esTexto = fuenteStep === 'texto';
+    const hayContenido = esTexto
+      ? texto.trim().length > 0
+      : parseUrls(urls).length > 0;
 
     return (
       <form className="ingest" onSubmit={(e) => {
@@ -740,18 +837,18 @@ export function LoteForm() {
         };
 
         // Entrar sin ofertas pegadas: se abre el último plan de la cuenta.
-        if (entrando && parseUrls(urls).length === 0) {
+        if (entrando && fuenteStep === 'urls' && parseUrls(urls).length === 0) {
           void entrarSolo(cuenta);
           return;
         }
 
-        void correr(cuenta, modo);
+        void correr(cuenta, modo, fuenteStep);
       }}>
         <div className="ingest__head">
-          <span>Cargamos tu lote</span>
+          <span>Cargamos tu {esTexto ? 'oferta' : 'lote'}</span>
           <span>
             {entrando
-              ? hayUrls
+              ? hayContenido
                 ? 'Entrá para verlo'
                 : 'Entrá a tu cuenta'
               : 'Creá una cuenta para guardarlo'}
@@ -760,10 +857,14 @@ export function LoteForm() {
         <div className="ingest__account">
           <p className="ingest__account-lead">
             {entrando
-              ? hayUrls
-                ? 'Entrá con tu cuenta y abrimos el plan de este lote.'
+              ? hayContenido
+                ? esTexto
+                  ? 'Entrá con tu cuenta y abrimos el plan de esta oferta.'
+                  : 'Entrá con tu cuenta y abrimos el plan de este lote.'
                 : 'Entrá con tu cuenta y abrimos tu último plan guardado.'
-              : 'Tu lote queda guardado en tu cuenta, así podés volver a mirarlo desde cualquier dispositivo.'}
+              : esTexto
+                ? 'Tu oferta queda guardada en tu cuenta, así podés volver a mirarla desde cualquier dispositivo.'
+                : 'Tu lote queda guardado en tu cuenta, así podés volver a mirarlo desde cualquier dispositivo.'}
           </p>
 
           {!entrando ? (
@@ -837,6 +938,7 @@ export function LoteForm() {
                 kind: 'needs-account',
                 cuenta: { ...cuenta, password: '' },
                 modo: entrando ? 'crear' : 'entrar',
+                fuente: fuenteStep,
               });
             }}
           >
@@ -908,8 +1010,41 @@ export function LoteForm() {
   /* Paso 1: pegar el lote                                             */
   /* ---------------------------------------------------------------- */
   const lista = parseUrls(urls);
-  const overflow = lista.length > MAX_URLS;
+  const overflow = fuente === 'urls' && lista.length > MAX_URLS;
   const enCurso = state.kind === 'working';
+  const hayTexto = texto.trim().length > 0;
+
+  /** Una oferta ya entró en sesión con el texto pegado: directo al plan. */
+  async function guardarTextoEnSesion() {
+    setAviso(null);
+    setState({ kind: 'working', hechos: 0, total: 1 });
+
+    try {
+      const { resultado, sesion, fallidas } = await crearDesdeTexto(
+        texto.trim(),
+        tituloTexto.trim() || undefined,
+      );
+
+      setState({ kind: 'done', result: resultado, sesion, fallidas });
+    } catch (e) {
+      // Sin sesión (la API la rechazó) se pide entrar con la oferta a la vista.
+      if (!leerSesion()) {
+        setState({
+          kind: 'needs-account',
+          cuenta: CUENTA_VACIA,
+          modo: 'entrar',
+          fuente: 'texto',
+        });
+        return;
+      }
+
+      setState({
+        kind: 'error',
+        message:
+          e instanceof Error ? e.message : 'No pudimos guardar esa oferta.',
+      });
+    }
+  }
 
   return (
     <>
@@ -921,6 +1056,28 @@ export function LoteForm() {
           setState({ kind: 'error', message: SIN_API });
           return;
         }
+
+        if (fuente === 'texto') {
+          if (!hayTexto) {
+            setState({ kind: 'error', message: 'Pegá el texto de la oferta.' });
+            return;
+          }
+
+          // Si ya hay sesión, no se vuelve a pedir cuenta: se analiza directo.
+          if (leerSesion()) {
+            void guardarTextoEnSesion();
+            return;
+          }
+
+          setState({
+            kind: 'needs-account',
+            cuenta: CUENTA_VACIA,
+            modo: 'crear',
+            fuente: 'texto',
+          });
+          return;
+        }
+
         if (lista.length === 0) {
           setState({ kind: 'error', message: 'Pegá al menos una URL de oferta.' });
           return;
@@ -933,31 +1090,95 @@ export function LoteForm() {
           return;
         }
 
-        setState({ kind: 'needs-account', cuenta: CUENTA_VACIA, modo: 'crear' });
+        setState({
+          kind: 'needs-account',
+          cuenta: CUENTA_VACIA,
+          modo: 'crear',
+          fuente: 'urls',
+        });
       }}
     >
       <div className="ingest__head">
-        <span>Ofertas (URL)</span>
-        <span>Una por línea · pegá las tuyas</span>
+        <span>Ofertas</span>
+        <span>
+          {fuente === 'urls'
+            ? 'URLs, una por línea · pegá las tuyas'
+            : 'El texto completo de una oferta'}
+        </span>
       </div>
       <div className="ingest__body">
-        <label className="sr-only" htmlFor="lote-urls">
-          URLs de las ofertas, una por línea
-        </label>
-        <textarea
-          id="lote-urls"
-          className="ingest__textarea"
-          value={urls}
-          onChange={(e) => setUrls(e.target.value)}
-          placeholder={EXAMPLE}
-          rows={5}
-          spellCheck={false}
-        />
-        {overflow ? (
-          <p className="ingest__notice" role="status">
-            Solo analizamos las primeras {MAX_URLS} ofertas de este lote.
-          </p>
-        ) : null}
+        <div className="ingest__tabs" role="tablist" aria-label="Cómo pegás las ofertas">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={fuente === 'urls'}
+            className={`ingest__tab${fuente === 'urls' ? ' is-activo' : ''}`}
+            onClick={() => setFuente('urls')}
+          >
+            URLs
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={fuente === 'texto'}
+            className={`ingest__tab${fuente === 'texto' ? ' is-activo' : ''}`}
+            onClick={() => setFuente('texto')}
+          >
+            Pegar texto
+          </button>
+        </div>
+
+        {fuente === 'urls' ? (
+          <>
+            <label className="sr-only" htmlFor="lote-urls">
+              URLs de las ofertas, una por línea
+            </label>
+            <textarea
+              id="lote-urls"
+              className="ingest__textarea"
+              value={urls}
+              onChange={(e) => setUrls(e.target.value)}
+              placeholder={EXAMPLE}
+              rows={5}
+              spellCheck={false}
+            />
+            {overflow ? (
+              <p className="ingest__notice" role="status">
+                Solo analizamos las primeras {MAX_URLS} ofertas de este lote.
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <p className="ingest__notice">
+              Para portales que piden login o no tienen página pública: pegá el texto
+              de la oferta tal como lo leste.
+            </p>
+            <label className="sr-only" htmlFor="lote-titulo">
+              Título de la oferta, opcional
+            </label>
+            <input
+              id="lote-titulo"
+              className="ingest__titulo"
+              type="text"
+              value={tituloTexto}
+              onChange={(e) => setTituloTexto(e.target.value)}
+              placeholder="Título de la oferta (opcional)"
+              spellCheck={false}
+            />
+            <label className="sr-only" htmlFor="lote-texto">
+              Texto de la oferta
+            </label>
+            <textarea
+              id="lote-texto"
+              className="ingest__textarea"
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+              placeholder={EXAMPLE_TEXTO}
+              rows={8}
+            />
+          </>
+        )}
       </div>
       <div className="ingest__foot">
         <span className="ingest__gets">
@@ -970,7 +1191,9 @@ export function LoteForm() {
       </div>
       {state.kind === 'working' ? (
         <p className="ingest__notice" role="status">
-          Analizando {state.hechos} de {state.total}…
+          {fuente === 'texto'
+            ? 'Leyendo la oferta…'
+            : `Analizando ${state.hechos} de ${state.total}…`}
         </p>
       ) : null}
       {aviso ? (

@@ -469,7 +469,8 @@ export async function listarLotes(): Promise<LoteGuardado[]> {
  */
 export type OfertaResumen = {
   id: string;
-  url: string;
+  /** Nula en la oferta pegada por texto, sin URL posteable. */
+  url: string | null;
   title: string | null;
   company: string | null;
   status: string;
@@ -594,6 +595,76 @@ async function analizar(
   }
 
   throw new Error('El análisis tardó demasiado. Probá con menos ofertas.');
+}
+
+/**
+ * Guarda una sola oferta pegada por texto (cuando el portal no deja abrir
+ * una URL posteable) y arma el plan con ella. El titulo es lo que la persona
+ * le puso; el extractor local saca las tecnologías del texto.
+ */
+export async function crearDesdeTexto(
+  texto: string,
+  titulo?: string,
+): Promise<ResultadoLote> {
+  const sesion = leerSesion();
+
+  if (!sesion) {
+    throw new ErrorApi('Entrá de nuevo para guardar la oferta.', 401);
+  }
+
+  try {
+    const guardada = await pedirConSesion<{ id: string }>('/postulaciones', {
+      method: 'POST',
+      body: JSON.stringify(
+        titulo ? { title: titulo, description: texto } : { description: texto },
+      ),
+    });
+
+    const resultado = await pedirConSesion<Resultado>(
+      `/postulaciones/analisis-lote?ids=${guardada.id}`,
+    );
+
+    // Igual que un lote de URLs: el plan también cruza dispositivos.
+    let loteId: string | null = null;
+    try {
+      const lote = await pedirConSesion<LoteGuardado>('/lotes', {
+        method: 'POST',
+        body: JSON.stringify({
+          ids: [guardada.id],
+          nombre: resultado.ecosistema ?? undefined,
+        }),
+      });
+      loteId = lote.id;
+    } catch {
+      // Sin lote en la cuenta el plan igual se ve; solo no cruza dispositivos.
+    }
+
+    const actual = leerSesion() ?? sesion;
+    const actualizada: SesionGuardada = {
+      ...actual,
+      ids: [guardada.id],
+      loteId,
+    };
+    guardarSesion(actualizada);
+
+    return {
+      resultado,
+      ids: [guardada.id],
+      loteId,
+      fallidas: 0,
+      sesion: actualizada,
+    };
+  } catch (e) {
+    if (e instanceof ErrorApi && e.status === 401) {
+      // `pedirConSesion` ya borró la sesión: el formulario pide entrar.
+      throw e;
+    }
+    throw new Error(
+      e instanceof Error && /venció/i.test(e.message)
+        ? e.message
+        : 'No pudimos guardar esa oferta. Probá de nuevo.',
+    );
+  }
 }
 
 export type ResultadoLote = {

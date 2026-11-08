@@ -765,6 +765,55 @@ input {
   color: var(--accent-ink);
 }
 
+/* ============================== PEGAR TEXTO ============================== */
+
+/* El toggle es parte de la entrada de datos: el color queda para el
+   seleccionado, el resto es tinta suave. */
+.ingest__tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ingest__tab {
+  padding: 5px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.ingest__tab:hover {
+  border-color: var(--ink-faint);
+  color: var(--ink);
+}
+
+.ingest__tab.is-activo {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.ingest__titulo {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.ingest__titulo::placeholder {
+  color: var(--ink-faint);
+}
+
 .lote-detalle__meta {
   margin-top: 2px;
   font-size: 12px;
