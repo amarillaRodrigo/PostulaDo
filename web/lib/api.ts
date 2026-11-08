@@ -468,6 +468,49 @@ export async function listarLotes(): Promise<LoteGuardado[]> {
   }
 }
 
+/** Renombra un lote guardado. Un nombre de espacios vuelve al sin-nombre. */
+export async function renombrarLote(
+  id: string,
+  nombre: string,
+): Promise<LoteGuardado | null> {
+  try {
+    return await pedirConSesion<LoteGuardado>(`/lotes/${id}/nombre`, {
+      method: 'PUT',
+      body: JSON.stringify({ nombre }),
+    });
+  } catch {
+    return null;
+  }
+}
+
+/** Borra un lote guardado. Las ofertas de la cuenta quedan. */
+export async function borrarLote(id: string): Promise<boolean> {
+  try {
+    await pedirConSesion(`/lotes/${id}`, { method: 'DELETE' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Agrega ofertas propias a un lote guardado. Devuelve el lote completo con
+ * los ids fusionados, o `null` si la API no lo aceptó.
+ */
+export async function agregarAlLote(
+  id: string,
+  ids: string[],
+): Promise<LoteGuardado | null> {
+  try {
+    return await pedirConSesion<LoteGuardado>(`/lotes/${id}/ofertas`, {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    });
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Una oferta guardada, tal como la dejó el extractor: es lo que permite
  * mostrar el lote de adentro en vez de solo el agregado.

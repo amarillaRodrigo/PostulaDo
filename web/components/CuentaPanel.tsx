@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  borrarLote,
   cerrarTodasLasSesiones,
   listarLotes,
   miPerfil,
   reenviarVerificacion,
+  renombrarLote,
   type LoteGuardado,
   type SesionGuardada,
 } from '@/lib/api';
@@ -26,16 +28,213 @@ function fecha(iso: string): string {
   });
 }
 
+/**
+ * Una fila de lote con sus acciones renombrar, borrar y agregar ofertas. El
+ * estado de cada acción vive acá: el borrar necesita su propia confirmación
+ * en fila y el renombrar, un input que aparece sin recargar nada.
+ */
+function FilaLote({
+  lote,
+  abierto,
+  onAbrir,
+  onAgregar,
+  onRenombrado,
+  onLoteBorrado,
+}: {
+  lote: LoteGuardado;
+  abierto: boolean;
+  onAbrir: (lote: LoteGuardado) => void;
+  onAgregar: (lote: LoteGuardado) => void;
+  onRenombrado: (lote: LoteGuardado) => void;
+  onLoteBorrado: (lote: LoteGuardado) => void;
+}) {
+  const [editando, setEditando] = useState(false);
+  const [nombre, setNombre] = useState(lote.nombre ?? '');
+  const [confirmando, setConfirmando] = useState(false);
+  const [trabajando, setTrabajando] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+
+  const mostrado = lote.nombre ?? 'Lote sin nombre';
+
+  if (editando) {
+    return (
+      <div className="cuenta__lote">
+        <form
+          className="cuenta__form"
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            if (trabajando) return;
+            setTrabajando(true);
+
+            void renombrarLote(lote.id, nombre.trim()).then((r) => {
+              setTrabajando(false);
+
+              if (!r) {
+                setAviso('No pudimos guardar el nombre. Probá de nuevo.');
+                return;
+              }
+
+              setEditando(false);
+              onRenombrado(r);
+            });
+          }}
+        >
+          <label className="sr-only" htmlFor={`nombre-${lote.id}`}>
+            Nuevo nombre del lote
+          </label>
+          <input
+            id={`nombre-${lote.id}`}
+            className="cuenta__editar"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Nombre del lote (opcional)"
+            autoFocus
+            spellCheck={false}
+          />
+          <button
+            type="submit"
+            className="cuenta__action"
+            disabled={trabajando}
+          >
+            {trabajando ? 'Guardando…' : 'Guardar'}
+          </button>
+          <button
+            type="button"
+            className="cuenta__action cuenta__action--soft"
+            onClick={() => {
+              setEditando(false);
+              setAviso(null);
+              setNombre(lote.nombre ?? '');
+            }}
+          >
+            Cancelar
+          </button>
+        </form>
+        {aviso ? (
+          <p className="cuenta__error" role="alert">
+            {aviso}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (confirmando) {
+    return (
+      <div className="cuenta__lote">
+        <span className="cuenta__lote-nombre">{mostrado}</span>
+        <span className="cuenta__lote-meta">
+          ¿Borrar este lote? Las {lote.ids.length}{' '}
+          {lote.ids.length === 1 ? 'oferta queda' : 'ofertas quedan'} en tu
+          cuenta; solo se pierde el plan.
+        </span>
+        <div className="cuenta__form">
+          <button
+            type="button"
+            className="cuenta__action"
+            disabled={trabajando}
+            onClick={() => {
+              if (trabajando) return;
+              setTrabajando(true);
+
+              void borrarLote(lote.id).then((ok) => {
+                setTrabajando(false);
+                setConfirmando(false);
+
+                if (ok) {
+                  onLoteBorrado(lote);
+                } else {
+                  setAviso('No pudimos borrar el lote. Probá de nuevo.');
+                }
+              });
+            }}
+          >
+            {trabajando ? 'Borrando…' : 'Sí, borrar'}
+          </button>
+          <button
+            type="button"
+            className="cuenta__action cuenta__action--soft"
+            onClick={() => setConfirmando(false)}
+          >
+            Cancelar
+          </button>
+        </div>
+        {aviso ? (
+          <p className="cuenta__error" role="alert">
+            {aviso}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="cuenta__lote">
+      <span className="cuenta__lote-nombre">{mostrado}</span>
+      <span className="cuenta__lote-meta">
+        {lote.ids.length}{' '}
+        {lote.ids.length === 1 ? 'oferta' : 'ofertas'} ·{' '}
+        {fecha(lote.createdAt)}
+      </span>
+      {abierto ? (
+        <span className="cuenta__lote-abierto">Viendo este plan</span>
+      ) : (
+        <button
+          type="button"
+          className="cuenta__action"
+          onClick={() => onAbrir(lote)}
+        >
+          Abrir plan
+        </button>
+      )}
+      <div className="cuenta__minis">
+        <button
+          type="button"
+          className="cuenta__mini"
+          onClick={() => onAgregar(lote)}
+        >
+          Agregar ofertas
+        </button>
+        <button
+          type="button"
+          className="cuenta__mini cuenta__mini--riesgo"
+          onClick={() => {
+            setNombre(lote.nombre ?? '');
+            setConfirmando(true);
+          }}
+        >
+          Borrar
+        </button>
+        <button
+          type="button"
+          className="cuenta__mini"
+          onClick={() => {
+            setNombre(lote.nombre ?? '');
+            setEditando(true);
+          }}
+        >
+          Renombrar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function CuentaPanel({
   sesion,
   onAbrir,
   onAbrirCorpus,
+  onAgregar,
+  onLoteBorrado,
   onSalir,
   onVerificado,
 }: {
   sesion: SesionGuardada;
   onAbrir: (lote: LoteGuardado) => void;
   onAbrirCorpus: () => void;
+  onAgregar: (lote: LoteGuardado) => void;
+  onLoteBorrado: (lote: LoteGuardado) => void;
   onSalir: () => void;
   onVerificado: () => void;
 }) {
@@ -237,38 +436,31 @@ export function CuentaPanel({
             )}
           </div>
 
-          {lotes?.map((lote) => {
-            // El plan que ya está a la vista no se reabre: "Abrir plan" sobre
-            // el lote abierto repintaba el mismo resultado y se leía como
-            // recarga constante.
-            const abierto = sesion.loteId === lote.id;
-
-            return (
-              <div key={lote.id} className="cuenta__lote">
-                <span className="cuenta__lote-nombre">
-                  {lote.nombre ?? 'Lote sin nombre'}
-                </span>
-                <span className="cuenta__lote-meta">
-                  {lote.ids.length}{' '}
-                  {lote.ids.length === 1 ? 'oferta' : 'ofertas'} ·{' '}
-                  {fecha(lote.createdAt)}
-                </span>
-                {abierto ? (
-                  <span className="cuenta__lote-abierto">
-                    Viendo este plan
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    className="cuenta__action"
-                    onClick={() => onAbrir(lote)}
-                  >
-                    Abrir plan
-                  </button>
-                )}
-              </div>
-            );
-          })}
+          {lotes?.map((lote) => (
+            <FilaLote
+              key={lote.id}
+              lote={lote}
+              abierto={sesion.loteId === lote.id}
+              onAbrir={(l) => {
+                // El que se abre deja de estar pendiente en esta lista: el
+                // cambio de nombre pudo estar editorialmente pendiente.
+                setLotes((prev) =>
+                  prev?.map((p) => (p.id === l.id ? { ...l } : p)) ?? null,
+                );
+                onAbrir(l);
+              }}
+              onAgregar={onAgregar}
+              onRenombrado={(r) =>
+                setLotes((prev) =>
+                  prev?.map((p) => (p.id === r.id ? { ...p, nombre: r.nombre } : p)) ?? null,
+                )
+              }
+              onLoteBorrado={(l) => {
+                setLotes((prev) => prev?.filter((p) => p.id !== l.id) ?? null);
+                onLoteBorrado(l);
+              }}
+            />
+          ))}
         </div>
 
         <div className="cuenta__foot">

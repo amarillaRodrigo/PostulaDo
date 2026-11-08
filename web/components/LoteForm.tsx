@@ -16,6 +16,7 @@ import {
   listarPostulaciones,
   listarTodas,
   pedirPlanCompleto,
+  agregarAlLote,
   actualizarOferta,
   olvidePassword,
   recuperarPlan,
@@ -168,6 +169,25 @@ export function LoteForm() {
     enviando: boolean;
     aviso: { tipo: 'ok' | 'error'; texto: string } | null;
   }>({ abierto: false, enviando: false, aviso: null });
+  /** Lote al que van a entrar las próximas ofertas pegadas. */
+  const [destino, setDestino] = useState<LoteGuardado | null>(null);
+
+  /** El aviso del modo-agregar: lo muestran el paso 1 y el paso de cuenta. */
+  const bannerDestino = destino ? (
+    <div className="ingest__banner" role="status">
+      <span className="ingest__banner-texto">
+        Las ofertas que pegues ahora entran al lote{' '}
+        <b>«{destino.nombre ?? 'Lote sin nombre'}»</b>.
+      </span>
+      <button
+        type="button"
+        className="ingest__banner-cancelar"
+        onClick={() => setDestino(null)}
+      >
+        Cancelar
+      </button>
+    </div>
+  ) : null;
 
   // Al volver (F5, otra pestaña, otro día) se retoma el último lote. Se hace
   // en un efecto para no romper la hidratación del export estático.
@@ -286,6 +306,19 @@ export function LoteForm() {
         (hechos, total) => setState({ kind: 'working', hechos, total }),
       );
 
+      // Si había un lote destino, lo nuevo entra ahí y el plan se redibuja
+      // con el denominador completo, antes que armar un lote nuevo.
+      if (
+        await terminarConDestino(
+          sesion.ids,
+          sesion,
+          fallidas,
+          emailEnviado,
+        )
+      ) {
+        return;
+      }
+
       setState({
         kind: 'done',
         result: resultado,
@@ -329,6 +362,12 @@ export function LoteForm() {
           texto.trim(),
           tituloTexto.trim() || undefined,
         );
+
+        if (
+          await terminarConDestino(sesion.ids, sesion, 0, entrada.emailEnviado)
+        ) {
+          return;
+        }
 
         setState({
           kind: 'done',
@@ -449,6 +488,97 @@ export function LoteForm() {
     }
 
     await abrir(lotes[0]);
+  }
+
+  /**
+   * Si hay un lote destino ("Agregar ofertas"), lo nuevo entra a ese lote y
+   * el plan se redibuja con el denominador completo. Devuelve `true` cuando
+   * se encargó del flujo y no hace falta armar un lote nuevo.
+   */
+  async function terminarConDestino(
+    nuevosIds: string[],
+    sesionBase: SesionGuardada,
+    fallidas: number,
+    emailEnviado?: boolean,
+  ): Promise<boolean> {
+    if (!destino) return false;
+
+    const ampli = await agregarAlLote(destino.id, nuevosIds);
+
+    if (!ampli) {
+      // Sin lote crecido, lo nuevo queda en un lote propio: se avisa, sigue
+      // el flujo normal y nada se pierde.
+      setDestino(null);
+      setAviso(
+        `No pudimos sumar al lote «${destino.nombre ?? 'Lote sin nombre'}»: el plan quedó con lo nuevo solo.`,
+      );
+      return false;
+    }
+
+    const plan = await abrirLote(ampli.ids);
+
+    if (!plan) {
+      setDestino(null);
+      setAviso(
+        `El lote «${ampli.nombre ?? 'Lote sin nombre'}» creció, pero no pudimos recalcular su plan. Probá de nuevo.`,
+      );
+      setState({ kind: 'idle' });
+      return true;
+    }
+
+    const actual = leerSesion() ?? sesionBase;
+    const actualizada: SesionGuardada = {
+      ...actual,
+      ids: ampli.ids,
+      loteId: ampli.id,
+      planCompleto: false,
+    };
+    guardarSesion(actualizada);
+    setDestino(null);
+
+    setState({
+      kind: 'done',
+      result: plan,
+      sesion: actualizada,
+      fallidas,
+      emailEnviado,
+    });
+
+    document
+      .querySelector('#lote')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    return true;
+  }
+
+  /** Vuelve al formulario puro con las ofertas entrando a un lote guardado. */
+  function agregarAl(lote: LoteGuardado) {
+    setDestino(lote);
+    setAviso(null);
+    setState({ kind: 'idle' });
+
+    document
+      .querySelector('#lote')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /** El lote abierto se borró desde la cuenta: el plan queda sin lote. */
+  function loteBorradoEnCuenta(lote: LoteGuardado) {
+    const guardada = leerSesion();
+    if (guardada?.loteId !== lote.id) return;
+
+    const actualizada: SesionGuardada = {
+      ...guardada,
+      loteId: null,
+      planCompleto: false,
+    };
+    guardarSesion(actualizada);
+
+    setState((prev) =>
+      prev.kind === 'done'
+        ? { ...prev, sesion: actualizada }
+        : prev,
+    );
   }
 
   async function abrir(lote: LoteGuardado) {
@@ -855,6 +985,8 @@ export function LoteForm() {
           sesion={sesion}
           onAbrir={(lote) => void abrir(lote)}
           onAbrirCorpus={() => void abrirCorpus()}
+          onAgregar={(lote) => agregarAl(lote)}
+          onLoteBorrado={(lote) => loteBorradoEnCuenta(lote)}
           onSalir={salir}
           onVerificado={() => {
             const guardada = leerSesion();
@@ -902,6 +1034,8 @@ export function LoteForm() {
       : parseUrls(urls).length > 0;
 
     return (
+      <>
+      {bannerDestino}
       <form className="ingest" onSubmit={(e) => {
         e.preventDefault();
         const form = new FormData(e.currentTarget);
@@ -1079,6 +1213,7 @@ export function LoteForm() {
           </button>
         </div>
       </form>
+      </>
     );
   }
 
@@ -1100,6 +1235,10 @@ export function LoteForm() {
         texto.trim(),
         tituloTexto.trim() || undefined,
       );
+
+      if (await terminarConDestino(sesion.ids, sesion, fallidas)) {
+        return;
+      }
 
       setState({ kind: 'done', result: resultado, sesion, fallidas });
     } catch (e) {
@@ -1124,6 +1263,7 @@ export function LoteForm() {
 
   return (
     <>
+    {bannerDestino}
     <form
       className="ingest"
       onSubmit={(e) => {
