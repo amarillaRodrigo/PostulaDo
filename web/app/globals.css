@@ -879,6 +879,23 @@ input {
   color: var(--accent-ink);
 }
 
+/* El borrado de cuenta: la caja avisa lo que se pierde y pide la contraseña.
+   Es la acción sin retorno, por eso vive en una caja propia y el texto no se
+   mete en un confirm() nativo. */
+.cuenta__borrar {
+  margin-top: 4px;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+}
+
+.cuenta__borrar-texto {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
 /* Fila editable / confirmación de borrado, en la fila misma. */
 .cuenta__form {
   display: flex;

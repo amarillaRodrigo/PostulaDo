@@ -554,6 +554,31 @@ export async function cerrarOtrasSesiones(): Promise<ResultadoCerrarOtras> {
 }
 
 /**
+ * Borra la cuenta para siempre: exige la contraseña actual. Si la API la
+ * aceptó, la sesión local ya no representa a nadie y queda borrada.
+ */
+export async function borrarCuenta(
+  password: string,
+): Promise<{ ok: boolean; message?: string }> {
+  try {
+    await pedirConSesion('/auth/borrar-cuenta', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    });
+
+    borrarSesion();
+
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      message:
+        e instanceof Error ? e.message : 'No pudimos borrar la cuenta.',
+    };
+  }
+}
+
+/**
  * Borra un lote guardado. Las ofertas de la cuenta quedan.
  */
 export async function borrarLote(id: string): Promise<boolean> {

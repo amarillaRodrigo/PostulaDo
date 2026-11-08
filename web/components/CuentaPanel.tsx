@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  borrarCuenta,
   borrarLote,
   cerrarOtrasSesiones,
   cerrarTodasLasSesiones,
@@ -250,6 +251,9 @@ export function CuentaPanel({
   const [cerrandoTodo, setCerrandoTodo] = useState(false);
   const [confirmandoOtras, setConfirmandoOtras] = useState(false);
   const [cerrandoOtras, setCerrandoOtras] = useState(false);
+  const [borrarPaso, setBorrarPaso] = useState<'nada' | 'confirmando'>('nada');
+  const [contraBorrado, setContraBorrado] = useState('');
+  const [borrandoCuenta, setBorrandoCuenta] = useState(false);
 
   // Los callbacks del padre cambian de identidad en cada render. Se guardan en
   // refs para que el efecto de abajo corra una sola vez y no pida en loop.
@@ -407,6 +411,35 @@ export function CuentaPanel({
     if (dias === 1) return 'vence mañana';
 
     return `vence en ${dias} días`;
+  }
+
+  /** Borra la cuenta con la contraseña escrita. Irreversible: se avisa dos veces. */
+  async function borrarLaCuenta() {
+    if (!contraBorrado) {
+      setAviso({
+        tipo: 'error',
+        texto: 'Escribí tu contraseña para confirmar el borrado.',
+      });
+      return;
+    }
+
+    setBorrandoCuenta(true);
+    setAviso(null);
+
+    const resultado = await borrarCuenta(contraBorrado);
+    setBorrandoCuenta(false);
+
+    if (!resultado.ok) {
+      setAviso({
+        tipo: 'error',
+        texto: resultado.message ?? 'No pudimos borrar la cuenta.',
+      });
+      return;
+    }
+
+    // La API ya borró todo y `borrarCuenta` limpió la sesión local: el panel
+    // se despide.
+    onSalir();
   }
 
   return (
@@ -580,6 +613,71 @@ export function CuentaPanel({
                 Cerrar las otras sesiones
               </button>
             ))}
+        </div>
+
+        <div className="cuenta__borrar">
+          {borrarPaso === 'nada' ? (
+            <>
+              <p className="cuenta__borrar-texto">
+                <b>Borrar la cuenta</b> borra tus ofertas, tus lotes y sus
+                planes. No hay vuelta atrás.
+              </p>
+              <button
+                type="button"
+                className="cuenta__mini cuenta__mini--riesgo"
+                onClick={() => {
+                  setContraBorrado('');
+                  setBorrarPaso('confirmando');
+                }}
+              >
+                Borrar mi cuenta
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="cuenta__borrar-texto">
+                Se borran{' '}
+                <b>todas tus ofertas, todos tus lotes y sus planes</b>, y no
+                vuelven ni pidiendo el mismo correo. Para confirmar,
+                escribí tu contraseña.
+              </p>
+              <form
+                className="cuenta__form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void borrarLaCuenta();
+                }}
+              >
+                <label className="sr-only" htmlFor="borrar-contra">
+                  Tu contraseña actual, para confirmar el borrado
+                </label>
+                <input
+                  id="borrar-contra"
+                  className="cuenta__editar"
+                  type="password"
+                  value={contraBorrado}
+                  onChange={(e) => setContraBorrado(e.target.value)}
+                  placeholder="Tu contraseña actual"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  className="cuenta__action"
+                  disabled={borrandoCuenta}
+                >
+                  {borrandoCuenta ? 'Borrando…' : 'Sí, borrar mi cuenta'}
+                </button>
+                <button
+                  type="button"
+                  className="cuenta__action cuenta__action--soft"
+                  disabled={borrandoCuenta}
+                  onClick={() => setBorrarPaso('nada')}
+                >
+                  Cancelar
+                </button>
+              </form>
+            </>
+          )}
         </div>
 
         <div className="cuenta__foot">
