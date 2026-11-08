@@ -167,6 +167,7 @@ export function leerSesion(): SesionGuardada | null {
       emailVerificado: datos.emailVerificado === true,
       ids: datos.ids.filter((id): id is string => typeof id === 'string'),
       loteId: typeof datos.loteId === 'string' ? datos.loteId : null,
+      planCompleto: datos.planCompleto === true,
     };
   } catch {
     return null;
@@ -480,6 +481,7 @@ export type OfertaResumen = {
   status: string;
   tecnologias: string[];
   aniosExperiencia: number | null;
+  isArchived: boolean;
 };
 
 /**
@@ -532,14 +534,16 @@ export async function actualizarOferta(
 
 /**
  * Las ofertas no archivadas de la cuenta, para el plan completo: ahí el
- * denominador es todo lo que quedó en pie, no solo un lote.
+ * denominador es todo lo que quedó en pie, no solo un lote. El filtro va en
+ * el cliente: la API castea `isArchived=false` con Boolean() y ese string se
+ * vuelve `true`.
  */
 export async function listarTodas(): Promise<OfertaResumen[]> {
   const todas: OfertaResumen[] = [];
 
   for (let page = 1; page <= 10; page += 1) {
     const pagina = await pedirConSesion<OfertaResumen[]>(
-      `/postulaciones?limit=100&page=${page}&isArchived=false`,
+      `/postulaciones?limit=100&page=${page}`,
     );
 
     todas.push(...pagina);
@@ -547,7 +551,7 @@ export async function listarTodas(): Promise<OfertaResumen[]> {
     if (pagina.length < 100) break;
   }
 
-  return todas;
+  return todas.filter((o) => !o.isArchived);
 }
 
 /**
