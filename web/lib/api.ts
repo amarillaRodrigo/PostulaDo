@@ -483,7 +483,79 @@ export async function renombrarLote(
   }
 }
 
-/** Borra un lote guardado. Las ofertas de la cuenta quedan. */
+export type SesionAbierta = {
+  id: string;
+  esteDispositivo: boolean;
+  /** Fecha de ISO de apertura de la sesion. */
+  abierta: string;
+  /** Fecha ISO de vencimiento del refresh token. */
+  vence: string;
+};
+
+export type ResultadoCerrarOtras =
+  | { ok: true; cerradas: number }
+  | { ok: false; message: string };
+
+/**
+ * Las sesiones abiertas de la cuenta, marcando cuál es este dispositivo. El
+ * identificador de "este dispositivo" es el refresh token guardado: la misma
+ * clave con la que la API distingue las filas.
+ */
+export async function listarSesiones(): Promise<SesionAbierta[] | null> {
+  const sesion = leerSesion();
+  if (!sesion || !API_CONFIGURADA) return null;
+
+  try {
+    return await pedirConSesion<SesionAbierta[]>('/auth/sesiones', {
+      method: 'POST',
+      body: JSON.stringify(
+        sesion.refreshToken
+          ? { refresh_token: sesion.refreshToken }
+          : {},
+      ),
+    });
+  } catch (e) {
+    if (e instanceof ErrorApi && e.status === 401) borrarSesion();
+    return null;
+  }
+}
+
+/**
+ * Cierra las sesiones de los otros dispositivos sin cerrar esta. Necesita el
+ * refresh token guardado para saber cuál es la sesión a conservar.
+ */
+export async function cerrarOtrasSesiones(): Promise<ResultadoCerrarOtras> {
+  const sesion = leerSesion();
+
+  if (!sesion?.refreshToken || !API_CONFIGURADA) {
+    return {
+      ok: false,
+      message:
+        'Esta sesión no sabe quién es (entró sin refresh token): volvé a entrar y probá de nuevo.',
+    };
+  }
+
+  try {
+    const r = await pedirConSesion<{ cerradas: number }>('/auth/logout-otros', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: sesion.refreshToken }),
+    });
+
+    return { ok: true, cerradas: r.cerradas };
+  } catch (e) {
+    return {
+      ok: false,
+      message:
+        e instanceof Error
+          ? e.message
+          : 'No pudimos cerrar las otras sesiones.',
+    };
+  }
+}
+
+/**
+ * Borra un lote guardado. Las ofertas de la cuenta quedan.
+ */
 export async function borrarLote(id: string): Promise<boolean> {
   try {
     await pedirConSesion(`/lotes/${id}`, { method: 'DELETE' });

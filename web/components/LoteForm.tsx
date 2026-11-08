@@ -171,6 +171,12 @@ export function LoteForm() {
   }>({ abierto: false, enviando: false, aviso: null });
   /** Lote al que van a entrar las próximas ofertas pegadas. */
   const [destino, setDestino] = useState<LoteGuardado | null>(null);
+  /**
+   * El plan que se estaba viendo cuando se entró al modo-agregar. Al
+   * cancelar se vuelve a él: sin esto, el que cancelaba quedaba en el
+   * formulario del paso 1 sin poder ver su plan de nuevo sin recargar.
+   */
+  const vistaAnteriorRef = useRef<Estado | null>(null);
 
   /** El aviso del modo-agregar: lo muestran el paso 1 y el paso de cuenta. */
   const bannerDestino = destino ? (
@@ -182,7 +188,15 @@ export function LoteForm() {
       <button
         type="button"
         className="ingest__banner-cancelar"
-        onClick={() => setDestino(null)}
+        onClick={() => {
+          setDestino(null);
+
+          const vista = vistaAnteriorRef.current;
+          if (vista?.kind === 'done') {
+            vistaAnteriorRef.current = null;
+            setState(vista);
+          }
+        }}
       >
         Cancelar
       </button>
@@ -553,6 +567,10 @@ export function LoteForm() {
 
   /** Vuelve al formulario puro con las ofertas entrando a un lote guardado. */
   function agregarAl(lote: LoteGuardado) {
+    // Si había un plan a la vista, se guarda: "Cancelar" vuelve a él.
+    vistaAnteriorRef.current =
+      estadoRef.current.kind === 'done' ? estadoRef.current : null;
+
     setDestino(lote);
     setAviso(null);
     setState({ kind: 'idle' });

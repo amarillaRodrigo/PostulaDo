@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   borrarLote,
+  cerrarOtrasSesiones,
   cerrarTodasLasSesiones,
   listarLotes,
+  listarSesiones,
   miPerfil,
   reenviarVerificacion,
   renombrarLote,
   type LoteGuardado,
+  type SesionAbierta,
   type SesionGuardada,
 } from '@/lib/api';
 
@@ -239,11 +242,14 @@ export function CuentaPanel({
   onVerificado: () => void;
 }) {
   const [lotes, setLotes] = useState<LoteGuardado[] | null>(null);
+  const [sesiones, setSesiones] = useState<SesionAbierta[] | null>(null);
   const [verificado, setVerificado] = useState(sesion.emailVerificado);
   const [aviso, setAviso] = useState<Aviso>(null);
   const [enviando, setEnviando] = useState(false);
   const [confirmandoTodo, setConfirmandoTodo] = useState(false);
   const [cerrandoTodo, setCerrandoTodo] = useState(false);
+  const [confirmandoOtras, setConfirmandoOtras] = useState(false);
+  const [cerrandoOtras, setCerrandoOtras] = useState(false);
 
   // Los callbacks del padre cambian de identidad en cada render. Se guardan en
   // refs para que el efecto de abajo corra una sola vez y no pida en loop.
@@ -286,6 +292,10 @@ export function CuentaPanel({
 
     void listarLotes().then((lista) => {
       if (vigente) setLotes(lista);
+    });
+
+    void listarSesiones().then((lista) => {
+      if (vigente) setSesiones(lista);
     });
 
     void refrescarPerfil();
@@ -358,6 +368,45 @@ export function CuentaPanel({
     // La sesión local ya se borró dentro de `cerrarTodasLasSesiones`; el padre
     // limpia el estado de la pantalla.
     onSalir();
+  }
+
+  async function cerrarLasOtras() {
+    setCerrandoOtras(true);
+    setAviso(null);
+
+    const resultado = await cerrarOtrasSesiones();
+    setCerrandoOtras(false);
+    setConfirmandoOtras(false);
+
+    if (!resultado.ok) {
+      setAviso({ tipo: 'error', texto: resultado.message });
+      return;
+    }
+
+    if (resultado.cerradas > 0) {
+      setAviso({
+        tipo: 'ok',
+        texto:
+          resultado.cerradas === 1
+            ? 'Cerramos la sesión del otro dispositivo.'
+            : `Cerramos las sesiones de los otros ${resultado.cerradas} dispositivos.`,
+      });
+    }
+
+    const lista = await listarSesiones();
+    if (lista) setSesiones(lista);
+  }
+
+  /** Cuánto le queda de vida a una sesión, dicho en días honestos. */
+  function venceEn(iso: string): string {
+    const dias = Math.ceil(
+      (new Date(iso).getTime() - Date.now()) / (24 * 60 * 60 * 1000),
+    );
+
+    if (Number.isNaN(dias) || dias <= 0) return 'vence pronto';
+    if (dias === 1) return 'vence mañana';
+
+    return `vence en ${dias} días`;
   }
 
   return (
@@ -461,6 +510,76 @@ export function CuentaPanel({
               }}
             />
           ))}
+        </div>
+
+        <div className="cuenta__lotes">
+          <div className="cuenta__lotes-head">
+            <span>Tus sesiones</span>
+            <span>
+              {sesiones === null
+                ? 'Cargando…'
+                : sesiones.length === 0
+                  ? 'ninguna abierta'
+                  : `${sesiones.length} ${sesiones.length === 1 ? 'abierta' : 'abiertas'}`}
+            </span>
+          </div>
+
+          {sesiones === null ? (
+            <p className="cuenta__empty">
+              No pudimos leer las sesiones de esta cuenta.
+            </p>
+          ) : (
+            sesiones.map((s) => (
+              <div key={s.id} className="cuenta__lote">
+                <span className="cuenta__lote-nombre">
+                  {s.esteDispositivo ? 'Este dispositivo' : 'Otro dispositivo'}
+                </span>
+                <span className="cuenta__lote-meta">
+                  abierta el {fecha(s.abierta)} · {venceEn(s.vence)}
+                </span>
+                {s.esteDispositivo ? (
+                  <span className="cuenta__lote-abierto">Estás acá</span>
+                ) : null}
+              </div>
+            ))
+          )}
+
+          {sesiones !== null &&
+            sesiones.some((s) => !s.esteDispositivo) &&
+            (confirmandoOtras ? (
+              <div className="cuenta__lote">
+                <span className="cuenta__lote-meta">
+                  ¿Cerrar las sesiones de los otros dispositivos? Esta queda
+                  abierta.
+                </span>
+                <div className="cuenta__form">
+                  <button
+                    type="button"
+                    className="cuenta__action"
+                    disabled={cerrandoOtras}
+                    onClick={() => void cerrarLasOtras()}
+                  >
+                    {cerrandoOtras ? 'Cerrando…' : 'Sí, cerrar las otras'}
+                  </button>
+                  <button
+                    type="button"
+                    className="cuenta__action cuenta__action--soft"
+                    disabled={cerrandoOtras}
+                    onClick={() => setConfirmandoOtras(false)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="cuenta__mini cuenta__mini--riesgo"
+                onClick={() => setConfirmandoOtras(true)}
+              >
+                Cerrar las otras sesiones
+              </button>
+            ))}
         </div>
 
         <div className="cuenta__foot">
