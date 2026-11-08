@@ -245,6 +245,9 @@ El acento de un tema **no** se marca con una franja lateral: se marca con un swa
 - **Estados:** los links de sección no tienen hover; el CTA de la nav es tinta.
 - **Mobile:** los links se ocultan y aparece un `<details>` con un panel de 190px alineado a la derecha.
 
+### La Marca (identity)
+Lockup de `components/Marca.tsx`: símbolo prisma + wordmark, link a `#top`. El símbolo es el diagrama clásico de refracción en viewBox 32: triángulo **outline** (apéx arriba, trazo 2.25, `currentColor`), haz horizontal en tinta que lo atraviesa (y=17) y tres rayos espectrales que salen del borde derecho azul `#2563eb` / magenta `#e879f9` / ámbar `#f59e0b`. El prisma es neutro: **el color vive solo en la luz dispersa**, misma regla que El Prisma. El favicon (`public/favicon.svg`) es la misma geometría sobre chip de papel `#f5f3ee` radio 7; se declara en `layout.tsx` con `icons` y `BASE_PATH`, no como `favicon.ico`.
+
 ### La Lente (signature)
 El hero: degradado radial `--lens-1 → --lens-3` con una retícula de 76px al 10% (máscara radial), el haz de 7 capas de 14px con `blur(18px) saturate(.7)` divergiendo desde el 30% izquierdo, saturación total 42%, núcleo blanco al 58%. El haz respira: 28s de deriva, no un loop de scroll.
 
@@ -260,6 +263,7 @@ Placa de tinta, `::after` con un gradiente espectral de 2px en el canto inferior
 - **Do** mostrá el denominador junto a cada porcentaje: "5 ofertas" al lado de "100%".
 - **Do** rotulá como **Ejemplo** cualquier dataset que no venga de un lote real del usuario.
 - **Do** usá el espectro para marcar información (cobertura, dispersión, cáustica), nunca para decorar.
+- **Do** usá la marca como acá: prisma y haz en tinta, color solo en los rayos que salen del prisma.
 - **Do** mantené el foco visible en todo control: anillo de 2px azul.
 - **Do** reduuí el largo del rayo del prisma al porcentaje, y el del texto al dato real.
 - **Do** derivá el número de tecnologías del extractor real, no de un número escrito a mano.

@@ -8,10 +8,15 @@ const geist = Geist({
   display: 'swap',
 });
 
+const basePath = process.env.BASE_PATH ?? '';
+
 export const metadata: Metadata = {
   title: 'PostulaDo — Dejá de adivinar qué estudiar',
   description:
     'Pegá las ofertas que estás mirando y PostulaDo encuentra el tipo de trabajo que comparten, los temas que lo cubren y por cuál empezar.',
+  icons: {
+    icon: `${basePath}/favicon.svg`,
+  },
   openGraph: {
     title: 'PostulaDo — Dejá de adivinar qué estudiar',
     description:

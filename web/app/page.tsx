@@ -1,5 +1,6 @@
 import { Lens } from '@/components/Lens';
 import { EntrarLink } from '@/components/EntrarLink';
+import { Marca } from '@/components/Marca';
 import { LoteForm } from '@/components/LoteForm';
 import { PrismDiagram } from '@/components/PrismDiagram';
 import {
@@ -70,9 +71,9 @@ const PRINCIPALES = temasPrincipales(EXAMPLE_THEMES, EXAMPLE_LOTE);
 export default function Page() {
   return (
     <>
-      <nav className="nav">
+      <nav className="nav" id="top">
         <div className="wrap nav__in">
-          <div className="nav__logo">PostulaDo</div>
+          <Marca />
           <div className="nav__links">
             <a href="#producto">Producto</a>
             <a href="#como-funciona">Cómo funciona</a>

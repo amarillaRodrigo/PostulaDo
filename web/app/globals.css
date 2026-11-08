@@ -159,10 +159,36 @@ input {
   gap: 32px;
 }
 
-.nav__logo {
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.marca__simbolo {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.marca__texto {
   font-size: 19px;
   font-weight: 800;
   letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.marca:hover .marca__texto {
+  color: var(--accent-ink);
+}
+
+.marca:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 .nav__links {
@@ -1996,6 +2022,19 @@ html[data-plan='si'] a[href='#producto'] {
 }
 
 @media (max-width: 520px) {
+  .marca {
+    gap: 7px;
+  }
+
+  .marca__simbolo {
+    width: 22px;
+    height: 22px;
+  }
+
+  .marca__texto {
+    font-size: 17px;
+  }
+
   .nav__cta .btn {
     padding: 7px 10px;
     font-size: 12.5px;
