@@ -11,6 +11,7 @@ import { ListPostulacionesQueryDto } from './dto/list-postulaciones-query.dto';
 import { extractTechnologies } from './helpers/technology-extractor.helper';
 import { JobAnalyzerService } from './job-analyzer.service';
 import { detectarEcosistema, temaPorKey, temasDe } from '../common/taxonomy';
+import { armarRuta } from '../common/ruta';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import {
@@ -359,6 +360,49 @@ export class PostulacionesService {
     }
 
     return this.analisisDeLote(
+      userId,
+      propias.map((p) => p.id),
+    );
+  }
+
+  /**
+   * La ruta de estudio de un lote: mismos denominadores que el análisis,
+   * pero con los temas en orden de estudio según sus prerequisitos.
+   * Reusa `analisisDeLote` para heredar el mensaje del lote vacío y el
+   * cálculo del conteo sin copiarlo.
+   */
+  async rutaDeLote(userId: string, ids: string[]) {
+    const analisis = await this.analisisDeLote(userId, ids);
+
+    if (!analisis.temas.length) {
+      return { totalOfertasAnalizadas: 0, ecosistema: analisis.ecosistema, nodos: [] };
+    }
+
+    const conteo = new Map<string, number>();
+    for (const tema of analisis.temas) {
+      conteo.set(tema.key, tema.cobertura);
+    }
+
+    return armarRuta(
+      conteo,
+      analisis.totalOfertasAnalizadas,
+      analisis.ecosistema,
+    );
+  }
+
+  /** La ruta sobre todo el corpus, igual que el plan completo. */
+  async rutaDeCorpus(userId: string) {
+    const propias = await this.prisma.postulacion.findMany({
+      where: { userId, isArchived: false },
+      select: { id: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (propias.length === 0) {
+      return { totalOfertasAnalizadas: 0, ecosistema: null, nodos: [] };
+    }
+
+    return this.rutaDeLote(
       userId,
       propias.map((p) => p.id),
     );

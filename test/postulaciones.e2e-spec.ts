@@ -547,6 +547,120 @@ describe('Integracion postulaciones', () => {
     ).toBe(false);
   });
 
+  it('arma la ruta del lote en orden de estudio, con prerequisitos y fuentes', async () => {
+    const owner = await registerAndLogin(`ruta-${unique()}@test.com`);
+
+    const crear = async (tecnologias: string[]) => {
+      const res = await request(app.getHttpServer())
+        .post('/postulaciones')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .send({
+          url: `https://example.com/jobs/${unique()}`,
+          tecnologias,
+        })
+        .expect(201);
+      return res.body.id as string;
+    };
+
+    // Una sola oferta de Cloud Engineering: la ruta completa de su ecosistema.
+    const enElLote = await crear(['Docker', 'Kubernetes', 'AWS', 'CI/CD']);
+
+    const ruta = await request(app.getHttpServer())
+      .get(`/postulaciones/analisis-ruta?ids=${enElLote}`)
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    // El cierre trae lo implícito: cloud necesita ci y containers, ci
+    // necesita testing, y containers/testing/backend salen del mismo hilo.
+    const keys = ruta.body.nodos.map((n: { key: string }) => n.key);
+    for (const esperado of ['backend', 'testing', 'containers', 'ci', 'cloud']) {
+      expect(keys).toContain(esperado);
+    }
+
+    const posicion = new Map(
+      ruta.body.nodos.map((n: { key: string }, i: number) => [n.key, i]),
+    );
+    const p = (k: string) => posicion.get(k) as number;
+    expect(p('containers')).toBeLessThan(p('ci'));
+    expect(p('ci')).toBeLessThan(p('cloud'));
+
+    // Denominador honesto: nadie pidió testing, así que entra con 0%.
+    const testing = ruta.body.nodos.find(
+      (n: { key: string }) => n.key === 'testing',
+    );
+    expect(testing?.presenteEnCorpus).toBe(false);
+    expect(testing?.cobertura).toBe(0);
+
+    // cloud sí la pidió: 100% del único denominador.
+    const cloud = ruta.body.nodos.find(
+      (n: { key: string }) => n.key === 'cloud',
+    );
+    expect(cloud?.cobertura).toBe(100);
+    expect(cloud?.fuentes.length).toBeGreaterThan(0);
+
+    // backend no tiene prerequisitos dentro del grafo: empiezaAca.
+    const backend = ruta.body.nodos.find(
+      (n: { key: string }) => n.key === 'backend',
+    );
+    expect(backend?.empiezaAca).toBe(true);
+  });
+
+  it('la ruta del corpus completo usa el mismo denominador que el plan', async () => {
+    const owner = await registerAndLogin(`ruta-corpus-${unique()}@test.com`);
+
+    const crear = async (tecnologias: string[]) => {
+      const res = await request(app.getHttpServer())
+        .post('/postulaciones')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .send({
+          url: `https://example.com/jobs/${unique()}`,
+          tecnologias,
+        })
+        .expect(201);
+      return res.body.id as string;
+    };
+
+    await crear(['NestJS', 'PostgreSQL']);
+    const archivada = await crear(['React']);
+
+    await prisma.postulacion.update({
+      where: { id: archivada },
+      data: { isArchived: true },
+    });
+
+    const ruta = await request(app.getHttpServer())
+      .get('/postulaciones/analisis-ruta')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    expect(ruta.body.totalOfertasAnalizadas).toBe(1);
+    // React quedó archivado: frontend no entra por el lado implícito ni explícito.
+    expect(
+      ruta.body.nodos.some((n: { key: string }) => n.key === 'frontend'),
+    ).toBe(false);
+
+    // Los pedidos están, más backend como prerequisito del dato.
+    const presentes = ruta.body.nodos
+      .filter((n: { presenteEnCorpus: boolean }) => n.presenteEnCorpus)
+      .map((n: { key: string }) => n.key);
+    expect(presentes).toEqual(expect.arrayContaining(['backend', 'data']));
+
+    // cache no lo pidió nadie y no es prerequisito de nada en la ruta: fuera.
+    expect(presentes).not.toContain('cache');
+  });
+
+  it('la ruta sin ofertas no promete mostrar nada', async () => {
+    const owner = await registerAndLogin(`ruta-vacia-${unique()}@test.com`);
+
+    const ruta = await request(app.getHttpServer())
+      .get('/postulaciones/analisis-ruta')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    expect(ruta.body.totalOfertasAnalizadas).toBe(0);
+    expect(ruta.body.nodos).toEqual([]);
+  });
+
   it('crea una postulación pegando el texto, sin URL', async () => {
     const owner = await registerAndLogin(`texto-${unique()}@test.com`);
 

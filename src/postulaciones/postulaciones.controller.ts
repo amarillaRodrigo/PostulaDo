@@ -119,6 +119,35 @@ export class PostulacionesController {
     return this.service.analisisDeLote(userId, list);
   }
 
+  @Get('analisis-ruta')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary:
+      'Learning route for a batch (or the whole corpus): temas in study order with prerequisites',
+  })
+  @ApiResponse({
+    description:
+      'Route nodes topologically ordered, with sources and honest denominators',
+  })
+  async getRutaAnalysis(
+    @Req() req: any,
+    @Query('ids') ids: string | undefined,
+  ) {
+    const userId = req.user?.sub ?? req.user?.id;
+    const list = (ids ?? '')
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean);
+
+    // Misma convención que analisis-lote: sin ids, la ruta aprende del corpus.
+    if (list.length === 0) {
+      return this.service.rutaDeCorpus(userId);
+    }
+
+    return this.service.rutaDeLote(userId, list);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
