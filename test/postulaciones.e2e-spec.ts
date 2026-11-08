@@ -147,6 +147,20 @@ describe('Integracion postulaciones', () => {
       isArchived: true,
       userId: owner.user.id,
     });
+
+    // "isArchived=false" llega como el texto "false": Boolean("false") es
+    // true, así que el filtro correcto exige comparar el texto.
+    const noArchivadas = await request(app.getHttpServer())
+      .get('/postulaciones')
+      .query({ isArchived: false })
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    expect(noArchivadas.body).toHaveLength(1);
+    expect(noArchivadas.body[0]).toMatchObject({
+      id: firstPostulacion.body.id,
+      isArchived: false,
+    });
   });
 
   it('permite leer y actualizar solo las postulaciones propias', async () => {
