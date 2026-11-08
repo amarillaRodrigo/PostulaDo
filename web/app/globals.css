@@ -651,6 +651,133 @@ input {
   color: var(--ink-soft);
 }
 
+/* ============================ EL LOTE DE ADENTRO ============================ */
+
+/* El plan granulariza; acá queda el denominador con nombre y apellido:
+   qué ofertas lo forman y qué detectó el extractor en cada una. */
+.lote-detalle {
+  margin-top: 18px;
+  padding-top: 2px;
+  border-top: 1px solid var(--rule);
+}
+
+.lote-detalle summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 2px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.lote-detalle summary::-webkit-details-marker {
+  display: none;
+}
+
+.lote-detalle summary::after {
+  content: '+';
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.lote-detalle[open] summary::after {
+  content: '–';
+}
+
+.lote-detalle__aviso {
+  padding: 2px 2px 12px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.lote-detalle__filas {
+  padding-bottom: 12px;
+}
+
+.lote-detalle__fila {
+  padding: 10px 2px;
+  border-top: 1px solid var(--rule);
+}
+
+.lote-detalle__fila:first-child {
+  border-top: 0;
+  padding-top: 2px;
+}
+
+.lote-detalle__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+}
+
+.lote-detalle__titulo {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.lote-detalle__titulo a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.lote-detalle__titulo a:hover {
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lote-detalle__estado {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+
+.lote-detalle__select {
+  flex-shrink: 0;
+  padding: 3px 4px 3px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.lote-detalle__select:hover {
+  border-color: var(--ink-faint);
+}
+
+.lote-detalle__aviso.is-error {
+  color: var(--accent-ink);
+}
+
+.lote-detalle__meta {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.lote-detalle__temas {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-faint);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

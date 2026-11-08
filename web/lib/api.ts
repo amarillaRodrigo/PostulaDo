@@ -463,6 +463,68 @@ export async function listarLotes(): Promise<LoteGuardado[]> {
   }
 }
 
+/**
+ * Una oferta guardada, tal como la dejó el extractor: es lo que permite
+ * mostrar el lote de adentro en vez de solo el agregado.
+ */
+export type OfertaResumen = {
+  id: string;
+  url: string;
+  title: string | null;
+  company: string | null;
+  status: string;
+  tecnologias: string[];
+  aniosExperiencia: number | null;
+};
+
+/**
+ * Lee las ofertas del lote, en el orden del lote.
+ *
+ * El listado de la API es paginado y no acepta varios ids, así que se recorre
+ * por páginas hasta completar el lote (o quedarse sin páginas).
+ */
+export async function listarPostulaciones(
+  ids: string[],
+): Promise<OfertaResumen[]> {
+  const faltan = new Set(ids);
+  const mapa = new Map<string, OfertaResumen>();
+
+  for (let page = 1; page <= 10 && faltan.size > 0; page += 1) {
+    const pagina = await pedirConSesion<OfertaResumen[]>(
+      `/postulaciones?limit=100&page=${page}`,
+    );
+
+    for (const oferta of pagina) {
+      if (faltan.delete(oferta.id)) mapa.set(oferta.id, oferta);
+    }
+
+    if (pagina.length < 100) break;
+  }
+
+  return ids
+    .map((id) => mapa.get(id))
+    .filter((o): o is OfertaResumen => Boolean(o));
+}
+
+/**
+ * Cambia el estado de una postulación (aplicada, entrevista, rechazada…).
+ * No toca el plan: el agregado sale del lote, este dato es por oferta.
+ */
+export async function actualizarOferta(
+  id: string,
+  cambios: { status: string },
+): Promise<boolean> {
+  try {
+    await pedirConSesion<OfertaResumen>(`/postulaciones/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(cambios),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Plan de un lote ya guardado en la cuenta. */
 export async function abrirLote(ids: string[]): Promise<Resultado | null> {
   if (ids.length === 0) return null;

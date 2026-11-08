@@ -12,9 +12,12 @@ import {
   guardarSesion,
   leerSesion,
   listarLotes,
+  listarPostulaciones,
+  actualizarOferta,
   olvidePassword,
   recuperarPlan,
   SIN_API,
+  type OfertaResumen,
   type LoteGuardado,
   type Resultado,
   type SesionGuardada,
@@ -39,6 +42,31 @@ type Cuenta = {
 };
 
 type Modo = 'crear' | 'entrar';
+
+type Detalle =
+  | { estado: 'nada' }
+  | { estado: 'cargando' }
+  | { estado: 'listo'; ofertas: OfertaResumen[]; aviso: string | null }
+  | { estado: 'error' };
+
+const ETIQUETA_ESTADO: Record<string, string> = {
+  ENVIADO: 'Enviado',
+  ENTREVISTA: 'Entrevista',
+  OFERTA: 'Oferta',
+  RECHAZADO: 'Rechazado',
+  GHOSTEADO: 'Ghosteado',
+};
+
+/** Sin título guardado, el dominio de la URL es lo más honesto que hay. */
+function tituloDe(oferta: OfertaResumen): string {
+  if (oferta.title) return oferta.title;
+
+  try {
+    return new URL(oferta.url).host.replace(/^www\./, '');
+  } catch {
+    return 'Oferta';
+  }
+}
 
 type Estado =
   | { kind: 'idle' }
@@ -112,6 +140,8 @@ export function LoteForm() {
   const [aviso, setAviso] = useState<string | null>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const estadoRef = useRef<Estado>(state);
+  const [detalle, setDetalle] = useState<Detalle>({ estado: 'nada' });
+  const detalleCargadaRef = useRef(false);
   const [recuperar, setRecuperar] = useState<{
     abierto: boolean;
     enviando: boolean;
@@ -155,9 +185,15 @@ export function LoteForm() {
 
   // Con un plan propio a la vista, la landing esconde el plan de ejemplo:
   // dos tablas de cobertura distintas seguidas se leen como dos resultados.
+  // Al cambiar de plan también se descarta el detalle ya cargado.
   useEffect(() => {
     document.documentElement.dataset.plan =
       state.kind === 'done' || state.kind === 'restoring' ? 'si' : 'no';
+
+    if (state.kind !== 'done') {
+      setDetalle({ estado: 'nada' });
+      detalleCargadaRef.current = false;
+    }
 
     return () => {
       delete document.documentElement.dataset.plan;
@@ -367,6 +403,65 @@ export function LoteForm() {
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  /** Lee el lote de adentro la primera vez que se abre el panel. */
+  async function abrirDetalle() {
+    const actual = estadoRef.current;
+    if (actual.kind !== 'done' || detalleCargadaRef.current) return;
+
+    detalleCargadaRef.current = true;
+    setDetalle({ estado: 'cargando' });
+
+    try {
+      const ofertas = await listarPostulaciones(actual.sesion.ids);
+      setDetalle({ estado: 'listo', ofertas, aviso: null });
+    } catch {
+      setDetalle({
+        estado: 'error',
+      });
+    }
+  }
+
+  /**
+   * Marca cómo va una postulación del lote. No recalcula el plan: este dato
+   * es por oferta, el agregado sale del lote entero.
+   */
+  async function cambiarEstado(oferta: OfertaResumen, estado: string) {
+    const actual = estadoRef.current;
+    if (actual.kind !== 'done') return;
+
+    const antes = oferta.status;
+    const back = (aviso: string | null) => {
+      setDetalle((prev) =>
+        prev.estado === 'listo'
+          ? {
+              ...prev,
+              ofertas: prev.ofertas.map((o) =>
+                o.id === oferta.id ? { ...o, status: antes } : o,
+              ),
+              aviso,
+            }
+          : prev,
+      );
+    };
+
+    // Optimista: si la API no acepta, la fila vuelve a su estado anterior.
+    setDetalle((prev) =>
+      prev.estado === 'listo'
+        ? {
+            ...prev,
+            ofertas: prev.ofertas.map((o) =>
+              o.id === oferta.id ? { ...o, status: estado } : o,
+            ),
+          }
+        : prev,
+    );
+
+    const okCambios = await actualizarOferta(oferta.id, { status: estado });
+    if (!okCambios) {
+      back('No pudimos guardar ese estado. Probá de nuevo.');
+    }
+  }
+
   async function salir() {
     // Revoca el refresh token en la API y borra lo guardado. Si la API no
     // responde, `cerrarSesion` igual limpia el navegador.
@@ -503,6 +598,83 @@ export function LoteForm() {
             </div>
           ))}
           <p className="ingest__done-suggestion">{result.sugerenciaAprendizaje}</p>
+
+          <details
+            className="lote-detalle"
+            onToggle={(e) => {
+              if ((e.currentTarget as HTMLDetailsElement).open) {
+                void abrirDetalle();
+              }
+            }}
+          >
+            <summary>
+              <span>
+                Las {result.totalOfertasAnalizadas} ofertas de este lote
+              </span>
+            </summary>
+            {detalle.estado === 'cargando' ? (
+              <p className="lote-detalle__aviso">Leyendo el lote…</p>
+            ) : null}
+            {detalle.estado === 'error' ? (
+              <p className="lote-detalle__aviso">
+                No pudimos leer tus ofertas guardadas. Probá de nuevo.
+              </p>
+            ) : null}
+            {detalle.estado === 'listo' ? (
+              <div className="lote-detalle__filas">
+                {detalle.aviso ? (
+                  <p className="lote-detalle__aviso is-error" role="alert">
+                    {detalle.aviso}
+                  </p>
+                ) : null}
+                {detalle.ofertas.map((oferta) => (
+                  <div key={oferta.id} className="lote-detalle__fila">
+                    <div className="lote-detalle__top">
+                      <span className="lote-detalle__titulo">
+                        <a href={oferta.url} target="_blank" rel="noreferrer">
+                          {tituloDe(oferta)}
+                        </a>
+                      </span>
+                      <select
+                        className="lote-detalle__select"
+                        value={oferta.status}
+                        onChange={(e) =>
+                          void cambiarEstado(
+                            oferta,
+                            (e.target as HTMLSelectElement).value,
+                          )
+                        }
+                        aria-label={`Estado de ${tituloDe(oferta)}`}
+                      >
+                        {Object.entries(ETIQUETA_ESTADO).map(([valor, texto]) => (
+                          <option key={valor} value={valor}>
+                            {texto}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {oferta.company || oferta.aniosExperiencia ? (
+                      <div className="lote-detalle__meta">
+                        {[
+                          oferta.company,
+                          oferta.aniosExperiencia
+                            ? `${oferta.aniosExperiencia} años`
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </div>
+                    ) : null}
+                    <div className="lote-detalle__temas">
+                      {oferta.tecnologias.length
+                        ? oferta.tecnologias.join(' · ')
+                        : 'Sin tecnologías detectadas'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </details>
 
           {state.emailEnviado === false && !sesion.emailVerificado ? (
             <p className="ingest__notice" role="status">
