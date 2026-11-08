@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -15,6 +23,7 @@ import { OlvidePasswordDto } from './dto/olvide-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { CerrarSesionDto } from './dto/cerrar-sesion.dto';
+import { BorrarCuentaDto } from './dto/borrar-cuenta.dto';
 import { AuthResultDto } from './dto/auth-result.dto';
 import { PublicUserDto } from '../usuarios/dto/public-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -133,5 +142,16 @@ export class AuthController {
   async logoutOtros(@Body() dto: CerrarSesionDto, @Req() req: any) {
     const userId = req.user?.sub ?? req.user?.id;
     return this.authService.cerrarOtrasSesiones(userId, dto.refresh_token);
+  }
+
+  @Post('borrar-cuenta')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Delete the account permanently (needs password)' })
+  @ApiOkResponse({ description: 'Account and all its data deleted' })
+  async borrarCuenta(@Body() dto: BorrarCuentaDto, @Req() req: any) {
+    const userId = req.user?.sub ?? req.user?.id;
+    return this.authService.borrarCuenta(userId, dto.password);
   }
 }

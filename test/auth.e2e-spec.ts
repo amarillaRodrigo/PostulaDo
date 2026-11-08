@@ -259,4 +259,76 @@ describe('Integracion autenticacion y usuarios', () => {
       .send({ refresh_token: deviceB.body.refresh_token })
       .expect(401);
   });
+
+  it('borra la cuenta con contraseña y las cascadas se llevan todo', async () => {
+    const email = `delete-me-${unique()}@test.com`;
+    const password = 'Password123!';
+
+    const register = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(createUserPayload(email, password))
+      .expect(201);
+    const token = register.body.access_token as string;
+    const userId = register.body.user.id as string;
+
+    const postulacion = await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        url: `https://example.com/jobs/borrar-${unique()}`,
+        title: 'Oferta para borrar',
+        description: 'Descripción',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/lotes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ids: [postulacion.body.id], nombre: 'Lote a borrar' })
+      .expect(201);
+
+    // Contraseña equivocada: la cuenta no se toca.
+    await request(app.getHttpServer())
+      .post('/auth/borrar-cuenta')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ password: 'not-the-password' })
+      .expect(400);
+
+    const queda = await request(app.getHttpServer())
+      .get('/auth/yo')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(queda.body.id).toBe(userId);
+
+    // Sin contraseña no hay borrado.
+    await request(app.getHttpServer())
+      .post('/auth/borrar-cuenta')
+      .set('Authorization', `Bearer ${token}`)
+      .send({})
+      .expect(400);
+
+    // La contraseña correcta borra la cuenta para siempre.
+    await request(app.getHttpServer())
+      .post('/auth/borrar-cuenta')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ password })
+      .expect(200);
+
+    // La sesión quedó muerta y el login ya no entra.
+    await request(app.getHttpServer())
+      .get('/auth/yo')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401);
+
+    await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email, password })
+      .expect(401);
+
+    // Cascadas: no queda rastro de ofertas ni lotes.
+    const ofertas = await prisma.postulacion.count({ where: { userId } });
+    const lotes = await prisma.lote.count({ where: { userId } });
+    expect(ofertas).toBe(0);
+    expect(lotes).toBe(0);
+  });
 });

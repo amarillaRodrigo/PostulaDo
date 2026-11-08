@@ -384,6 +384,32 @@ export class AuthService {
     return { cerradas: count };
   }
 
+  /**
+   * Borra la cuenta para siempre: la contraseña actual es la única llave.
+   *
+   * Las cascadas del schema hacen el resto: cada Postulacion, Lote y
+   * RefreshToken de la persona desaparece con ella. No hay paso atrás ni
+   * export pendiente por hacer: lo que se borra es exactamente lo que la
+   * cuenta mostraba.
+   */
+  async borrarCuenta(userId: string, password: string): Promise<{ borrada: true }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { password: true },
+    });
+
+    const esValida = user && (await compare(password, user.password));
+
+    if (!esValida) {
+      // Mismo mensaje sin importar si la cuenta existe: no hay adivinación.
+      throw new BadRequestException('La contraseña no es correcta.');
+    }
+
+    await this.prisma.user.delete({ where: { id: userId } });
+
+    return { borrada: true };
+  }
+
   private async revocarFamilia(familyId: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
       where: { familyId, revokedAt: null },

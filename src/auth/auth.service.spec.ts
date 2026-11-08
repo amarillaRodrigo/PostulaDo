@@ -66,6 +66,10 @@ describe('AuthService', () => {
   };
 
   const mockPrisma = {
+    user: {
+      findUnique: jest.fn(),
+      delete: jest.fn(),
+    },
     refreshToken: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -775,6 +779,46 @@ describe('AuthService', () => {
           }),
         }),
       );
+    });
+  });
+
+  describe('borrarCuenta', () => {
+    it('borra la cuenta cuando la contraseña es la actual', async () => {
+      (compare as jest.Mock).mockResolvedValueOnce(true);
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        password: 'hashed-password',
+      });
+      mockPrisma.user.delete.mockResolvedValueOnce({});
+
+      await expect(service.borrarCuenta('user-1', 'la-contra')).resolves.toEqual(
+        { borrada: true },
+      );
+
+      expect(mockPrisma.user.delete).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+      });
+    });
+
+    it('con contraseña equivocada no borra nada', async () => {
+      (compare as jest.Mock).mockResolvedValueOnce(false);
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        password: 'hashed-password',
+      });
+
+      await expect(
+        service.borrarCuenta('user-1', 'otra-contra'),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockPrisma.user.delete).not.toHaveBeenCalled();
+    });
+
+    it('sin usuario detrás del token, tampoco borra nada', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.borrarCuenta('user-1', 'la-contra'),
+      ).rejects.toThrow(BadRequestException);
+      expect(compare).not.toHaveBeenCalled();
+      expect(mockPrisma.user.delete).not.toHaveBeenCalled();
     });
   });
 });
