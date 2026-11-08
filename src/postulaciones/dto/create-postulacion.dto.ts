@@ -2,9 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUrl, IsInt, IsArray } from 'class-validator';
 
 export class CreatePostulacionDto {
-  @ApiProperty({ example: 'https://empresa.com/oferta/123' })
+  @ApiPropertyOptional({ example: 'https://empresa.com/oferta/123' })
+  @IsOptional()
   @IsUrl()
-  url!: string;
+  url?: string;
 
   @ApiPropertyOptional({ example: 'Frontend Developer' })
   @IsOptional()

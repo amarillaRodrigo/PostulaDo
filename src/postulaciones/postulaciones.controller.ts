@@ -99,12 +99,23 @@ export class PostulacionesController {
   @ApiResponse({
     description: 'Batch analysis with themes, coverage and alternatives',
   })
-  async getLoteAnalysis(@Req() req: any, @Query('ids') ids: string) {
+  async getLoteAnalysis(
+    @Req() req: any,
+    @Query('ids') ids: string | undefined,
+  ) {
     const userId = req.user?.sub ?? req.user?.id;
     const list = (ids ?? '')
       .split(',')
       .map((id) => id.trim())
       .filter(Boolean);
+
+    // Sin ids explícitos, el lote es el corpus entero: todas las ofertas no
+    // archivadas de la cuenta. Es el plan global que la UI llama "Tu plan
+    // completo".
+    if (list.length === 0) {
+      return this.service.analisisDeCorpus(userId);
+    }
+
     return this.service.analisisDeLote(userId, list);
   }
 

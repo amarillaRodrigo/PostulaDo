@@ -493,4 +493,74 @@ describe('Integracion postulaciones', () => {
     expect(lote.body.totalOfertasAnalizadas).toBe(0);
     expect(lote.body.temas).toEqual([]);
   });
+
+  it('analiza el corpus completo cuando no se pasan ids', async () => {
+    const owner = await registerAndLogin(`corpus-${unique()}@test.com`);
+
+    const crear = async (tecnologias: string[]) => {
+      const res = await request(app.getHttpServer())
+        .post('/postulaciones')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .send({
+          url: `https://example.com/jobs/${unique()}`,
+          tecnologias,
+        })
+        .expect(201);
+      return res.body.id as string;
+    };
+
+    await crear(['Docker', 'Kubernetes', 'AWS', 'CI/CD']);
+    const archivada = await crear(['React']);
+
+    // Archivar saca la oferta del corpus: denominador de lo que queda en pie.
+    await prisma.postulacion.update({
+      where: { id: archivada },
+      data: { isArchived: true },
+    });
+
+    const corpus = await request(app.getHttpServer())
+      .get('/postulaciones/analisis-lote')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+
+    expect(corpus.body.totalOfertasAnalizadas).toBe(1);
+    expect(corpus.body.ecosistema).toBeTruthy();
+    expect(corpus.body.temas.length).toBeGreaterThan(0);
+    expect(
+      corpus.body.temas.some(
+        (t: { label: string }) => t.label === 'Frontend y experiencia',
+      ),
+    ).toBe(false);
+  });
+
+  it('crea una postulación pegando el texto, sin URL', async () => {
+    const owner = await registerAndLogin(`texto-${unique()}@test.com`);
+
+    const pegada = await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({
+        title: 'Backend Developer',
+        description:
+          'Buscamos alguien con experiencia en NestJS, PostgreSQL y Docker para APIs en producción.',
+      })
+      .expect(201);
+
+    expect(pegada.body.url).toBeNull();
+    expect(pegada.body.title).toBe('Backend Developer');
+    // El extractor local hace su trabajo con el texto pegado.
+    expect(pegada.body.tecnologias).toEqual(
+      expect.arrayContaining(['NestJS', 'PostgreSQL', 'Docker']),
+    );
+  });
+
+  it('rechaza una postulación sin URL ni texto', async () => {
+    const owner = await registerAndLogin(`vacia-${unique()}@test.com`);
+
+    await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({})
+      .expect(400);
+  });
 });

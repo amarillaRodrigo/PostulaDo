@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   ForbiddenException,
@@ -119,6 +120,14 @@ export class PostulacionesService {
   }
 
   async create(dto: CreatePostulacionDto, userId: string) {
+    // Sin URL hay que pegar el texto de la oferta: es el camino cuando el
+    // portal no se puede abrir. Con nada de las dos, no hay nada que analizar.
+    if (!dto.url && !dto.title && !dto.description) {
+      throw new BadRequestException(
+        'La oferta necesita una URL o su texto pegado.',
+      );
+    }
+
     const combinedText = `${dto.title || ''} ${dto.description || ''}`;
     const technologies = extractTechnologies(combinedText);
 
@@ -321,5 +330,34 @@ export class PostulacionesService {
       temas,
       sugerenciaAprendizaje,
     };
+  }
+
+  /**
+   * El plan sobre todo el corpus: cada oferta no archivada de la cuenta,
+   * sin importar el lote. Es la misma mecánica que un lote, con el historial
+   * completo como denominador.
+   */
+  async analisisDeCorpus(userId: string) {
+    const propias = await this.prisma.postulacion.findMany({
+      where: { userId, isArchived: false },
+      select: { id: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (propias.length === 0) {
+      return {
+        totalOfertasAnalizadas: 0,
+        ecosistema: null,
+        coberturaConjunta: 0,
+        temas: [],
+        sugerenciaAprendizaje:
+          'Tu cuenta todavía no tiene ofertas guardadas. Analizá las que te interesan y este plan se arma con todas juntas.',
+      };
+    }
+
+    return this.analisisDeLote(
+      userId,
+      propias.map((p) => p.id),
+    );
   }
 }

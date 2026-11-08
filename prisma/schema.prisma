@@ -95,7 +95,8 @@ model Lote {
 model Postulacion {
   id String @id @default(uuid())
   userId String
-  url String
+  /// Nula cuando la oferta se guardó pegando el texto, sin URL posteable
+  url String?
   title String?
   description String?
   company String?
