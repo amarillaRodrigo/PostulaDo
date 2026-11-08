@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { colorDeTema } from '@/lib/themes';
+import { RutaPlan } from '@/components/RutaPlan';
 import {
   abrirLote,
   analizarLote,
@@ -907,6 +908,8 @@ export function LoteForm() {
             </div>
           ))}
           <p className="ingest__done-suggestion">{result.sugerenciaAprendizaje}</p>
+
+          <RutaPlan ids={result.corpus ? null : sesion.ids} />
 
           <details
             className="lote-detalle"

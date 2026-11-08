@@ -33,6 +33,32 @@ export type Resultado = {
   corpus?: boolean;
 };
 
+export type FuenteRuta = {
+  titulo: string;
+  url: string;
+  tipo: 'docs' | 'tutoriales';
+};
+
+/** Un paso de la ruta: los mismos denominadores que el plan, en orden. */
+export type NodoRuta = {
+  key: string;
+  label: string;
+  summary: string;
+  piden: number;
+  cobertura: number;
+  prerequisitos: string[];
+  desbloquea: string[];
+  empiezaAca: boolean;
+  presenteEnCorpus: boolean;
+  fuentes: FuenteRuta[];
+};
+
+export type Ruta = {
+  totalOfertasAnalizadas: number;
+  ecosistema: string | null;
+  nodos: NodoRuta[];
+};
+
 export type Usuario = {
   id: string;
   email: string;
@@ -717,6 +743,25 @@ export async function abrirLote(ids: string[]): Promise<Resultado | null> {
 
     return resultado?.totalOfertasAnalizadas ? resultado : null;
   } catch {
+    return null;
+  }
+}
+
+/**
+ * La ruta de estudio del mismo denominador que el plan: `ids === null` pide
+ * la del corpus entero, igual que el plan completo. Se pide a demanda, no
+ * junto con el plan: la mayoría mira el plan y de ahí decide leer la ruta.
+ */
+export async function pedirRuta(ids: string[] | null): Promise<Ruta | null> {
+  const caminho =
+    ids && ids.length > 0
+      ? `/postulaciones/analisis-ruta?ids=${encodeURIComponent(ids.join(','))}`
+      : '/postulaciones/analisis-ruta';
+
+  try {
+    return await pedirConSesion<Ruta>(caminho);
+  } catch (e) {
+    if (e instanceof ErrorApi && e.status === 401) borrarSesion();
     return null;
   }
 }
