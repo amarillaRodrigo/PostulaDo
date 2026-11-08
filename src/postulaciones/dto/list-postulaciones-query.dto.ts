@@ -11,9 +11,10 @@ export class ListPostulacionesQueryDto {
 
   @ApiPropertyOptional({ example: false })
   @IsOptional()
-  // El query string trae "true"/"false" como texto: Boolean("false") es true,
-  // así que el cast correcto es comparar el texto, no convertir.
-  @Transform(({ value }) => value === true || value === 'true')
+  // El casteo a booleano ocurre ANTES de este callback (conversión por
+  // design:type): "false" ya entra como true. El valor crudo está en `obj`,
+  // así que la comparación de texto se hace contra él.
+  @Transform(({ key, obj }) => obj?.[key] === true || obj?.[key] === 'true')
   @IsBoolean()
   isArchived?: boolean;
 
