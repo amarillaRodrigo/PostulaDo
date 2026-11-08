@@ -13,6 +13,8 @@ const mockPrisma = {
     create: jest.fn(),
     findMany: jest.fn(),
     findUnique: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
   },
 };
 
@@ -90,6 +92,137 @@ describe('LotesService', () => {
       await expect(service.obtener('user-1', 'lote-1')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('renombrar', () => {
+    it('renombra y normaliza un nombre vacío a null', async () => {
+      mockPrisma.lote.findUnique.mockResolvedValueOnce({
+        id: 'lote-1',
+        userId: 'user-1',
+        ids: ['a'],
+      });
+      mockPrisma.lote.update.mockResolvedValueOnce({
+        id: 'lote-1',
+        nombre: null,
+      });
+
+      await service.renombrar('user-1', 'lote-1', '   ');
+
+      expect(mockPrisma.lote.update).toHaveBeenCalledWith({
+        where: { id: 'lote-1' },
+        data: { nombre: null },
+      });
+    });
+
+    it('no deja renombrar el lote de otro', async () => {
+      mockPrisma.lote.findUnique.mockResolvedValueOnce({
+        id: 'lote-1',
+        userId: 'otro',
+      });
+
+      await expect(service.renombrar('user-1', 'lote-1', 'X')).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockPrisma.lote.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('borrar', () => {
+    it('borra el lote propio', async () => {
+      mockPrisma.lote.findUnique.mockResolvedValueOnce({
+        id: 'lote-1',
+        userId: 'user-1',
+      });
+      mockPrisma.lote.delete.mockResolvedValueOnce({ id: 'lote-1' });
+
+      await expect(service.borrar('user-1', 'lote-1')).resolves.toEqual({
+        borrado: true,
+        id: 'lote-1',
+      });
+
+      expect(mockPrisma.lote.delete).toHaveBeenCalledWith({
+        where: { id: 'lote-1' },
+      });
+    });
+
+    it('no deja borrar el lote de otro', async () => {
+      mockPrisma.lote.findUnique.mockResolvedValueOnce({
+        id: 'lote-1',
+        userId: 'otro',
+      });
+
+      await expect(service.borrar('user-1', 'lote-1')).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockPrisma.lote.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('agregar', () => {
+    it('agrega al final solo las que no estaban', async () => {
+      mockPrisma.lote.findUnique.mockResolvedValueOnce({
+        id: 'lote-1',
+        userId: 'user-1',
+        ids: ['a', 'b'],
+      });
+      mockPrisma.postulacion.findMany.mockResolvedValueOnce([
+        { id: 'b' },
+        { id: 'c' },
+      ]);
+      mockPrisma.lote.update.mockResolvedValueOnce({
+        id: 'lote-1',
+        ids: ['a', 'b', 'c'],
+      });
+
+      await service.agregar('user-1', 'lote-1', ['b', 'c', 'ajena']);
+
+      expect(mockPrisma.lote.update).toHaveBeenCalledWith({
+        where: { id: 'lote-1' },
+        data: { ids: ['a', 'b', 'c'] },
+      });
+    });
+
+    it('rechaza si ninguna oferta es propia', async () => {
+      mockPrisma.lote.findUnique.mockResolvedValueOnce({
+        id: 'lote-1',
+        userId: 'user-1',
+        ids: ['a'],
+      });
+      mockPrisma.postulacion.findMany.mockResolvedValueOnce([]);
+
+      await expect(
+        service.agregar('user-1', 'lote-1', ['ajena']),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockPrisma.lote.update).not.toHaveBeenCalled();
+    });
+
+    it('devuelve el lote sin tocarlo si ya tiene esas ofertas', async () => {
+      const lote = { id: 'lote-1', userId: 'user-1', ids: ['a', 'b'] };
+      mockPrisma.lote.findUnique.mockResolvedValueOnce(lote);
+      mockPrisma.postulacion.findMany.mockResolvedValueOnce([{ id: 'a' }]);
+
+      await expect(service.agregar('user-1', 'lote-1', ['a'])).resolves.toBe(
+        lote,
+      );
+      expect(mockPrisma.lote.update).not.toHaveBeenCalled();
+    });
+
+    it('rechaza el paso que llevaría el lote por encima del tope', async () => {
+      mockPrisma.lote.findUnique.mockResolvedValueOnce({
+        id: 'lote-1',
+        userId: 'user-1',
+        ids: Array.from({ length: 49 }, (_, i) => `id-${i}`),
+      });
+      mockPrisma.postulacion.findMany.mockResolvedValueOnce([
+        { id: 'x' },
+        { id: 'y' },
+      ]);
+
+      await expect(
+        service.agregar('user-1', 'lote-1', ['x', 'y']),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockPrisma.lote.update).not.toHaveBeenCalled();
     });
   });
 });
