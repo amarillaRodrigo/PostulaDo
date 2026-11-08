@@ -322,6 +322,68 @@ export class AuthService {
     return { cerradas: count };
   }
 
+  /**
+   * Lista las sesiones abiertas de la cuenta, marcando cuál es la del
+   * dispositivo que pregunta. Es el listado del panel de cuenta: cada fila
+   * es un dispositivo con la sesión activa, sin datos inventados — solo lo
+   * que la cuenta puede saber de seguro (cuándo se abrió y cuándo vence).
+   */
+  async listarSesiones(
+    userId: string,
+    refreshToken?: string,
+  ): Promise<
+    Array<{
+      id: string;
+      esteDispositivo: boolean;
+      abierta: Date;
+      vence: Date;
+    }>
+  > {
+    const ahora = new Date();
+
+    const tokens = await this.prisma.refreshToken.findMany({
+      where: { userId, revokedAt: null, expiresAt: { gt: ahora } },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, tokenHash: true, createdAt: true, expiresAt: true },
+    });
+
+    const hashLocal = refreshToken ? this.hashToken(refreshToken) : null;
+
+    return tokens.map((t) => ({
+      id: t.id,
+      esteDispositivo: Boolean(hashLocal) && t.tokenHash === hashLocal,
+      abierta: t.createdAt,
+      vence: t.expiresAt,
+    }));
+  }
+
+  /**
+   * Cierra las sesiones abiertas en los otros dispositivos: revoca cada
+   * refresh token vivo que no sea el del dispositivo que pregunta. La
+   * sesión actual queda abierta; los access tokens viejos vencen solos.
+   */
+  async cerrarOtrasSesiones(
+    userId: string,
+    refreshToken?: string,
+  ): Promise<{ cerradas: number }> {
+    const hashLocal = refreshToken ? this.hashToken(refreshToken) : null;
+
+    if (!hashLocal) {
+      // Sin manera de saber cuál es la actual, cerrar "las otras" no se
+      // puede hacer sin cerrar también ésta: se niega.
+      throw new BadRequestException(
+        'Necesitamos el refresh token para saber qué sesión conservar.',
+      );
+    }
+
+    const { count } = await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null, NOT: { tokenHash: hashLocal } },
+      data: { revokedAt: new Date() },
+    });
+
+    return { cerradas: count };
+  }
+
   private async revocarFamilia(familyId: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
       where: { familyId, revokedAt: null },

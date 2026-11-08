@@ -69,6 +69,7 @@ describe('AuthService', () => {
     refreshToken: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       update: jest.fn(),
       updateMany: jest.fn(),
       deleteMany: jest.fn(),
@@ -720,6 +721,60 @@ describe('AuthService', () => {
       const result = await service.cerrarTodasLasSesiones(mockUser.id);
 
       expect(result).toEqual({ cerradas: 0 });
+    });
+  });
+
+  describe('sesiones', () => {
+    const hashDe = (token: string) => service['hashToken'](token);
+
+    it('marca la sesión del refresh token dado como este-este dispositivo', async () => {
+      mockPrisma.refreshToken.findMany.mockResolvedValueOnce([
+        {
+          id: 's-1',
+          tokenHash: hashDe('dispositivo-1'),
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 1000),
+        },
+        {
+          id: 's-2',
+          tokenHash: hashDe('dispositivo-2'),
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 1000),
+        },
+      ]);
+
+      const sesiones = await service.listarSesiones('user-1', 'dispositivo-1');
+
+      expect(sesiones).toHaveLength(2);
+      expect(sesiones[0]).toMatchObject({ id: 's-1', esteDispositivo: true });
+      expect(sesiones[1]).toMatchObject({ id: 's-2', esteDispositivo: false });
+    });
+
+    it('sin manera de identificar la actual, cerrar las otras se niega', async () => {
+      await expect(service.cerrarOtrasSesiones('user-1')).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockPrisma.refreshToken.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('cierra todas menos la del dispositivo que pregunta', async () => {
+      mockPrisma.refreshToken.updateMany.mockResolvedValueOnce({ count: 2 });
+
+      const result = await service.cerrarOtrasSesiones(
+        'user-1',
+        'dispositivo-1',
+      );
+
+      expect(result).toEqual({ cerradas: 2 });
+      expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            userId: 'user-1',
+            revokedAt: null,
+            NOT: { tokenHash: hashDe('dispositivo-1') },
+          }),
+        }),
+      );
     });
   });
 });

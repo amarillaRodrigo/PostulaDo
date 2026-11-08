@@ -114,4 +114,24 @@ export class AuthController {
     const userId = req.user?.sub ?? req.user?.id;
     return this.authService.cerrarTodasLasSesiones(userId);
   }
+
+  @Post('sesiones')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'List open sessions; the current device is marked' })
+  @ApiOkResponse({ description: 'Open sessions, newest first' })
+  async listarSesiones(@Body() dto: CerrarSesionDto, @Req() req: any) {
+    const userId = req.user?.sub ?? req.user?.id;
+    return this.authService.listarSesiones(userId, dto.refresh_token);
+  }
+
+  @Post('logout-otros')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: "Close every session except the caller's device" })
+  @ApiOkResponse({ description: 'Sessions closed, this device stays open' })
+  async logoutOtros(@Body() dto: CerrarSesionDto, @Req() req: any) {
+    const userId = req.user?.sub ?? req.user?.id;
+    return this.authService.cerrarOtrasSesiones(userId, dto.refresh_token);
+  }
 }

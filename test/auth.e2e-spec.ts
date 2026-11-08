@@ -186,4 +186,77 @@ describe('Integracion autenticacion y usuarios', () => {
 
     expect(response.body.message).toBeDefined();
   });
+
+  it('lista las sesiones abiertas y cierra las otras sin cerrar la actual', async () => {
+    const email = `sessions-${unique()}@test.com`;
+    const password = 'Password123!';
+
+    const register = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(createUserPayload(email, password))
+      .expect(201);
+    const token = register.body.access_token as string;
+
+    // Dos logins más representan otros dispositivos: cada uno pide su
+    // propio par de tokens.
+    const deviceA = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email, password })
+      .expect(201);
+    const deviceB = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email, password })
+      .expect(201);
+
+    const sinSesionActual = await request(app.getHttpServer())
+      .post('/auth/sesiones')
+      .set('Authorization', `Bearer ${token}`)
+      .send({})
+      .expect(201);
+    expect(sinSesionActual.body).toHaveLength(3);
+    expect(sinSesionActual.body.every((s: any) => !s.esteDispositivo)).toBe(
+      true,
+    );
+
+    const conSesionActual = await request(app.getHttpServer())
+      .post('/auth/sesiones')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ refresh_token: register.body.refresh_token })
+      .expect(201);
+    const propia = conSesionActual.body.filter((s: any) => s.esteDispositivo);
+    expect(propia).toHaveLength(1);
+
+    // Sin el token de la sesión a conservar, cerrar "las otras" se niega.
+    await request(app.getHttpServer())
+      .post('/auth/logout-otros')
+      .set('Authorization', `Bearer ${token}`)
+      .send({})
+      .expect(400);
+
+    const cerradas = await request(app.getHttpServer())
+      .post('/auth/logout-otros')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ refresh_token: register.body.refresh_token })
+      .expect(201);
+    expect(cerradas.body).toMatchObject({ cerradas: 2 });
+
+    // La sesión actual sigue viva y el resto quedó cerrado.
+    const restantes = await request(app.getHttpServer())
+      .post('/auth/sesiones')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ refresh_token: register.body.refresh_token })
+      .expect(201);
+    expect(restantes.body).toHaveLength(1);
+    expect(restantes.body[0]).toMatchObject({ esteDispositivo: true });
+
+    // Los refresh tokens de los otros dispositivos ya no renuevan.
+    await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .send({ refresh_token: deviceA.body.refresh_token })
+      .expect(401);
+    await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .send({ refresh_token: deviceB.body.refresh_token })
+      .expect(401);
+  });
 });
