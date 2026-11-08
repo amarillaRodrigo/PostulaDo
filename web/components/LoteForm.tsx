@@ -14,6 +14,8 @@ import {
   leerSesion,
   listarLotes,
   listarPostulaciones,
+  listarTodas,
+  pedirPlanCompleto,
   actualizarOferta,
   olvidePassword,
   recuperarPlan,
@@ -178,7 +180,8 @@ export function LoteForm() {
 
     // Una sesión sin ids es un lote a medio armar (o recién entrado): no hay
     // plan que recuperar, así que se muestra el formulario sin parpadeo.
-    if (guardada.ids.length === 0) return;
+    // Con el plan completo abierto, lo que se retoma es el corpus.
+    if (guardada.ids.length === 0 && !guardada.planCompleto) return;
 
     let vigente = true;
     setState({ kind: 'restoring', texto: 'Recuperando tu último lote…' });
@@ -473,6 +476,7 @@ export function LoteForm() {
       ...actual,
       ids: lote.ids,
       loteId: lote.id,
+      planCompleto: false,
     };
     guardarSesion(actualizada);
 
@@ -490,6 +494,60 @@ export function LoteForm() {
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  /**
+   * Abre el plan sobre el corpus entero: todas las ofertas no archivadas de
+   * la cuenta. No le pertenece a un lote, así que la sesión queda sin lote
+   * abierto y ningún lote se muestra como "Viendo este plan".
+   */
+  async function abrirCorpus() {
+    const guardada = leerSesion();
+    if (!guardada) {
+      setState({ kind: 'idle' });
+      return;
+    }
+
+    if (!API_CONFIGURADA) {
+      setState({ kind: 'error', message: SIN_API });
+      return;
+    }
+
+    setState({ kind: 'restoring', texto: 'Abriendo tu plan completo…' });
+
+    try {
+      const result = await pedirPlanCompleto();
+
+      if (result.totalOfertasAnalizadas === 0) {
+        setState({
+          kind: 'error',
+          message:
+            'Tu cuenta no tiene ofertas sin archivar todavía. Analizá alguna y el plan completo se abre con todas juntas.',
+        });
+        return;
+      }
+
+      const actual = leerSesion() ?? guardada;
+      const actualizada: SesionGuardada = {
+        ...actual,
+        ids: [],
+        loteId: null,
+        planCompleto: true,
+      };
+      guardarSesion(actualizada);
+
+      setState({ kind: 'done', result, sesion: actualizada, fallidas: 0 });
+
+      // Quedó abajo, en el panel: el cambio se ve volviendo al plan.
+      document
+        .querySelector('#lote')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch {
+      setState({
+        kind: 'error',
+        message: 'No pudimos abrir tu plan completo. Probá de nuevo en un rato.',
+      });
+    }
+  }
+
   /** Lee el lote de adentro la primera vez que se abre el panel. */
   async function abrirDetalle() {
     const actual = estadoRef.current;
@@ -499,7 +557,12 @@ export function LoteForm() {
     setDetalle({ estado: 'cargando' });
 
     try {
-      const ofertas = await listarPostulaciones(actual.sesion.ids);
+      // El plan completo lista todas las ofertas no archivadas; un lote,
+      // solo las del lote.
+      const ofertas = actual.result.corpus
+        ? await listarTodas()
+        : await listarPostulaciones(actual.sesion.ids);
+
       setDetalle({ estado: 'listo', ofertas, aviso: null });
     } catch {
       setDetalle({
@@ -572,6 +635,13 @@ export function LoteForm() {
     setTexto('');
     setTituloTexto('');
     setFuente('urls');
+
+    // Se va a armar otro lote: lo que se recupere al recargar no es el corpus.
+    const guardada = leerSesion();
+    if (guardada?.planCompleto) {
+      guardarSesion({ ...guardada, planCompleto: false });
+    }
+
     setAviso(null);
     setState({ kind: 'idle' });
   }
@@ -655,7 +725,8 @@ export function LoteForm() {
         <div className="ingest__head">
           <span>Tu plan</span>
           <span>
-            {result.totalOfertasAnalizadas} ofertas ·{' '}
+            {result.totalOfertasAnalizadas}{' '}
+            {result.totalOfertasAnalizadas === 1 ? 'oferta' : 'ofertas'} ·{' '}
             {result.ecosistema ?? 'sin ecosistema'}
           </span>
         </div>
@@ -663,7 +734,7 @@ export function LoteForm() {
           {fallidas > 0 ? (
             <p className="ingest__notice" role="status">
               No pudimos leer {fallidas}{' '}
-              {fallidas === 1 ? 'de las ofertas' : 'de las ofertas'} que pegaste.
+              {fallidas === 1 ? 'de la oferta' : 'de las ofertas'} que pegaste.
               El plan se calcula solo con las que sí entraron.
             </p>
           ) : null}
@@ -699,7 +770,9 @@ export function LoteForm() {
           >
             <summary>
               <span>
-                Las {result.totalOfertasAnalizadas} ofertas de este lote
+                Las {result.totalOfertasAnalizadas}{' '}
+                {result.totalOfertasAnalizadas === 1 ? 'oferta' : 'ofertas'}{' '}
+                {result.corpus ? 'de tu cuenta' : 'de este lote'}
               </span>
             </summary>
             {detalle.estado === 'cargando' ? (
@@ -781,6 +854,7 @@ export function LoteForm() {
         <CuentaPanel
           sesion={sesion}
           onAbrir={(lote) => void abrir(lote)}
+          onAbrirCorpus={() => void abrirCorpus()}
           onSalir={salir}
           onVerificado={() => {
             const guardada = leerSesion();
@@ -801,9 +875,11 @@ export function LoteForm() {
         <div className="ingest__foot">
           <span className="ingest__gets">
             <b>Quedó guardado en tu cuenta.</b>{' '}
-            {sesion.emailVerificado
-              ? 'Entrá desde cualquier dispositivo y abrí este plan.'
-              : 'Confirmá tu correo en Mi cuenta para abrirlo desde otro dispositivo.'}
+            {result.corpus
+              ? 'Este plan se recalcula con todas tus ofertas sin archivar.'
+              : sesion.emailVerificado
+                ? 'Entrá desde cualquier dispositivo y abrí este plan.'
+                : 'Confirmá tu correo en Mi cuenta para abrirlo desde otro dispositivo.'}
           </span>
           <button className="ingest__restart" type="button" onClick={otroLote}>
             Analizar otro lote

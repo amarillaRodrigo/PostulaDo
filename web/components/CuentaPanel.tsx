@@ -29,11 +29,13 @@ function fecha(iso: string): string {
 export function CuentaPanel({
   sesion,
   onAbrir,
+  onAbrirCorpus,
   onSalir,
   onVerificado,
 }: {
   sesion: SesionGuardada;
   onAbrir: (lote: LoteGuardado) => void;
+  onAbrirCorpus: () => void;
   onSalir: () => void;
   onVerificado: () => void;
 }) {
@@ -215,6 +217,25 @@ export function CuentaPanel({
               Todavía no hay lotes guardados en esta cuenta.
             </p>
           ) : null}
+
+          {/* El plan del corpus entero: mismo cálculo, denominador completo. */}
+          <div className="cuenta__lote">
+            <span className="cuenta__lote-nombre">Todas tus ofertas</span>
+            <span className="cuenta__lote-meta">
+              el plan con todo lo que quedó en pie
+            </span>
+            {sesion.planCompleto ? (
+              <span className="cuenta__lote-abierto">Viendo este plan</span>
+            ) : (
+              <button
+                type="button"
+                className="cuenta__action"
+                onClick={onAbrirCorpus}
+              >
+                Abrir plan
+              </button>
+            )}
+          </div>
 
           {lotes?.map((lote) => {
             // El plan que ya está a la vista no se reabre: "Abrir plan" sobre

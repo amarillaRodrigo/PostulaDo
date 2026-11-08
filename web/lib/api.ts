@@ -29,6 +29,8 @@ export type Resultado = {
   coberturaConjunta: number;
   temas: Tema[];
   sugerenciaAprendizaje: string;
+  /** `true` cuando el plan se armo con el corpus entero, no con un lote. */
+  corpus?: boolean;
 };
 
 export type Usuario = {
@@ -82,6 +84,8 @@ export type SesionGuardada = {
   emailVerificado: boolean;
   ids: string[];
   loteId: string | null;
+  /** `true` cuando lo que restablece la recarga es el plan completo. */
+  planCompleto?: boolean;
 };
 
 const CLAVE_SESION = 'postulado.sesion';
@@ -526,6 +530,38 @@ export async function actualizarOferta(
   }
 }
 
+/**
+ * Las ofertas no archivadas de la cuenta, para el plan completo: ahí el
+ * denominador es todo lo que quedó en pie, no solo un lote.
+ */
+export async function listarTodas(): Promise<OfertaResumen[]> {
+  const todas: OfertaResumen[] = [];
+
+  for (let page = 1; page <= 10; page += 1) {
+    const pagina = await pedirConSesion<OfertaResumen[]>(
+      `/postulaciones?limit=100&page=${page}&isArchived=false`,
+    );
+
+    todas.push(...pagina);
+
+    if (pagina.length < 100) break;
+  }
+
+  return todas;
+}
+
+/**
+ * El plan sobre el corpus entero: la propia API ya devuelve el análisis de
+ * todas las ofertas no archivadas cuando no se le pasan ids.
+ */
+export async function pedirPlanCompleto(): Promise<Resultado> {
+  const resultado = await pedirConSesion<Resultado>(
+    '/postulaciones/analisis-lote',
+  );
+
+  return { ...resultado, corpus: true };
+}
+
 /** Plan de un lote ya guardado en la cuenta. */
 export async function abrirLote(ids: string[]): Promise<Resultado | null> {
   if (ids.length === 0) return null;
@@ -552,6 +588,9 @@ export async function abrirLote(ids: string[]): Promise<Resultado | null> {
 export async function recuperarPlan(): Promise<Resultado | null> {
   const sesion = leerSesion();
   if (!sesion || !API_CONFIGURADA) return null;
+
+  // El plan completo se recalcula con el corpus entero, sin ids.
+  if (sesion.planCompleto) return pedirPlanCompleto();
 
   // Una sesión sin ids es un lote a medio armar: no hay plan que recuperar.
   if (sesion.ids.length === 0) return null;
@@ -644,6 +683,7 @@ export async function crearDesdeTexto(
       ...actual,
       ids: [guardada.id],
       loteId,
+      planCompleto: false,
     };
     guardarSesion(actualizada);
 
@@ -751,7 +791,12 @@ export async function analizarLote(
 
   // Se relee por si el refresh cambió los tokens durante el análisis.
   const actual = leerSesion() ?? sesion;
-  const actualizada: SesionGuardada = { ...actual, ids: guardados, loteId };
+  const actualizada: SesionGuardada = {
+    ...actual,
+    ids: guardados,
+    loteId,
+    planCompleto: false,
+  };
   guardarSesion(actualizada);
 
   return {
