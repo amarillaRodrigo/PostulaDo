@@ -39,6 +39,16 @@ export type FuenteRuta = {
   tipo: 'docs' | 'tutoriales';
 };
 
+/**
+ * El qué construir del tema: un entregable concreto, los pasos en orden y la
+ * carga estimada. Sale de contenido curado en el repo, igual que la ruta.
+ */
+export type PlanRuta = {
+  objetivo: string;
+  pasos: string[];
+  horas: number;
+};
+
 /** Un paso de la ruta: los mismos denominadores que el plan, en orden. */
 export type NodoRuta = {
   key: string;
@@ -51,6 +61,7 @@ export type NodoRuta = {
   empiezaAca: boolean;
   presenteEnCorpus: boolean;
   fuentes: FuenteRuta[];
+  plan: PlanRuta;
 };
 
 export type Ruta = {

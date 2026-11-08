@@ -861,6 +861,117 @@ input {
   color: var(--ink-soft);
 }
 
+/* EL PLAN DEL NODO: el entregable y los pasos chequeables. La prioridad
+   visual está toda en el paso siguiente: el resto queda abajo, apagado. */
+.ruta__plan {
+  margin-top: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--paper, #fff);
+}
+
+.ruta__plan-objetivo {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.ruta__plan-titulo {
+  font-weight: 600;
+}
+
+.ruta__plan-horas {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.ruta__pasos {
+  list-style: none;
+  margin: 7px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.ruta__paso-boton {
+  width: 100%;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 3px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.ruta__paso-boton:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.ruta__paso-marca {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  font-size: 9.5px;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+
+/* La próxima acción es el único paso con energía: caja y color digeribles. */
+.ruta__paso.is-proximo .ruta__paso-boton {
+  background: var(--band);
+  color: var(--ink);
+}
+
+.ruta__paso.is-proximo .ruta__paso-marca {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.ruta__paso-siguiente {
+  font-weight: 700;
+}
+
+.ruta__paso.is-hecho .ruta__paso-texto {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
+
+.ruta__paso.is-hecho .ruta__paso-marca {
+  border-color: var(--band);
+  background: var(--band);
+}
+
+.ruta__fuentes-desplegable {
+  margin-top: 6px;
+}
+
+.ruta__fuentes-desplegable > summary {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.ruta__fuentes-desplegable > summary:hover {
+  color: var(--ink);
+}
+
+.ruta__fuentes-desplegable .ruta__fuentes {
+  margin: 5px 0 0 0;
+}
+
 /* El plan granulariza; acá queda el denominador con nombre y apellido:
    qué ofertas lo forman y qué detectó el extractor en cada una. */
 .lote-detalle {

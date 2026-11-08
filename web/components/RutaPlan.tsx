@@ -33,8 +33,16 @@ const SIGUIENTE: Record<ProgresoNodo, ProgresoNodo> = {
 };
 
 const CLAVE_PROGRESO = 'postulado.ruta-progreso';
+const CLAVE_PASOS = 'postulado.ruta-pasos';
 
 type Progreso = Record<string, ProgresoNodo>;
+
+/**
+ * El avance de los pasos del plan, por nodo: guardar los índices hechos es
+ * simple y tolera que el plan crezca (los índices viejos siguen siendo viejos,
+ * los nuevos aparecen sin marcar).
+ */
+type PasosHechos = Record<string, number[]>;
 
 function leerProgreso(): Progreso {
   try {
@@ -54,6 +62,23 @@ function leerProgreso(): Progreso {
   }
 }
 
+function leerPasosHechos(): PasosHechos {
+  try {
+    const crudo = localStorage.getItem(CLAVE_PASOS);
+    if (!crudo) return {};
+
+    const objeto = JSON.parse(crudo) as PasosHechos;
+    // Solo listas de números: lo demás es historia vieja o ruido.
+    return Object.fromEntries(
+      Object.entries(objeto).filter(
+        ([, v]) => Array.isArray(v) && v.every((x) => typeof x === 'number'),
+      ),
+    ) as PasosHechos;
+  } catch {
+    return {};
+  }
+}
+
 /**
  * `ids === null` pregunta la ruta del corpus entero; con ids, la del lote
  * abierto. Es la convención exacta del plan.
@@ -62,8 +87,12 @@ export function RutaPlan({ ids }: { ids: string[] | null }) {
   const [ruta, setRuta] = useState<Ruta | null>(null);
   const [falla, setFalla] = useState(false);
   const [progreso, setProgreso] = useState<Progreso>({});
+  const [pasos, setPasos] = useState<PasosHechos>({});
 
-  useEffect(() => setProgreso(leerProgreso()), []);
+  useEffect(() => {
+    setProgreso(leerProgreso());
+    setPasos(leerPasosHechos());
+  }, []);
 
   function siguienteNodo(key: string) {
     const pro = progreso[key] ?? 'pendiente';
@@ -72,6 +101,24 @@ export function RutaPlan({ ids }: { ids: string[] | null }) {
     setProgreso(nuevo);
     localStorage.setItem(CLAVE_PROGRESO, JSON.stringify(nuevo));
   }
+
+  function alternarPaso(key: string, index: number) {
+    const hechos = new Set(pasos[key] ?? []);
+    if (hechos.has(index)) hechos.delete(index);
+    else hechos.add(index);
+
+    const nuevo = { ...pasos, [key]: [...hechos].sort((a, b) => a - b) };
+    setPasos(nuevo);
+    localStorage.setItem(CLAVE_PASOS, JSON.stringify(nuevo));
+  }
+
+  /** El primer paso sin hacer: la única acción priorizada del nodo. */
+  const proximoPaso = (key: string): number => {
+    const hechos = new Set(pasos[key] ?? []);
+    const total = ruta?.nodos.find((n) => n.key === key)?.plan.pasos.length ?? 0;
+    for (let i = 0; i < total; i++) if (!hechos.has(i)) return i;
+    return -1;
+  };
 
   // La ruta se pide solo la primera vez que se abre: después queda viva
   // hasta que la pestaña se recargue (igual que el detalle del lote).
@@ -197,6 +244,55 @@ export function RutaPlan({ ids }: { ids: string[] | null }) {
                       {nodo.summary}
                     </div>
 
+                    <div className="ruta__plan">
+                      <div className="ruta__plan-objetivo">
+                        <span className="ruta__plan-titulo">El entregable:</span>{' '}
+                        {nodo.plan.objetivo}{' '}
+                        <span className="ruta__plan-horas">
+                          ≈ {nodo.plan.horas} h en total
+                        </span>
+                      </div>
+
+                      <ol className="ruta__pasos">
+                        {nodo.plan.pasos.map((paso, index) => {
+                          const hecho =
+                            (pasos[nodo.key] ?? []).includes(index);
+                          const esProximo = proximoPaso(nodo.key) === index;
+
+                          return (
+                            <li
+                              key={index}
+                              className={`ruta__paso${hecho ? ' is-hecho' : ''}${
+                                esProximo ? ' is-proximo' : ''
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                className="ruta__paso-boton"
+                                aria-pressed={hecho}
+                                aria-label={`Paso ${index + 1} de ${nodo.label}${
+                                  hecho ? ': hecho.' : ': péndiente.'
+                                }`}
+                                onClick={() => alternarPaso(nodo.key, index)}
+                              >
+                                <span className="ruta__paso-marca" aria-hidden="true">
+                                  {hecho ? '✓' : String(index + 1)}
+                                </span>
+                                <span className="ruta__paso-texto">
+                                  {esProximo && !hecho ? (
+                                    <strong className="ruta__paso-siguiente">
+                                      Tu próxima acción:{' '}
+                                    </strong>
+                                  ) : null}
+                                  {paso}
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </div>
+
                     {nodo.prerequisitos.length > 0 ? (
                       <div className="ruta__relacion">
                         Conviene antes:{' '}
@@ -218,16 +314,19 @@ export function RutaPlan({ ids }: { ids: string[] | null }) {
                       </div>
                     ) : null}
 
-                    <ul className="ruta__fuentes">
-                      {nodo.fuentes.map((f) => (
-                        <li key={f.url}>
-                          <a href={f.url} target="_blank" rel="noreferrer">
-                            {f.titulo}
-                          </a>
-                          <span className="ruta__tipo"> · {f.tipo}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <details className="ruta__fuentes-desplegable">
+                      <summary>Dónde leer (docs de las alternativas)</summary>
+                      <ul className="ruta__fuentes">
+                        {nodo.fuentes.map((f) => (
+                          <li key={f.url}>
+                            <a href={f.url} target="_blank" rel="noreferrer">
+                              {f.titulo}
+                            </a>
+                            <span className="ruta__tipo"> · {f.tipo}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
                   </div>
                 </li>
               );
