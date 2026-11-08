@@ -319,9 +319,12 @@ export class PostulacionesService {
         ? 'Este tema'
         : `Estos ${principales.length} temas`;
 
+    const cantidadOfertas =
+      total === 1 ? 'la 1 oferta del lote' : `las ${total} ofertas del lote`;
+
     const sugerenciaAprendizaje = principales.length
-      ? `${sujeto} ${verbo} el ${coberturaConjunta}% de las ${total} ofertas del lote. Empezá por el tema ${primero.label} y entrá por ${alternativas}, según lo que ya tengas a mano.`
-      : `Este lote pide ${temas.length} oficios distintos y ninguno domina. Revisá las ${total} ofertas y elegí el tipo de trabajo que más te interese antes de armar un plan.`;
+      ? `${sujeto} ${verbo} el ${coberturaConjunta}% de ${cantidadOfertas}. Empezá por el tema ${primero.label} y entrá por ${alternativas}, según lo que ya tengas a mano.`
+      : `Este lote pide ${temas.length} oficios distintos y ninguno domina. Revisá ${total === 1 ? 'la oferta' : `las ${total} ofertas`} y elegí el tipo de trabajo que más te interese antes de armar un plan.`;
 
     return {
       totalOfertasAnalizadas: total,
