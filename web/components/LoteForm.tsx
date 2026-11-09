@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { colorDeTema } from '@/lib/themes';
 import { RutaPlan } from '@/components/RutaPlan';
 import {
   abrirLote,
@@ -888,25 +887,9 @@ export function LoteForm() {
             </p>
           ) : null}
 
-          {result.temas.map((tema) => (
-            <div key={tema.key} className="cov">
-              <div>
-                <div className="cov__label">{tema.label}</div>
-                <div className="bar">
-                  <i
-                    style={{
-                      width: `${tema.porcentaje}%`,
-                      background: colorDeTema(tema.key),
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="cov__pct">{tema.porcentaje}%</div>
-              <div className="cov__alt">
-                {tema.alternativas.slice(0, 2).join(' · ')}
-              </div>
-            </div>
-          ))}
+          {/* LA LISTA ES LA RUTA: el panel no repite los temas en otra tabla.
+              Abajo, la ruta con su barra, su orden de estudio y su línea
+              guía. Acá sólo queda la evidencia del lote. */}
           <p className="ingest__done-suggestion">{result.sugerenciaAprendizaje}</p>
 
           <RutaPlan ids={result.corpus ? null : sesion.ids} />

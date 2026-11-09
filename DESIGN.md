@@ -257,6 +257,17 @@ SVG de 1240×250: un haz blanco entra por la izquierda, un triángulo lo dispers
 ### El Botón-Cáustica (signature)
 Placa de tinta, `::after` con un gradiente espectral de 2px en el canto inferior y `::before` con el mismo gradiente desenfocado 11px que se derrama por debajo, respirando a 7s.
 
+### La Ruta (el plan del oficio)
+`components/RutaPlan.tsx`: la lista de temas del corpus en **orden de estudio** (el que desbloquea a lo demás va primero), no por porcentaje. Es la única lista: la tabla de cobertura que la acompañaba quedó eliminada, porque dos listas de los mismos temas en dos órdenes dan dos respuestas distintas para la misma pregunta.
+
+- **La fila:** número en mono, título a 15px/700, la barra de cobertura con el color del tema (la misma pista que la grilla de la landing) y el porcentaje en mono con su denominador al lado (`100% · 10/10`). La barra y los porcentajes caen en columna: los ocho temas se comparan de un vistazo.
+- **La línea guía:** una sola frase arriba de la lista —"Empezá por **Backend y APIs** — aparece en 10 de tus 10 ofertas."— en 16.5px de tinta, sin caja. Nombra un nodo y sólo uno; el que queda de título lo lleva la fila.
+- **La raíz es una sola:** el grafo puede tener más de una raíz —frontend no necesita backend para practicar frontend—, pero "Empezá acá" señala únicamente la primera del orden de estudio. El rótulo es un label (700, 12px, .12em, versalitas) en `--accent-ink` con filete de 1px, no una pastilla.
+- **El encabezado:** el progreso global con su denominador y la carga de la ruta, en mono —"3 de 8 temas · 11 de 37 pasos · 34 h restantes" y "91 h en total"—. Es la respuesta a "dónde estoy": un número sin el total al lado no dice nada.
+- **La numeración es de la ruta, no del nodo:** los pasos se cuentan a lo largo de todo el camino (7, 8, 9…), nunca se reinician en cada tema. El nodo dice su tramo —"Pasos 7–12 de 37"— y el paso, su número de ruta.
+- **La dependencia arriba:** "Necesita: Backend y APIs" abre el nodo, antes de leer un solo paso. "Te prepara para" es del futuro y baja a meta: un segundo nivel, sin tinta llena.
+- **El dato:** mono con cifras tabulares en las dos superficies (la ruta y el ejemplo del shotcard), nunca sans. Un porcentaje sin su denominador no significa nada.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -269,6 +280,7 @@ Placa de tinta, `::after` con un gradiente espectral de 2px en el canto inferior
 - **Do** derivá el número de tecnologías del extractor real, no de un número escrito a mano.
 
 ### Don't:
+- **Don't** muestres los mismos temas en dos listas con dos órdenes distintos: si la ruta es la lista, no hay tabla al lado.
 - **Don't** pongas un eyebrow, un kicker o una etiqueta encima de un titular.
 - **Don't** uses texto con gradiente: el énfasis viene del peso o del tamaño.
 - **Don't** uses una franja de color de más de 1px en el borde de una tarjeta.

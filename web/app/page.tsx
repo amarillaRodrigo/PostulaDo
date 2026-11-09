@@ -7,7 +7,9 @@ import {
   colorDeTema,
   EXAMPLE_COBERTURA_CONJUNTA,
   EXAMPLE_ECOSYSTEM,
+  EXAMPLE_EMPIEZA_POR,
   EXAMPLE_LOTE,
+  EXAMPLE_RUTA,
   EXAMPLE_THEMES,
   temasPrincipales,
 } from '@/lib/themes';
@@ -67,6 +69,9 @@ const FAQ = [
 ];
 
 const PRINCIPALES = temasPrincipales(EXAMPLE_THEMES, EXAMPLE_LOTE);
+
+/** El nodo por el que arranca la ruta de ejemplo: el primero de la lista. */
+const EMPIEZA = EXAMPLE_THEMES.find((t) => t.key === EXAMPLE_EMPIEZA_POR);
 
 export default function Page() {
   return (
@@ -133,29 +138,50 @@ export default function Page() {
                 <span>Brechas</span>
               </div>
               <div className="shotcard__main">
-                <p className="shotcard__title">Plan de estudio</p>
+                <p className="shotcard__title">La ruta, en orden de estudio</p>
                 <p className="shotcard__meta">
                   Ejemplo · lote de {EXAMPLE_LOTE} ofertas · {EXAMPLE_ECOSYSTEM}
                 </p>
-                {EXAMPLE_THEMES.map((row) => (
-                  <div key={row.key} className="cov">
-                    <div>
-                      <div className="cov__label">{row.label}</div>
-                      <div className="bar">
-                        <i
-                          style={{
-                            width: `${row.porcentaje}%`,
-                            background: colorDeTema(row.key),
-                          }}
-                        />
+                <p className="shotcard__guia">
+                  Empezá por <strong>{EMPIEZA?.label}</strong> — aparece en{' '}
+                  <span className="dato">
+                    {EMPIEZA?.cobertura} de tus {EXAMPLE_LOTE}
+                  </span>{' '}
+                  ofertas.
+                </p>
+                {EXAMPLE_RUTA.map((key, i) => {
+                  const row = EXAMPLE_THEMES.find((t) => t.key === key);
+                  if (!row) return null;
+
+                  return (
+                    <div key={row.key} className="cov">
+                      <div>
+                        <div className="cov__label">
+                          <span className="cov__num">{String(i + 1).padStart(2, '0')}</span>
+                          {row.label}
+                        </div>
+                        <div className="bar">
+                          <i
+                            style={{
+                              width: `${row.porcentaje}%`,
+                              background: colorDeTema(row.key),
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="cov__pct">
+                        {row.porcentaje}%
+                        <span className="cov__denom">
+                          {' '}
+                          · {row.cobertura}/{EXAMPLE_LOTE}
+                        </span>
+                      </div>
+                      <div className="cov__alt">
+                        {row.alternativas.slice(0, 2).join(' · ')}
                       </div>
                     </div>
-                    <div className="cov__pct">{row.porcentaje}%</div>
-                    <div className="cov__alt">
-                      {row.alternativas.slice(0, 2).join(' · ')}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

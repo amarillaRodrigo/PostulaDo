@@ -62,6 +62,23 @@ export const EXAMPLE_LOTE = 5;
 export const EXAMPLE_ECOSYSTEM = 'Cloud Engineering';
 export const EXAMPLE_COBERTURA_CONJUNTA = 100;
 
+/**
+ * LA RUTA DEL LOTE DE EJEMPLO: los mismos temas, pero en ORDEN DE ESTUDIO
+ * y no por porcentaje. Es el mismo orden que devuelve el backend para ese
+ * corpus (el que desbloquea a lo demás va primero), y el mismo que muestra
+ * el panel: una sola lista, un solo orden.
+ */
+export const EXAMPLE_RUTA = [
+  'backend',
+  'containers',
+  'testing',
+  'ci',
+  'cloud',
+] as const;
+
+/** El tema por el que arranca la ruta de ejemplo: la primera raíz. */
+export const EXAMPLE_EMPIEZA_POR = 'backend';
+
 export const EXAMPLE_THEMES: ThemeRow[] = [
   {
     key: 'testing',

@@ -14,6 +14,10 @@
   --ink-soft: #61656b;
   --ink-faint: #8c8e92;
   --ink-deep: #16181a;
+  /* Un peldaño más de tinta que --ink-soft, para lo que tiene que seguir
+     leyéndose sinopsis: 8:1 sobre papel y 5.8:1 sobre la banda salvia. Es un
+     color propio, no un opacity: opacificar --ink-soft lo bajaba a 2.56:1. */
+  --ink-apagado: #4d5155;
 
   /* La lente: el ground óptico del hero */
   --lens-1: #c9c2b2;
@@ -55,12 +59,15 @@
   --card: #ffffff;
   --radius: 14px;
   --radius-sm: 10px;
-  --shadow-sm: 0 1px 2px rgba(22, 24, 26, 0.04), 0 8px 24px rgba(22, 24, 26, 0.06);
+  --shadow-sm:
+    0 1px 2px rgba(22, 24, 26, 0.04), 0 8px 24px rgba(22, 24, 26, 0.06);
   --shadow-lg: 0 18px 48px rgba(22, 24, 26, 0.12);
   --shadow-hero: 0 24px 60px rgba(0, 0, 0, 0.35);
 
-  --font-sans: var(--font-geist), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --font-sans:
+    var(--font-geist), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:
+    ui-monospace, 'Cascadia Mono', Consolas, 'Courier New', monospace;
 
   --page: min(1180px, 100% - 4rem);
 }
@@ -119,6 +126,14 @@ a {
   outline: 2px solid var(--sp-1);
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+/* UN DATO DENTRO DE UNA FRASE: mono con cifras tabulares. La regla del
+   sistema (DESIGN.md:181) dice que un porcentaje, una medida o un conteo van
+   en mono; la frase que los surrounds va en Geist. */
+.dato {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .wrap {
@@ -245,7 +260,10 @@ input {
   line-height: 1.2;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .btn--ghost {
@@ -275,7 +293,7 @@ input {
 }
 
 .btn--caustic::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 12px;
   right: 12px;
@@ -291,7 +309,7 @@ input {
 }
 
 .btn--caustic::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 12px;
   right: 12px;
@@ -336,7 +354,11 @@ input {
     linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
   background-size: 76px 76px;
-  -webkit-mask-image: radial-gradient(90% 70% at 50% 40%, #000, transparent 78%);
+  -webkit-mask-image: radial-gradient(
+    90% 70% at 50% 40%,
+    #000,
+    transparent 78%
+  );
   mask-image: radial-gradient(90% 70% at 50% 40%, #000, transparent 78%);
 }
 
@@ -392,8 +414,20 @@ input {
   filter: blur(18px) saturate(0.7);
   opacity: 0.3;
   mix-blend-mode: screen;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 70%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 26%,
+    #000 70%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 26%,
+    #000 70%,
+    transparent 100%
+  );
 }
 
 .beam__bloom {
@@ -407,8 +441,20 @@ input {
   filter: blur(54px) saturate(0.5);
   opacity: 0.17;
   mix-blend-mode: screen;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 30%, #000 66%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 30%, #000 66%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 30%,
+    #000 66%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 30%,
+    #000 66%,
+    transparent 100%
+  );
 }
 
 .beam__core {
@@ -482,7 +528,7 @@ input {
 }
 
 .hero__word::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0.02em;
   right: 0.02em;
@@ -512,10 +558,13 @@ input {
 /* ============================ EL CAMPO DE OFERTAS ============================ */
 
 .ingest {
+  /* La superficie del panel. La ruta vive acá: el halo del punto del nodo se
+     recorta contra ESTE color, no contra el blanco de una tarjeta. */
+  --panel-fondo: rgba(255, 255, 255, 0.96);
   margin: 32px auto 0;
   max-width: 720px;
   text-align: left;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--panel-fondo);
   color: var(--ink);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: var(--radius);
@@ -655,57 +704,131 @@ input {
 
 /* LA RUTA DEL OFICIO: el flujo vertical. El columnero izquierdo conecta los
    pasos (la línea es el prerequisito), el punto toma el color del tema y el
-   estado del nodo vive a mano derecha, como en un cuaderno de estudio. */
+   estado del nodo vive a mano derecha, como en un cuaderno de estudio.
+   En reposo son ocho filas de una línea: la ruta se lee de un vistazo y
+   entra en una pantalla. */
 .ruta {
   margin-top: 14px;
   padding-top: 2px;
   border-top: 1px solid var(--rule);
 }
 
-.ruta summary {
+/* El pliegue de la sección: sólo su propio resumen. Los resúmenes de los
+   nodos y el de "Dónde leer" tienen reglas propias. */
+.ruta > summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   padding: 11px 2px;
   cursor: pointer;
   list-style: none;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--ink);
 }
 
-.ruta summary::-webkit-details-marker {
+.ruta__titulo {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.ruta > summary::-webkit-details-marker {
   display: none;
 }
 
-.ruta summary::after {
-  content: '+';
-  flex-shrink: 0;
-  font-weight: 600;
+/* El indicador es un chevron dibujado: apunta a la derecha en reposo y gira
+   cuando la sección está abierta. */
+.ruta__chevron {
+  flex: none;
+  width: 13px;
+  height: 13px;
   color: var(--ink-soft);
+  transition: transform 160ms ease;
 }
 
-.ruta[open] summary::after {
-  content: '–';
+.ruta[open] > summary .ruta__chevron {
+  transform: rotate(90deg);
+}
+
+/* LOS DATOS DEL ENCABEZADO: el progreso global con su denominador y la
+   carga de la ruta entera. Los dos son datos: mono con cifras tabulares.
+   El grupo se alinea a la derecha y el chevron queda al borde. */
+.ruta__datos {
+  margin-left: auto;
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 14px;
 }
 
 .ruta__progreso {
+  /* Puede encogerse y partirse: en un teléfono la línea de datos es más
+     ancha que el panel y no puede empujar la página. */
+  flex: 0 1 auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-weight: 500;
-  font-size: 11.5px;
-  color: var(--ink-soft);
-}
-
-.ruta__aviso {
-  padding: 2px 2px 12px;
   font-size: 12.5px;
   color: var(--ink-soft);
 }
 
+/* La carga de la ruta entera: la suma de los ocho planes. Es el
+   denominador de las horas que quedan, así que va al lado. */
+.ruta__carga {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.ruta__aviso {
+  padding: 2px 2px 12px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
 .ruta__nota {
-  margin: 0 0 12px;
-  font-size: 11.5px;
+  margin: 0 0 6px;
+  font-size: 13.5px;
   line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* LA LÍNEA GUÍA: la respuesta, arriba de la lista. Sin caja y sin fondo —es
+   una frase, no un panel— y en tinta entera: 16.5px para que se lea de un
+   vistazo. Nombra un solo nodo, el primero que falta. */
+.ruta__guia {
+  margin: 0 0 10px;
+  font-size: 16.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.ruta__guia strong {
+  font-weight: 700;
+}
+
+/* La cifra de la línea guía no compite con la frase: un peldaño más abajo,
+   con la misma línea base. */
+.ruta__guia .dato {
+  font-size: 14.5px;
+}
+
+/* La verdad del progreso: es del navegador, no de la cuenta. Una línea, sin
+   prometer sincronización que todavía no existe. */
+.ruta__local {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
   color: var(--ink-soft);
 }
 
@@ -713,134 +836,466 @@ input {
   list-style: none;
   margin: 0;
   padding: 0 0 12px;
-  /* La columna es la línea de conexión: cada nodo cuelga del anterior. */
+  /* La columna es el grafo: las aristas se dibujan en la canaleta izquierda. */
   position: relative;
 }
 
-.ruta__lista::before {
-  content: '';
+.ruta__grafo-marco {
+  position: relative;
+}
+
+/* El grafo: un SVG decorativo que une el punto del prerrequisito con el del
+   dependiente. La tinta es neutra a propósito — el espectro no entra acá. */
+.ruta__grafo {
   position: absolute;
-  top: 14px;
-  bottom: 14px;
-  left: 5px;
-  width: 2px;
-  background: var(--rule);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ruta__grafo path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.34;
+  vector-effect: non-scaling-stroke;
 }
 
 .ruta__nodo {
   position: relative;
-  padding: 0 0 14px 20px;
+  z-index: 1;
+  padding: 0 0 8px 32px;
 }
 
 .ruta__nodo:last-child {
-  padding-bottom: 2px;
+  padding-bottom: 0;
 }
 
+/* El punto del tema: un anillo hueco. El estado lo llena, lo vuelve diamante
+   o lo deja punteado. Ya NO lleva el color del tema: el punto es el nodo de
+   proceso de la ruta y el color del tema vive en el swatch junto a su
+   porcentaje. El halo es el color real de la superficie donde vive la lista
+   —el panel— para que el conector pase por detrás sin pegarse al punto. */
 .ruta__punto {
   position: absolute;
-  top: 4px;
-  left: 0;
-  width: 12px;
-  height: 12px;
+  top: 13px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink);
   border-radius: 50%;
-  outline: 3px solid var(--card, var(--bg, #fff));
-  outline-offset: -1px;
-  /* Por encima de la línea de conexión. */
-  z-index: 1;
+  background: var(--panel-fondo, var(--paper));
+  box-shadow: 0 0 0 3px var(--panel-fondo, var(--paper));
+  z-index: 2;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
 }
 
+/* El nodo al que le toca: el punto cambia de forma (diamante) y su borde pasa
+   a terracota —el acento de marca sí marca el nodo de proceso que toca—.
+   No es una pastilla ni una franja: es el mismo punto, con otra geometría. */
+.ruta__nodo.is-raiz .ruta__punto {
+  border-color: var(--accent);
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+/* El tema que estás estudiando: punto lleno con un anillo de tinta y la fila
+   con más peso. Se reconoce sin hover y sin depender sólo del color. */
+.ruta__nodo.is-curso .ruta__punto {
+  background: var(--ink);
+  border-color: var(--ink);
+  box-shadow:
+    0 0 0 3px var(--panel-fondo, var(--paper)),
+    0 0 0 5px var(--ink);
+}
+
+.ruta__nodo.is-curso .ruta__caja {
+  border-color: var(--ink);
+}
+
+/* Lo completado: punto lleno y el texto baja de contraste. No se esconde:
+   sigue siendo parte de la ruta y se puede deshacer. */
+.ruta__nodo.is-lista .ruta__punto {
+  background: var(--ink-faint);
+  border-color: var(--ink-faint);
+}
+
+/* Lo que no pide el mercado: el punto se vuelve punteado y el rótulo lo dice
+   con palabras. Es apoyo para llegar a otro tema, no una exigencia del lote. */
+.ruta__nodo.is-ghost .ruta__punto {
+  border-style: dashed;
+}
+
+/* El nodo de apoyo se apaga con un color propio, no con un opacity: el
+   porcentaje sigue siendo un dato y tiene que llegar a 4.5:1. */
+.ruta__nodo.is-ghost .ruta__cobertura {
+  color: var(--ink-apagado);
+}
+
+.ruta__nodo.is-ghost .ruta__denom {
+  color: var(--ink-apagado);
+}
+
+/* LA CAJA DEL NODO: en reposo una fila, abierta el plan entero. */
 .ruta__caja {
-  padding: 8px 10px 10px;
   border: 1px solid var(--rule);
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--radius-sm);
 }
 
-.ruta__caja-top {
+/* LA FILA: número, título, cobertura y estado. Una sola línea por tema. */
+.ruta__fila {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
+  padding: 10px 11px;
+  cursor: pointer;
+  list-style: none;
+  border-radius: 9px;
 }
 
-.ruta__label {
+.ruta__fila::-webkit-details-marker {
+  display: none;
+}
+
+/* El chevron del nodo gira con SU pliegue —no con el de la sección— y queda
+   a 14px, pegado a la fila. */
+.ruta__caja > summary .ruta__chevron {
+  width: 14px;
+  height: 14px;
+}
+
+.ruta__caja[open] > summary .ruta__chevron {
+  transform: rotate(90deg);
+}
+
+/* EL NÚMERO DEL NODO ES UN NÚMERO DE PROCESO: terracota de texto (--accent-ink,
+   que es la versión legible sobre papel) y mono tabular. Es la numeración de
+   la ruta —01, 02…—, no un dato de cobertura. */
+.ruta__numero {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
   font-weight: 600;
-  font-size: 13px;
+  color: var(--accent-ink, #a83c18);
+}
+
+/* LA ETIQUETA DEL NODO: el título, las marcas que lo acompañan y la barra
+   de cobertura. Es una celda que crece: así la columna de títulos y la de
+   barras quedan alineadas en los ocho nodos y se comparan de un vistazo. */
+.ruta__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 10px;
+  row-gap: 6px;
+}
+
+/* El título del nodo es un título: 15px y 700. Es lo que se lee de un vistazo
+   en la lista de ocho temas. */
+.ruta__nombre {
+  min-width: 0;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
   color: var(--ink);
 }
 
+/* LA BARRA DE COBERTURA: la misma pista de la grilla de la landing, con el
+   color del tema. Ocupa el ancho de la celda del título: las ocho barras
+   forman una columna. */
+.ruta__barra {
+  order: 2;
+  flex: 0 0 100%;
+  width: 100%;
+  /* Un tope: en un panel muy ancho la barra dejaría de ser una medida y
+     pasaría a ser una regla. */
+  max-width: 320px;
+  height: 6px;
+  margin-top: 0;
+}
+
+/* EL NODO ABIERTO: pesa más con un borde más presente, no con una banda de
+   color. La salvia es de una sola cosa en este panel —la acción que toca— y
+   un nodo abierto con la misma banda marcaría dos cosas a la vez. Sin
+   sombra y sin franja: el nodo se abre, y el chevron gira. */
+.ruta__caja[open] {
+  border-color: var(--ink-faint);
+}
+
+/* "EMPEZÁ ACÁ" ES UN LABEL, NO UNA PASTILLA: la tipografía de etiqueta de
+   DESIGN.md:174 y un filete de 1px que le da cuerpo, sin fondo ni radio. El
+   terracota es de la acción que toca; el filete la separa del título sin
+   convertirla en un botón. */
 .ruta__badge {
   flex-shrink: 0;
-  font-size: 10.5px;
-  font-weight: 600;
-  padding: 1px 6px;
-  border-radius: 99px;
-  color: var(--accent-ink, #000);
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--accent-ink, #a83c18);
 }
 
+/* La etiqueta de apoyo: texto, no pastilla. Dice por qué el tema está en la
+   ruta aunque el mercado no lo pida. */
+.ruta__apoyo {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* La cobertura es un dato: mono con cifras tabulares, y tinta entera para
+   que se lea contra el papel y contra la banda salvia. Ancho fijo: así los
+   porcentajes y las barras de los ocho nodos caen en la misma columna y se
+   comparan de un vistazo. */
 .ruta__cobertura {
-  margin-left: auto;
   flex-shrink: 0;
-  font-size: 11.5px;
+  /* 92px de dato + el swatch de 10px y su gap de 6: el porcentaje y el
+     denominador siguen entrando en una línea. */
+  width: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--ink-soft);
+  color: var(--ink);
+  white-space: nowrap;
 }
 
-.ruta__nodo.is-ghost .ruta__cobertura {
-  color: var(--ink-soft);
-  opacity: 0.6;
+/* EL COLOR DEL TEMA, JUNTO A SU PORCENTAJE: un swatch cuadrado de 10px. El
+   acento de un tema no se marca con una franja lateral en la tarjeta
+   (DESIGN.md:233); el swatch es el dato, la barra es la medida y el punto de
+   la línea es el nodo de proceso. */
+.ruta__pct {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
-.ruta__estado {
-  flex-shrink: 0;
-  font-size: 11px;
+.ruta__swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(22, 24, 26, 0.12);
+}
+
+/* LA CARGA DEL NODO QUE TOCA: las horas que faltan de este tema, bajo su
+   porcentaje. La frase va en Geist —"faltan"— y la medida en mono con
+   cifras tabulares (DESIGN.md:181): el número es un dato, la palabra no. */
+.ruta__carga-nodo {
+  font-family: var(--font-sans);
   font-weight: 500;
-  padding: 2px 8px;
-  border: 1px solid var(--rule);
-  border-radius: 99px;
-  background: transparent;
+  font-size: 12.5px;
   color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* El denominador va al lado del porcentaje: un porcentaje sin el lote al que
+   corresponde no significa nada. Un peldaño más apagado: el porcentaje
+   manda. */
+.ruta__denom {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* LAS ACCIONES DEL NODO: completar es binario y "en curso" es un marcador
+   aparte. En reposo los dos son controles legibles —papel, tinta y borde de
+   1px con presencia—, no chips: radio de control (10px), nunca pastilla. */
+.ruta__acciones {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ruta__acciones button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--radius-sm);
+  background: var(--paper-raised);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.ruta__estado:hover {
-  border-color: var(--ink-soft);
-  color: var(--ink);
-}
-
-.ruta__estado.is-curso {
+.ruta__acciones button:hover {
   border-color: var(--ink);
-  color: var(--ink);
 }
 
-.ruta__estado.is-lista {
-  border-color: var(--band);
-  background: var(--band);
-  color: var(--ink);
+.ruta__acciones button:active {
+  transform: translateY(1px);
+}
+
+/* El foco no cambia la forma del control. */
+.ruta__acciones button:focus-visible {
+  border-radius: var(--radius-sm);
+}
+
+/* La caja dibujada del control de completar: el check sólo aparece cuando
+   el nodo está lista. Forma + texto + contraste, no sólo color. */
+.ruta__completar-marca {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+  color: var(--ink-soft);
+}
+
+.ruta__check {
+  width: 11px;
+  height: 11px;
+  opacity: 0;
+}
+
+.ruta__completar[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
   font-weight: 600;
 }
 
-.ruta__nodo.is-lista .ruta__label {
+.ruta__completar[aria-pressed='true'] .ruta__completar-marca {
+  border-color: var(--paper);
+  color: var(--paper);
+}
+
+.ruta__completar[aria-pressed='true'] .ruta__check {
+  opacity: 1;
+}
+
+/* "En curso" apagado dice la acción ("Empezar"); prendido dice el estado
+   ("En curso"), llena el punto y sube el peso. El control prendido es tinta,
+   no salvia: la salvia marca la acción que toca, y el estado del nodo es
+   otra cosa. */
+.ruta__en-curso-punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.ruta__en-curso[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.ruta__en-curso[aria-pressed='true'] .ruta__en-curso-punto {
+  background: currentColor;
+}
+
+/* Touch: el control nunca queda en ~19px. En pantallas táctiles y teléfonos
+   llega a 44px de alto, que es el target real. */
+/* Touch: el control nunca queda en ~19px. En pantallas táctiles y teléfonos
+   llega a 44px de alto, que es el target real. Los pasos también: son el
+   contenido principal de la app en un teléfono. */
+@media (pointer: coarse) {
+  .ruta__acciones button {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .ruta__paso-boton {
+    min-height: 44px;
+  }
+}
+
+.ruta__nodo.is-lista .ruta__nombre {
   color: var(--ink-soft);
   text-decoration: line-through;
 }
 
+.ruta__nodo.is-lista .ruta__numero,
+.ruta__nodo.is-lista .ruta__cobertura {
+  color: var(--ink-soft);
+}
+
 .ruta__meta {
-  margin-top: 3px;
-  font-size: 11.5px;
+  margin: 9px 0 0;
+  font-size: 12.5px;
   line-height: 1.5;
   color: var(--ink-soft);
 }
 
-.ruta__relacion {
-  margin-top: 5px;
-  font-size: 11.5px;
-  color: var(--ink-soft);
-}
-
-.ruta__relacion b {
-  font-weight: 500;
+/* El denominador del nodo manda sobre su resumen: la línea tiene dos
+   niveles, no uno. */
+.ruta__meta-dato {
+  font-weight: 600;
   color: var(--ink);
 }
 
+/* LA DEPENDENCIA, EN LA CABECERA DEL NODO: lo que hay que tener antes se
+   lee al abrir el nodo, no al pie de un plan de 300px. Es el encabezado del
+   nodo, con su rótulo y su dato. */
+.ruta__necesita {
+  margin: 0 0 9px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.ruta__necesita-rotulo {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.ruta__necesita-temas {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* "TE PREPARA PARA" ES META, NO PESO: informa del futuro en un segundo
+   nivel, sin tinta llena. */
+.ruta__desbloquea {
+  margin: 5px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* La fila del recurso: el link es el target, no el texto suelto. La fila
+   crece para que el dedo la alcance sin ampliar la tipografía. */
 .ruta__fuentes {
   list-style: none;
   margin: 8px 0 0;
@@ -849,40 +1304,59 @@ input {
   gap: 3px;
 }
 
+.ruta__fuentes li {
+  padding: 2px 0;
+}
+
 .ruta__fuentes a {
-  font-size: 11.5px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 0;
+  font-size: 13.5px;
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .ruta__tipo {
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--ink-soft);
 }
 
-/* EL PLAN DEL NODO: el entregable y los pasos chequeables. La prioridad
-   visual está toda en el paso siguiente: el resto queda abajo, apagado. */
-.ruta__plan {
-  margin-top: 8px;
-  padding: 7px 9px;
-  border: 1px solid var(--rule);
-  border-radius: 6px;
-  background: var(--paper, #fff);
+/* EL CUERPO DEL NODO ABIERTO: el plan completo, debajo de la banda. */
+.ruta__cuerpo {
+  padding: 0 11px 12px;
+  border-top: 1px solid var(--rule);
 }
 
+/* EL PLAN DEL NODO: el entregable y los pasos chequeables. La prioridad
+   visual está toda en el paso siguiente: el resto queda abajo, apagado.
+   Sin caja propia: el borde del nodo y las reglas de 1px separan. Dos cajas
+   anidadas por nodo leían como un libro contable. */
+.ruta__plan {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--rule);
+}
+
+/* El entregable es cuerpo: 14px y tinta entera. Es la primera puerta del
+   nodo abierto. */
 .ruta__plan-objetivo {
-  font-size: 11.5px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--ink);
 }
 
 .ruta__plan-titulo {
-  font-weight: 600;
+  font-weight: 700;
 }
 
+/* Las horas son un dato: mono con cifras tabulares. */
 .ruta__plan-horas {
-  font-size: 10.5px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
   color: var(--ink-soft);
   white-space: nowrap;
 }
@@ -895,41 +1369,65 @@ input {
   gap: 3px;
 }
 
+/* LA NUMERACIÓN ES DE LA RUTA: estos pasos van del 7 al 12, no del 1 al 6.
+   El total es el de los 37 pasos del camino. Es un dato: mono con cifras
+   tabulares. */
+.ruta__pasos-rango {
+  margin: 8px 0 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* El paso es contenido, no una nota: 13.5px y tinta entera. Lo que ya se
+   hizo baja a la tinta suave y se tacha. */
 .ruta__paso-boton {
   width: 100%;
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: flex-start;
   text-align: left;
-  padding: 3px 4px;
+  padding: 5px 6px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   background: none;
-  font-size: 11.5px;
+  font-size: 13.5px;
   line-height: 1.5;
-  color: var(--ink-soft);
+  color: var(--ink);
   cursor: pointer;
 }
 
 .ruta__paso-boton:hover {
-  background: rgba(0, 0, 0, 0.03);
+  /* Un hover visible de verdad: el 3% de negro era indistinguible sobre el
+     panel. La tinta al 6% se lee sin convertirse en una banda. */
+  background: rgba(22, 24, 26, 0.06);
 }
 
+/* EL NÚMERO DE PASO ES TERRACOTA: es la numeración de la ruta, el otro lugar
+   que DESIGN.md:132 reserva para el acento de marca. El dígito usa la
+   terracota de texto (legible a 12px); el anillo puede usar la terracota
+   pura porque es un trazo, no texto. */
 .ruta__paso-marca {
   flex: none;
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   margin-top: 1px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--accent);
   border-radius: 50%;
-  font-size: 9.5px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: 600;
   line-height: 1;
-  color: var(--ink-soft);
+  color: var(--accent-ink, #a83c18);
 }
 
-/* La próxima acción es el único paso con energía: caja y color digeribles. */
+/* LA PRÓXIMA ACCIÓN: un solo paso en toda la ruta lleva esta banda. Es el
+   marcador de lo que toca hacer ahora —nada más—: por eso la salvia no
+   aparece en ninguna otra parte del panel. */
 .ruta__paso.is-proximo .ruta__paso-boton {
   background: var(--band);
   color: var(--ink);
@@ -949,23 +1447,115 @@ input {
   text-decoration: line-through;
 }
 
+/* LO HECHO: la caja se llena de tinta y el check va en papel. Es el mismo
+   gesto que el botón de "Lista", para que el panel tenga una sola manera de
+   decir "listo" y la salvia quede libre para la acción que toca. El check va
+   dibujado, no como carácter. */
 .ruta__paso.is-hecho .ruta__paso-marca {
-  border-color: var(--band);
-  background: var(--band);
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
 }
 
-.ruta__fuentes-desplegable {
-  margin-top: 6px;
+.ruta__paso.is-hecho .ruta__paso-marca .ruta__check {
+  opacity: 1;
+  width: 12px;
+  height: 12px;
 }
 
-.ruta__fuentes-desplegable > summary {
-  font-size: 10.5px;
-  color: var(--ink-soft);
-  cursor: pointer;
+/* EL NODO TERMINADO: los pasos no se listan tachados, se cuentan. El pliegue
+   deja los pasos adentro, por si hay que deshacer alguno. */
+.ruta__pasos-cerrados {
+  margin-top: 7px;
 }
 
-.ruta__fuentes-desplegable > summary:hover {
+.ruta__pasos-cerrados > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+}
+
+.ruta__pasos-cerrados > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ruta__pasos-cerrados > summary .ruta__chevron {
+  width: 13px;
+  height: 13px;
+  color: var(--ink-soft);
+  transition: transform 170ms ease;
+}
+
+.ruta__pasos-cerrados[open] > summary .ruta__chevron {
+  transform: rotate(90deg);
+}
+
+/* La cuenta de pasos es un dato: mono con cifras tabulares. */
+.ruta__pasos-cuenta {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ruta__pasos-cerrados .ruta__pasos {
+  margin-top: 5px;
+}
+
+/* "Dónde leer" cuelga del encabezado del nodo: es la primera puerta que se
+   ve al abrirlo, no el pie de un plan de 500px. */
+.ruta__fuentes-desplegable {
+  margin: 0 0 9px;
+  padding-top: 9px;
+}
+
+/* El pliegue de las fuentes: su propio resumen, con su propio chevron. La
+   regla del resumen de la sección no lo alcanza. */
+.ruta__fuentes-desplegable > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+}
+
+.ruta__fuentes-desplegable > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ruta__fuentes-desplegable > summary .ruta__chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--ink-soft);
+  transition: transform 170ms ease;
+}
+
+.ruta__fuentes-desplegable[open] > summary .ruta__chevron {
+  transform: rotate(90deg);
+}
+
+.ruta__fuentes-desplegable > summary:hover .ruta__fuentes-rotulo {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* La cuenta de fuentes es un dato: mono con cifras tabulares. */
+.ruta__fuentes-cuenta {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--ink-soft);
 }
 
 .ruta__fuentes-desplegable .ruta__fuentes {
@@ -1709,7 +2299,6 @@ input {
   justify-self: start;
 }
 
-
 /* ============================ SECCIONES ============================ */
 
 .band {
@@ -1733,13 +2322,7 @@ input {
   color: #f4f4f2;
 }
 
-.band--dark 
-
-.band--dark 
-
-.band--dark 
-
-.sechead {
+.band--dark .band--dark .band--dark .sechead {
   text-align: center;
   max-width: 720px;
   margin: 0 auto 44px;
@@ -1768,7 +2351,7 @@ input {
 }
 
 .stepmark::before {
-  content: "";
+  content: '';
   display: inline-block;
   width: 22px;
   height: 2px;
@@ -1787,8 +2370,6 @@ input {
 .band--dark .sechead p {
   color: #a0a4aa;
 }
-
-
 
 /* ============================ TARJETA DE PRODUCTO ============================ */
 
@@ -1862,11 +2443,23 @@ input {
   color: var(--ink-soft);
 }
 
+/* La línea guía del ejemplo: la respuesta, arriba de la lista. Sin caja. */
+.shotcard__guia {
+  margin: 0 0 14px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.shotcard__guia strong {
+  font-weight: 700;
+}
+
 /* ============================ BARRAS DE COBERTURA ============================ */
 
 .cov {
   display: grid;
-  grid-template-columns: 1fr 92px 150px;
+  grid-template-columns: 1fr 104px 150px;
   gap: 14px;
   align-items: center;
   padding: 11px 0;
@@ -1879,7 +2472,18 @@ input {
 }
 
 .cov__label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   font-size: 14.5px;
+}
+
+/* El número del nodo, en mono: el orden de estudio es un dato. */
+.cov__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--ink-soft);
 }
 
 .cov__pct {
@@ -1889,6 +2493,13 @@ input {
   font-weight: 700;
   text-align: right;
   color: var(--ink);
+}
+
+/* El denominador va con el porcentaje: un porcentaje sin el lote al que
+   corresponde no significa nada. */
+.cov__denom {
+  font-weight: 500;
+  color: var(--ink-soft);
 }
 
 .cov__alt {
@@ -1948,25 +2559,11 @@ input {
 
 /* ============================ GRILLAS ============================ */
 
-
-
 .grid2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 22px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* ============================ EL PATRÓN ============================ */
 
@@ -2052,7 +2649,12 @@ input {
 .prism {
   border: 1px solid rgba(22, 24, 26, 0.16);
   border-radius: var(--radius);
-  background: radial-gradient(130% 130% at 22% -10%, #ded9cd 0%, #c2bcad 48%, #9a9486 100%);
+  background: radial-gradient(
+    130% 130% at 22% -10%,
+    #ded9cd 0%,
+    #c2bcad 48%,
+    #9a9486 100%
+  );
   padding: 26px 24px 12px;
   overflow: hidden;
 }
@@ -2285,7 +2887,7 @@ input {
 }
 
 .flow::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 14%;
   right: 14%;
@@ -2319,7 +2921,7 @@ input {
 }
 
 .flow__node::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 6px;
   border-radius: 50%;
@@ -2610,7 +3212,7 @@ html[data-plan='si'] a[href='#producto'] {
   }
 
   .cov {
-    grid-template-columns: 1fr 70px;
+    grid-template-columns: 1fr 104px;
   }
 
   .cov__alt {
@@ -2632,6 +3234,93 @@ html[data-plan='si'] a[href='#producto'] {
   .footer__bar {
     flex-direction: column;
     gap: 6px;
+  }
+
+  /* ---- LA RUTA EN UN PANEL ANGOSTO -------------------------------------
+     La ruta es una superficie Operate: el tamaño es fijo por breakpoint
+     (nunca clamp) y lo que se toca mide lo que dice que mide. En un panel
+     angosto el encabezado del nodo se apila en dos líneas —el título arriba,
+     sin que el rótulo, el porcentaje ni el control lo aprieten; el dato en
+     mono y el control abajo— y los pasos, que son el contenido principal de
+     la app en un teléfono, crecen y alcanzan los 44px. */
+
+  .ruta > summary {
+    flex-wrap: wrap;
+  }
+
+  .ruta > summary .ruta__chevron {
+    margin-left: auto;
+  }
+
+  /* Los datos del encabezado ocupan su propia línea: la cuenta y la carga
+     no entran apretadas contra el título. */
+  .ruta__datos {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    gap: 10px;
+  }
+
+  .ruta__fila {
+    flex-wrap: wrap;
+    row-gap: 9px;
+  }
+
+  /* El corte de línea entre el título y el resto: un pseudo que no ocupa
+     alto. */
+  .ruta__fila::after {
+    content: '';
+    flex: 0 0 100%;
+    height: 0;
+    order: 3;
+  }
+
+  .ruta__numero {
+    order: 0;
+  }
+
+  .ruta__label {
+    order: 1;
+    flex: 1 1 auto;
+  }
+
+  .ruta__apoyo,
+  .ruta__badge {
+    order: 1;
+  }
+
+  .ruta__cobertura {
+    order: 4;
+    margin-left: 0;
+  }
+
+  .ruta__acciones {
+    order: 5;
+    margin-left: auto;
+  }
+
+  .ruta__fila > .ruta__chevron {
+    order: 6;
+  }
+
+  .ruta__paso-boton {
+    min-height: 44px;
+    padding: 8px 6px;
+    font-size: 14px;
+  }
+
+  .ruta__paso-marca {
+    width: 22px;
+    height: 22px;
+    font-size: 12.5px;
+  }
+
+  .ruta__acciones button {
+    min-height: 40px;
+  }
+
+  .ruta__fuentes a {
+    min-height: 36px;
   }
 }
 
@@ -2658,6 +3347,112 @@ html[data-plan='si'] a[href='#producto'] {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  /* La ruta en el ancho de un teléfono: el título del nodo tiene su propia
+     línea y el dato en mono y el control, la de abajo. */
+  .ruta__fila {
+    gap: 6px;
+    row-gap: 10px;
+    padding: 9px 10px;
+    /* La fila se parte: el título arriba, el dato en mono y los controles
+       abajo. En un panel angosto no entran las tres cosas en una línea sin
+       que el título se parta. */
+    flex-wrap: wrap;
+  }
+
+  /* En el teléfono el porcentaje va con su denominador, pero sin columna
+     fija: la línea la comparte con los controles. */
+  .ruta__cobertura {
+    width: auto;
+  }
+
+  .ruta__nodo {
+    padding-left: 30px;
+  }
+
+  .ruta__cuerpo {
+    padding: 0 10px 11px;
+  }
+
+  /* La línea de conexión se adelgaza: en un panel angosto la arista compite
+     con el título, y el título manda. */
+  .ruta__grafo path {
+    stroke-width: 1.75;
+  }
+
+  /* Los controles se apretan en el borde para que el porcentaje, los dos
+     botones y el chevron quepan en la segunda línea. Los botones ceden antes
+     que el chevron quedarse solo en una tercera línea. */
+  .ruta__acciones {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .ruta__acciones button {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 48px;
+    padding: 8px 6px;
+    font-size: 12.5px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .ruta__paso-boton {
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  .ruta__paso-marca {
+    width: 24px;
+    height: 24px;
+    font-size: 13px;
+  }
+
+  .ruta__fuentes a {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .ruta__fuentes-desplegable > summary {
+    min-height: 44px;
+    font-size: 13.5px;
+  }
+
+  /* La escala sube un peldaño en el teléfono: nada queda bajo 12.5px. */
+  .ruta__titulo {
+    font-size: 17px;
+  }
+
+  .ruta__label {
+    font-size: 16px;
+  }
+
+  .ruta__nota {
+    font-size: 14px;
+  }
+
+  .ruta__meta,
+  .ruta__necesita,
+  .ruta__desbloquea {
+    font-size: 13px;
+  }
+
+  .ruta__apoyo,
+  .ruta__tipo {
+    font-size: 12.5px;
+  }
+
+  .ruta__cobertura,
+  .ruta__numero,
+  .ruta__progreso,
+  .ruta__carga,
+  .ruta__carga-nodo,
+  .ruta__pasos-rango,
+  .ruta__plan-horas,
+  .ruta__fuentes-cuenta {
+    font-size: 13px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2672,4 +3467,84 @@ html[data-plan='si'] a[href='#producto'] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ==========================================================================
+   La frontera de error (app/error.tsx)
+   Una sola caja sobre papel: dice que paso y da las dos salidas.
+   ========================================================================== */
+.fallo {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background: var(--paper);
+}
+
+.fallo__caja {
+  width: min(560px, 100%);
+  padding: 32px;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.fallo__marca {
+  margin: 0 0 18px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.fallo__titulo {
+  margin: 0 0 12px;
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.fallo__texto {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-apagado);
+}
+
+.fallo__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.fallo__pie {
+  margin: 24px 0 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* El reintento de la ruta: un boton de texto, pegado al aviso, para que el
+   mensaje de falla no sea terminal. */
+.ruta__reintentar {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.ruta__reintentar:hover {
+  color: var(--accent);
+}
+
+.ruta__reintentar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
 }

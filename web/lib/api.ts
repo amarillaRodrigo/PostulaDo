@@ -54,10 +54,13 @@ export type NodoRuta = {
   key: string;
   label: string;
   summary: string;
+  /** Las alternativas del tema, enteras: por dónde se entra. */
+  alternativas: string[];
   piden: number;
   cobertura: number;
   prerequisitos: string[];
   desbloquea: string[];
+  /** La raíz por la que arranca la ruta: exactamente un nodo. */
   empiezaAca: boolean;
   presenteEnCorpus: boolean;
   fuentes: FuenteRuta[];
@@ -229,6 +232,18 @@ async function pedir<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 function autorizacion(token: string): HeadersInit {
   return { Authorization: `Bearer ${token}` };
+}
+
+/**
+ * Una lista, o `null` si la API devolvio otra cosa.
+ *
+ * El generico de `pedir` es solo un cast: TypeScript no puede comprobar lo que
+ * llega por la red. Un 200 con `{}` donde se esperaba una lista llegaba hasta
+ * el `map` de un componente y React desmontaba el arbol entero: pantalla en
+ * blanco. Esto valida el borde donde el JSON se vuelve dato.
+ */
+export function esperandoArray<T>(valor: unknown): T[] | null {
+  return Array.isArray(valor) ? (valor as T[]) : null;
 }
 
 type RespuestaAuth = {
@@ -499,7 +514,11 @@ export async function cerrarTodasLasSesiones(): Promise<{
 
 export async function listarLotes(): Promise<LoteGuardado[]> {
   try {
-    return await pedirConSesion<LoteGuardado[]>('/lotes');
+    const lista = esperandoArray<LoteGuardado>(
+      await pedirConSesion<unknown>('/lotes'),
+    );
+
+    return lista ?? [];
   } catch {
     return [];
   }
@@ -543,14 +562,16 @@ export async function listarSesiones(): Promise<SesionAbierta[] | null> {
   if (!sesion || !API_CONFIGURADA) return null;
 
   try {
-    return await pedirConSesion<SesionAbierta[]>('/auth/sesiones', {
-      method: 'POST',
-      body: JSON.stringify(
-        sesion.refreshToken
-          ? { refresh_token: sesion.refreshToken }
-          : {},
-      ),
-    });
+    return esperandoArray<SesionAbierta>(
+      await pedirConSesion<unknown>('/auth/sesiones', {
+        method: 'POST',
+        body: JSON.stringify(
+          sesion.refreshToken
+            ? { refresh_token: sesion.refreshToken }
+            : {},
+        ),
+      }),
+    );
   } catch (e) {
     if (e instanceof ErrorApi && e.status === 401) borrarSesion();
     return null;
@@ -674,9 +695,13 @@ export async function listarPostulaciones(
   const mapa = new Map<string, OfertaResumen>();
 
   for (let page = 1; page <= 10 && faltan.size > 0; page += 1) {
-    const pagina = await pedirConSesion<OfertaResumen[]>(
-      `/postulaciones?limit=100&page=${page}`,
+    const pagina = esperandoArray<OfertaResumen>(
+      await pedirConSesion<unknown>(`/postulaciones?limit=100&page=${page}`),
     );
+
+    // Una pagina con otra forma no se puede leer: mejor vacio que romper el
+    // render de quien consume el lote.
+    if (!pagina) return [];
 
     for (const oferta of pagina) {
       if (faltan.delete(oferta.id)) mapa.set(oferta.id, oferta);
@@ -719,9 +744,11 @@ export async function listarTodas(): Promise<OfertaResumen[]> {
   const todas: OfertaResumen[] = [];
 
   for (let page = 1; page <= 10; page += 1) {
-    const pagina = await pedirConSesion<OfertaResumen[]>(
-      `/postulaciones?limit=100&page=${page}`,
+    const pagina = esperandoArray<OfertaResumen>(
+      await pedirConSesion<unknown>(`/postulaciones?limit=100&page=${page}`),
     );
+
+    if (!pagina) break;
 
     todas.push(...pagina);
 
