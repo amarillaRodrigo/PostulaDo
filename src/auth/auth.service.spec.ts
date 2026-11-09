@@ -790,9 +790,9 @@ describe('AuthService', () => {
       });
       mockPrisma.user.delete.mockResolvedValueOnce({});
 
-      await expect(service.borrarCuenta('user-1', 'la-contra')).resolves.toEqual(
-        { borrada: true },
-      );
+      await expect(
+        service.borrarCuenta('user-1', 'la-contra'),
+      ).resolves.toEqual({ borrada: true });
 
       expect(mockPrisma.user.delete).toHaveBeenCalledWith({
         where: { id: 'user-1' },
@@ -814,9 +814,9 @@ describe('AuthService', () => {
     it('sin usuario detrás del token, tampoco borra nada', async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce(null);
 
-      await expect(
-        service.borrarCuenta('user-1', 'la-contra'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.borrarCuenta('user-1', 'la-contra')).rejects.toThrow(
+        BadRequestException,
+      );
       expect(compare).not.toHaveBeenCalled();
       expect(mockPrisma.user.delete).not.toHaveBeenCalled();
     });

@@ -573,7 +573,13 @@ describe('Integracion postulaciones', () => {
     // El cierre trae lo implícito: cloud necesita ci y containers, ci
     // necesita testing, y containers/testing/backend salen del mismo hilo.
     const keys = ruta.body.nodos.map((n: { key: string }) => n.key);
-    for (const esperado of ['backend', 'testing', 'containers', 'ci', 'cloud']) {
+    for (const esperado of [
+      'backend',
+      'testing',
+      'containers',
+      'ci',
+      'cloud',
+    ]) {
       expect(keys).toContain(esperado);
     }
 

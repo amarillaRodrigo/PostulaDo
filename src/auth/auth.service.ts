@@ -392,7 +392,10 @@ export class AuthService {
    * export pendiente por hacer: lo que se borra es exactamente lo que la
    * cuenta mostraba.
    */
-  async borrarCuenta(userId: string, password: string): Promise<{ borrada: true }> {
+  async borrarCuenta(
+    userId: string,
+    password: string,
+  ): Promise<{ borrada: true }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { password: true },
