@@ -312,8 +312,6 @@ export class PostulacionesService {
     ).length;
     const coberturaConjunta = Math.round((cubiertos / total) * 100);
 
-    const primero = principales[0];
-    const alternativas = primero?.alternativas.slice(0, 2).join(' o ') ?? '';
     const verbo = principales.length === 1 ? 'cubre' : 'cubren';
     const sujeto =
       principales.length === 1
@@ -323,8 +321,13 @@ export class PostulacionesService {
     const cantidadOfertas =
       total === 1 ? 'la 1 oferta del lote' : `las ${total} ofertas del lote`;
 
+    // El plan NO dice por dónde empezar. El orden de estudio —y la única
+    // raíz que lleva "Empezá acá"— es de la ruta, que conoce los
+    // prerrequisitos: si acá también se recomendara un tema, el panel daría
+    // dos respuestas distintas para la misma pregunta. Acá va sólo la
+    // evidencia, y la frase manda a la ruta por el arranque.
     const sugerenciaAprendizaje = principales.length
-      ? `${sujeto} ${verbo} el ${coberturaConjunta}% de ${cantidadOfertas}. Empezá por el tema ${primero.label} y entrá por ${alternativas}, según lo que ya tengas a mano.`
+      ? `${sujeto} ${verbo} el ${coberturaConjunta}% de ${cantidadOfertas}. El orden de estudio —y por dónde empezar— lo decide la ruta.`
       : `Este lote pide ${temas.length} oficios distintos y ninguno domina. Revisá ${total === 1 ? 'la oferta' : `las ${total} ofertas`} y elegí el tipo de trabajo que más te interese antes de armar un plan.`;
 
     return {
@@ -375,7 +378,11 @@ export class PostulacionesService {
     const analisis = await this.analisisDeLote(userId, ids);
 
     if (!analisis.temas.length) {
-      return { totalOfertasAnalizadas: 0, ecosistema: analisis.ecosistema, nodos: [] };
+      return {
+        totalOfertasAnalizadas: 0,
+        ecosistema: analisis.ecosistema,
+        nodos: [],
+      };
     }
 
     const conteo = new Map<string, number>();

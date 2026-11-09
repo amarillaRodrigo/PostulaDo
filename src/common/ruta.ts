@@ -151,8 +151,11 @@ export const PLAN: Record<string, PlanTema> = {
 
 /**
  * Prerequisitos del oficio: para aprender el tema `key` hace falta, al menos,
- * algo de cada tema de su lista. Las listas vacías son las raíces de la ruta:
- * la del usuario empieza ahí — "empezá acá" en el UI sale de esta lista.
+ * algo de cada tema de su lista. Las listas vacías son las raíces del grafo, y
+ * puede haber más de una: un rol frontend no necesita construir un backend
+ * para practicar frontend. La ruta arranca por UNA sola de esas raíces —la
+ * primera del orden topológico, desempatada por demanda del corpus y después
+ * por nombre—; "empezá acá" en el UI señala ese nodo, nunca el conjunto.
  *
  * Las relaciones son de dominio, nunca de producto: el contenedor corre un
  * backend que alguien construyó, la nube despliega una pipeline de CI que ya
@@ -298,6 +301,12 @@ export interface NodoRuta {
   key: string;
   label: string;
   summary: string;
+  /**
+   * Las alternativas del tema, enteras y sin recortar: por dónde se entra
+   * (NestJS, FastAPI…). El plan las cortaba a dos y dejaba el resto mudo;
+   * en la ruta cada nodo muestra las suyas.
+   */
+  alternativas: string[];
   /** Cuántas ofertas del corpus piden este tema. 0 si nadie lo pidió. */
   piden: number;
   /** piden / total, en porcentaje redondeado: el mismo cálculo del plan. */
@@ -306,7 +315,11 @@ export interface NodoRuta {
   prerequisitos: string[];
   /** Quienes dependen de este tema dentro de la ruta: lo que desbloquea. */
   desbloquea: string[];
-  /** Sin prerequisitos dentro del grafo: la ruta puede empezar por acá. */
+  /**
+   * La raíz por la que arranca la ruta: exactamente un nodo. No es "cualquier
+   * tema sin prerequisitos" —el grafo puede tener varias raíces—, sino la
+   * primera raíz del orden de estudio. Es la única autoridad de "empezá acá".
+   */
   empiezaAca: boolean;
   /**
    * False cuando el corpus no pidió el tema pero entra a la ruta igual:
@@ -426,6 +439,15 @@ export function armarRuta(
     }
   }
 
+  /**
+   * La ruta empieza por una sola de sus raíces: la primera del orden
+   * topológico. El grafo puede tener varias —frontend no necesita backend—,
+   * pero "empezá acá" es una respuesta, no un conjunto de respuestas.
+   */
+  const raizDeLaRuta = orden.find(
+    (key) => (prereqsEnGrafo.get(key) ?? []).length === 0,
+  );
+
   const nodos = orden.map((key) => {
     const theme = temaPorKey(key);
     const piden = conteo.get(key) ?? 0;
@@ -434,11 +456,12 @@ export function armarRuta(
       key,
       label: theme?.label ?? key,
       summary: theme?.summary ?? '',
+      alternativas: theme?.alternatives ?? [],
       piden,
       cobertura: total > 0 ? Math.round((piden / total) * 100) : 0,
       prerequisitos: prereqsEnGrafo.get(key) ?? [],
       desbloquea: desbloquea.get(key) ?? [],
-      empiezaAca: (prereqsEnGrafo.get(key) ?? []).length === 0,
+      empiezaAca: key === raizDeLaRuta,
       presenteEnCorpus: presentes.has(key),
       fuentes: FUENTES[key] ?? [],
       plan: PLAN[key],

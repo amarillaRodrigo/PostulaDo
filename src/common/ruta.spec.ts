@@ -53,7 +53,7 @@ describe('ruta (orden de estudio del oficio)', () => {
       expect(ruta.nodos[1].key).toBe('backend');
     });
 
-    it('marca empezarAca solo en los temas sin prerequisitos del grafo', () => {
+    it('marca empezarAca solo en la raíz por la que arranca la ruta', () => {
       const conteo = new Map([
         ['cloud', 1],
         ['data', 1],
@@ -61,16 +61,35 @@ describe('ruta (orden de estudio del oficio)', () => {
 
       const ruta = armarRuta(conteo, 2, 'Backend Engineering');
 
+      // El grafo tiene dos raíces —backend y frontend, porque frontend no
+      // necesita backend para practicar frontend—, pero la ruta empieza por
+      // una sola: la que el orden topológico pone primero.
       const conMarca = ruta.nodos.filter((n) => n.empiezaAca === true);
-      expect(new Set(conMarca.map((n) => n.key))).toEqual(
-        new Set(['backend', 'frontend']),
-      );
+      expect(conMarca.map((n) => n.key)).toEqual(['backend']);
+
+      const frontend = ruta.nodos.find((n) => n.key === 'frontend');
+      expect(frontend?.prerequisitos).toEqual([]);
+      expect(frontend?.empiezaAca).toBe(false);
 
       const cloud = ruta.nodos.find((n) => n.key === 'cloud');
       expect(cloud?.empiezaAca).toBe(false);
       expect(cloud?.prerequisitos).toEqual(
         expect.arrayContaining(['ci', 'containers']),
       );
+    });
+
+    it('con dos raíces en el corpus, el badge sigue a la que abre la ruta', () => {
+      const conteo = new Map([
+        ['backend', 2],
+        ['frontend', 4],
+      ]);
+
+      const ruta = armarRuta(conteo, 6, null);
+
+      expect(ruta.nodos[0].key).toBe('frontend');
+      expect(ruta.nodos.filter((n) => n.empiezaAca).map((n) => n.key)).toEqual([
+        'frontend',
+      ]);
     });
 
     it('dice qué desbloquea cada tema dentro de la ruta', () => {
@@ -138,6 +157,18 @@ describe('ruta (orden de estudio del oficio)', () => {
       const testing = ruta.nodos.find((n) => n.key === 'testing');
       expect(testing?.presenteEnCorpus).toBe(false);
       expect(testing?.plan).toEqual(PLAN.testing);
+    });
+
+    it('trae las alternativas enteras de cada tema: el plan las cortaba a dos', () => {
+      const conteo = new Map([['backend', 2]]);
+
+      const ruta = armarRuta(conteo, 2, 'Backend Engineering');
+
+      const backend = ruta.nodos.find((n) => n.key === 'backend');
+      expect(backend?.alternativas).toEqual(
+        temaPorKey('backend')?.alternatives,
+      );
+      expect(backend?.alternativas.length).toBeGreaterThan(2);
     });
 
     it('con un corpus vacío, la ruta no promete nada', () => {
