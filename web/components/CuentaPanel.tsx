@@ -442,6 +442,10 @@ export function CuentaPanel({
     onSalir();
   }
 
+  // Un cuerpo inesperado de la API no puede tumbar el panel: si el estado no
+  // es una lista, se muestra el mismo aviso que cuando la lectura falla.
+  const listaSesiones = Array.isArray(sesiones) ? sesiones : null;
+
   return (
     <details className="cuenta" ref={detailsRef}>
       <summary className="cuenta__sum">
@@ -549,20 +553,20 @@ export function CuentaPanel({
           <div className="cuenta__lotes-head">
             <span>Tus sesiones</span>
             <span>
-              {sesiones === null
+              {listaSesiones === null
                 ? 'Cargando…'
-                : sesiones.length === 0
+                : listaSesiones.length === 0
                   ? 'ninguna abierta'
-                  : `${sesiones.length} ${sesiones.length === 1 ? 'abierta' : 'abiertas'}`}
+                  : `${listaSesiones.length} ${listaSesiones.length === 1 ? 'abierta' : 'abiertas'}`}
             </span>
           </div>
 
-          {sesiones === null ? (
+          {listaSesiones === null ? (
             <p className="cuenta__empty">
               No pudimos leer las sesiones de esta cuenta.
             </p>
           ) : (
-            sesiones.map((s) => (
+            listaSesiones.map((s) => (
               <div key={s.id} className="cuenta__lote">
                 <span className="cuenta__lote-nombre">
                   {s.esteDispositivo ? 'Este dispositivo' : 'Otro dispositivo'}
@@ -577,8 +581,8 @@ export function CuentaPanel({
             ))
           )}
 
-          {sesiones !== null &&
-            sesiones.some((s) => !s.esteDispositivo) &&
+          {listaSesiones !== null &&
+            listaSesiones.some((s) => !s.esteDispositivo) &&
             (confirmandoOtras ? (
               <div className="cuenta__lote">
                 <span className="cuenta__lote-meta">
