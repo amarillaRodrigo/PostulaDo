@@ -93,7 +93,13 @@ type Estado =
   | { kind: 'working'; hechos: number; total: number }
   | { kind: 'error'; message: string }
   | { kind: 'needs-account'; cuenta: Cuenta; modo: Modo; fuente: Fuente }
-  | { kind: 'account-error'; cuenta: Cuenta; modo: Modo; fuente: Fuente; message: string }
+  | {
+      kind: 'account-error';
+      cuenta: Cuenta;
+      modo: Modo;
+      fuente: Fuente;
+      message: string;
+    }
   | {
       kind: 'done';
       result: Resultado;
@@ -102,7 +108,12 @@ type Estado =
       emailEnviado?: boolean;
     };
 
-const CUENTA_VACIA: Cuenta = { nombre: '', email: '', password: '', birthDate: '' };
+const CUENTA_VACIA: Cuenta = {
+  nombre: '',
+  email: '',
+  password: '',
+  birthDate: '',
+};
 
 /**
  * Las URLs pegadas se guardan por pestaña: si recargás mientras el lote se
@@ -120,7 +131,9 @@ function leerUrlsPegadas(): string {
     const lista: unknown = JSON.parse(crudo);
     if (!Array.isArray(lista)) return '';
 
-    return lista.filter((url): url is string => typeof url === 'string').join('\n');
+    return lista
+      .filter((url): url is string => typeof url === 'string')
+      .join('\n');
   } catch {
     return '';
   }
@@ -323,12 +336,7 @@ export function LoteForm() {
       // Si había un lote destino, lo nuevo entra ahí y el plan se redibuja
       // con el denominador completo, antes que armar un lote nuevo.
       if (
-        await terminarConDestino(
-          sesion.ids,
-          sesion,
-          fallidas,
-          emailEnviado,
-        )
+        await terminarConDestino(sesion.ids, sesion, fallidas, emailEnviado)
       ) {
         return;
       }
@@ -593,9 +601,7 @@ export function LoteForm() {
     guardarSesion(actualizada);
 
     setState((prev) =>
-      prev.kind === 'done'
-        ? { ...prev, sesion: actualizada }
-        : prev,
+      prev.kind === 'done' ? { ...prev, sesion: actualizada } : prev,
     );
   }
 
@@ -691,7 +697,8 @@ export function LoteForm() {
     } catch {
       setState({
         kind: 'error',
-        message: 'No pudimos abrir tu plan completo. Probá de nuevo en un rato.',
+        message:
+          'No pudimos abrir tu plan completo. Probá de nuevo en un rato.',
       });
     }
   }
@@ -890,7 +897,9 @@ export function LoteForm() {
           {/* LA LISTA ES LA RUTA: el panel no repite los temas en otra tabla.
               Abajo, la ruta con su barra, su orden de estudio y su línea
               guía. Acá sólo queda la evidencia del lote. */}
-          <p className="ingest__done-suggestion">{result.sugerenciaAprendizaje}</p>
+          <p className="ingest__done-suggestion">
+            {result.sugerenciaAprendizaje}
+          </p>
 
           <RutaPlan ids={result.corpus ? null : sesion.ids} />
 
@@ -947,11 +956,13 @@ export function LoteForm() {
                         }
                         aria-label={`Estado de ${tituloDe(oferta)}`}
                       >
-                        {Object.entries(ETIQUETA_ESTADO).map(([valor, texto]) => (
-                          <option key={valor} value={valor}>
-                            {texto}
-                          </option>
-                        ))}
+                        {Object.entries(ETIQUETA_ESTADO).map(
+                          ([valor, texto]) => (
+                            <option key={valor} value={valor}>
+                              {texto}
+                            </option>
+                          ),
+                        )}
                       </select>
                     </div>
                     {oferta.company || oferta.aniosExperiencia ? (
@@ -1039,184 +1050,196 @@ export function LoteForm() {
 
     return (
       <>
-      {bannerDestino}
-      <form className="ingest" onSubmit={(e) => {
-        e.preventDefault();
-        const form = new FormData(e.currentTarget);
-        const cuenta: Cuenta = {
-          nombre: String(form.get('nombre') ?? ''),
-          email: String(form.get('email') ?? ''),
-          password: String(form.get('password') ?? ''),
-          birthDate: String(form.get('birthDate') ?? ''),
-        };
+        {bannerDestino}
+        <form
+          className="ingest"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = new FormData(e.currentTarget);
+            const cuenta: Cuenta = {
+              nombre: String(form.get('nombre') ?? ''),
+              email: String(form.get('email') ?? ''),
+              password: String(form.get('password') ?? ''),
+              birthDate: String(form.get('birthDate') ?? ''),
+            };
 
-        // Entrar sin ofertas pegadas: se abre el último plan de la cuenta.
-        if (entrando && fuenteStep === 'urls' && parseUrls(urls).length === 0) {
-          void entrarSolo(cuenta);
-          return;
-        }
+            // Entrar sin ofertas pegadas: se abre el último plan de la cuenta.
+            if (
+              entrando &&
+              fuenteStep === 'urls' &&
+              parseUrls(urls).length === 0
+            ) {
+              void entrarSolo(cuenta);
+              return;
+            }
 
-        void correr(cuenta, modo, fuenteStep);
-      }}>
-        <div className="ingest__head">
-          <span>Cargamos tu {esTexto ? 'oferta' : 'lote'}</span>
-          <span>
-            {entrando
-              ? hayContenido
-                ? 'Entrá para verlo'
-                : 'Entrá a tu cuenta'
-              : 'Creá una cuenta para guardarlo'}
-          </span>
-        </div>
-        <div className="ingest__account">
-          <p className="ingest__account-lead">
-            {entrando
-              ? hayContenido
-                ? esTexto
-                  ? 'Entrá con tu cuenta y abrimos el plan de esta oferta.'
-                  : 'Entrá con tu cuenta y abrimos el plan de este lote.'
-                : 'Entrá con tu cuenta y abrimos tu último plan guardado.'
-              : esTexto
-                ? 'Tu oferta queda guardada en tu cuenta, así podés volver a mirarla desde cualquier dispositivo.'
-                : 'Tu lote queda guardado en tu cuenta, así podés volver a mirarlo desde cualquier dispositivo.'}
-          </p>
-
-          {!entrando ? (
-            <div className="field">
-              <label htmlFor="cuenta-nombre">Nombre</label>
-              <input
-                id="cuenta-nombre"
-                name="nombre"
-                type="text"
-                required
-                autoComplete="name"
-                placeholder="Cómo te llamás"
-                defaultValue={cuenta.nombre}
-              />
-            </div>
-          ) : null}
-
-          <div className="field">
-            <label htmlFor="cuenta-email">Correo</label>
-            <input
-              id="cuenta-email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="vos@ejemplo.com"
-              defaultValue={cuenta.email}
-              ref={emailRef}
-            />
+            void correr(cuenta, modo, fuenteStep);
+          }}
+        >
+          <div className="ingest__head">
+            <span>Cargamos tu {esTexto ? 'oferta' : 'lote'}</span>
+            <span>
+              {entrando
+                ? hayContenido
+                  ? 'Entrá para verlo'
+                  : 'Entrá a tu cuenta'
+                : 'Creá una cuenta para guardarlo'}
+            </span>
           </div>
-          <div className="field">
-            <label htmlFor="cuenta-password">Contraseña</label>
-            <input
-              id="cuenta-password"
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              autoComplete={entrando ? 'current-password' : 'new-password'}
-              placeholder={entrando ? 'Tu contraseña' : 'mínimo 8 caracteres'}
-              defaultValue={cuenta.password}
-            />
-          </div>
-
-          {!entrando ? (
-            <div className="field">
-              <label htmlFor="cuenta-birth">Fecha de nacimiento</label>
-              <input
-                id="cuenta-birth"
-                name="birthDate"
-                type="date"
-                required
-                autoComplete="bday"
-                defaultValue={cuenta.birthDate}
-              />
-            </div>
-          ) : null}
-
-          {error ? (
-            <p className="ingest__error" role="alert">
-              {error}
+          <div className="ingest__account">
+            <p className="ingest__account-lead">
+              {entrando
+                ? hayContenido
+                  ? esTexto
+                    ? 'Entrá con tu cuenta y abrimos el plan de esta oferta.'
+                    : 'Entrá con tu cuenta y abrimos el plan de este lote.'
+                  : 'Entrá con tu cuenta y abrimos tu último plan guardado.'
+                : esTexto
+                  ? 'Tu oferta queda guardada en tu cuenta, así podés volver a mirarla desde cualquier dispositivo.'
+                  : 'Tu lote queda guardado en tu cuenta, así podés volver a mirarlo desde cualquier dispositivo.'}
             </p>
-          ) : null}
 
-          <button
-            type="button"
-            className="cuenta__switch"
-            onClick={() => {
-              setRecuperar({ abierto: false, enviando: false, aviso: null });
-              setState({
-                kind: 'needs-account',
-                cuenta: { ...cuenta, password: '' },
-                modo: entrando ? 'crear' : 'entrar',
-                fuente: fuenteStep,
-              });
-            }}
-          >
-            {entrando
-              ? 'No tengo cuenta: crear una'
-              : 'Ya tengo cuenta: entrar'}
-          </button>
+            {!entrando ? (
+              <div className="field">
+                <label htmlFor="cuenta-nombre">Nombre</label>
+                <input
+                  id="cuenta-nombre"
+                  name="nombre"
+                  type="text"
+                  required
+                  autoComplete="name"
+                  placeholder="Cómo te llamás"
+                  defaultValue={cuenta.nombre}
+                />
+              </div>
+            ) : null}
 
-          {entrando ? (
-            <div className="recuperar">
-              <button
-                type="button"
-                className="cuenta__switch"
-                onClick={() =>
-                  setRecuperar((r) => ({
-                    ...r,
-                    abierto: !r.abierto,
-                    aviso: r.abierto ? null : r.aviso,
-                  }))
-                }
-                aria-expanded={recuperar.abierto}
-              >
-                ¿Olvidaste tu contraseña?
-              </button>
-
-              {recuperar.abierto ? (
-                <div className="recuperar__box">
-                  <p className="recuperar__text">
-                    Escribí tu correo arriba y te mandamos un enlace para elegir
-                    una nueva. El enlace vence en 1 hora y sirve una sola vez.
-                  </p>
-
-                  {recuperar.aviso ? (
-                    <p
-                      className={`recuperar__aviso is-${recuperar.aviso.tipo}`}
-                      role={recuperar.aviso.tipo === 'error' ? 'alert' : 'status'}
-                    >
-                      {recuperar.aviso.texto}
-                    </p>
-                  ) : null}
-
-                  <button
-                    type="button"
-                    className="cuenta__action"
-                    onClick={() => void pedirEnlace()}
-                    disabled={recuperar.enviando}
-                  >
-                    {recuperar.enviando ? 'Pidiendo el enlace…' : 'Mandame el enlace'}
-                  </button>
-                </div>
-              ) : null}
+            <div className="field">
+              <label htmlFor="cuenta-email">Correo</label>
+              <input
+                id="cuenta-email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                placeholder="vos@ejemplo.com"
+                defaultValue={cuenta.email}
+                ref={emailRef}
+              />
             </div>
-          ) : null}
-        </div>
-        <div className="ingest__foot">
-          <span className="ingest__gets">
-            <b>Vas a obtener:</b> el tipo de trabajo que comparten, los temas que lo
-            cubren y por cuál empezar.
-          </span>
-          <button className="btn btn--ink btn--caustic" type="submit">
-            {entrando ? 'Entrar y ver mi plan' : 'Crear cuenta y ver mi plan'}
-          </button>
-        </div>
-      </form>
+            <div className="field">
+              <label htmlFor="cuenta-password">Contraseña</label>
+              <input
+                id="cuenta-password"
+                name="password"
+                type="password"
+                required
+                minLength={8}
+                autoComplete={entrando ? 'current-password' : 'new-password'}
+                placeholder={entrando ? 'Tu contraseña' : 'mínimo 8 caracteres'}
+                defaultValue={cuenta.password}
+              />
+            </div>
+
+            {!entrando ? (
+              <div className="field">
+                <label htmlFor="cuenta-birth">Fecha de nacimiento</label>
+                <input
+                  id="cuenta-birth"
+                  name="birthDate"
+                  type="date"
+                  required
+                  autoComplete="bday"
+                  defaultValue={cuenta.birthDate}
+                />
+              </div>
+            ) : null}
+
+            {error ? (
+              <p className="ingest__error" role="alert">
+                {error}
+              </p>
+            ) : null}
+
+            <button
+              type="button"
+              className="cuenta__switch"
+              onClick={() => {
+                setRecuperar({ abierto: false, enviando: false, aviso: null });
+                setState({
+                  kind: 'needs-account',
+                  cuenta: { ...cuenta, password: '' },
+                  modo: entrando ? 'crear' : 'entrar',
+                  fuente: fuenteStep,
+                });
+              }}
+            >
+              {entrando
+                ? 'No tengo cuenta: crear una'
+                : 'Ya tengo cuenta: entrar'}
+            </button>
+
+            {entrando ? (
+              <div className="recuperar">
+                <button
+                  type="button"
+                  className="cuenta__switch"
+                  onClick={() =>
+                    setRecuperar((r) => ({
+                      ...r,
+                      abierto: !r.abierto,
+                      aviso: r.abierto ? null : r.aviso,
+                    }))
+                  }
+                  aria-expanded={recuperar.abierto}
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+
+                {recuperar.abierto ? (
+                  <div className="recuperar__box">
+                    <p className="recuperar__text">
+                      Escribí tu correo arriba y te mandamos un enlace para
+                      elegir una nueva. El enlace vence en 1 hora y sirve una
+                      sola vez.
+                    </p>
+
+                    {recuperar.aviso ? (
+                      <p
+                        className={`recuperar__aviso is-${recuperar.aviso.tipo}`}
+                        role={
+                          recuperar.aviso.tipo === 'error' ? 'alert' : 'status'
+                        }
+                      >
+                        {recuperar.aviso.texto}
+                      </p>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      className="cuenta__action"
+                      onClick={() => void pedirEnlace()}
+                      disabled={recuperar.enviando}
+                    >
+                      {recuperar.enviando
+                        ? 'Pidiendo el enlace…'
+                        : 'Mandame el enlace'}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+          <div className="ingest__foot">
+            <span className="ingest__gets">
+              <b>Vas a obtener:</b> el tipo de trabajo que comparten, los temas
+              que lo cubren y por cuál empezar.
+            </span>
+            <button className="btn btn--ink btn--caustic" type="submit">
+              {entrando ? 'Entrar y ver mi plan' : 'Crear cuenta y ver mi plan'}
+            </button>
+          </div>
+        </form>
       </>
     );
   }
@@ -1267,25 +1290,52 @@ export function LoteForm() {
 
   return (
     <>
-    {bannerDestino}
-    <form
-      className="ingest"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!API_CONFIGURADA) {
-          setState({ kind: 'error', message: SIN_API });
-          return;
-        }
-
-        if (fuente === 'texto') {
-          if (!hayTexto) {
-            setState({ kind: 'error', message: 'Pegá el texto de la oferta.' });
+      {bannerDestino}
+      <form
+        className="ingest"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!API_CONFIGURADA) {
+            setState({ kind: 'error', message: SIN_API });
             return;
           }
 
+          if (fuente === 'texto') {
+            if (!hayTexto) {
+              setState({
+                kind: 'error',
+                message: 'Pegá el texto de la oferta.',
+              });
+              return;
+            }
+
+            // Si ya hay sesión, no se vuelve a pedir cuenta: se analiza directo.
+            if (leerSesion()) {
+              void guardarTextoEnSesion();
+              return;
+            }
+
+            setState({
+              kind: 'needs-account',
+              cuenta: CUENTA_VACIA,
+              modo: 'crear',
+              fuente: 'texto',
+            });
+            return;
+          }
+
+          if (lista.length === 0) {
+            setState({
+              kind: 'error',
+              message: 'Pegá al menos una URL de oferta.',
+            });
+            return;
+          }
+          guardarUrlsPegadas(lista);
+
           // Si ya hay sesión, no se vuelve a pedir cuenta: se analiza directo.
           if (leerSesion()) {
-            void guardarTextoEnSesion();
+            void analizarConSesion(lista);
             return;
           }
 
@@ -1293,144 +1343,131 @@ export function LoteForm() {
             kind: 'needs-account',
             cuenta: CUENTA_VACIA,
             modo: 'crear',
-            fuente: 'texto',
+            fuente: 'urls',
           });
-          return;
-        }
-
-        if (lista.length === 0) {
-          setState({ kind: 'error', message: 'Pegá al menos una URL de oferta.' });
-          return;
-        }
-        guardarUrlsPegadas(lista);
-
-        // Si ya hay sesión, no se vuelve a pedir cuenta: se analiza directo.
-        if (leerSesion()) {
-          void analizarConSesion(lista);
-          return;
-        }
-
-        setState({
-          kind: 'needs-account',
-          cuenta: CUENTA_VACIA,
-          modo: 'crear',
-          fuente: 'urls',
-        });
-      }}
-    >
-      <div className="ingest__head">
-        <span>Ofertas</span>
-        <span>
-          {fuente === 'urls'
-            ? 'URLs, una por línea · pegá las tuyas'
-            : 'El texto completo de una oferta'}
-        </span>
-      </div>
-      <div className="ingest__body">
-        <div className="ingest__tabs" role="tablist" aria-label="Cómo pegás las ofertas">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={fuente === 'urls'}
-            className={`ingest__tab${fuente === 'urls' ? ' is-activo' : ''}`}
-            onClick={() => setFuente('urls')}
+        }}
+      >
+        <div className="ingest__head">
+          <span>Ofertas</span>
+          <span>
+            {fuente === 'urls'
+              ? 'URLs, una por línea · pegá las tuyas'
+              : 'El texto completo de una oferta'}
+          </span>
+        </div>
+        <div className="ingest__body">
+          <div
+            className="ingest__tabs"
+            role="tablist"
+            aria-label="Cómo pegás las ofertas"
           >
-            URLs
-          </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={fuente === 'urls'}
+              className={`ingest__tab${fuente === 'urls' ? ' is-activo' : ''}`}
+              onClick={() => setFuente('urls')}
+            >
+              URLs
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={fuente === 'texto'}
+              className={`ingest__tab${fuente === 'texto' ? ' is-activo' : ''}`}
+              onClick={() => setFuente('texto')}
+            >
+              Pegar texto
+            </button>
+          </div>
+
+          {fuente === 'urls' ? (
+            <>
+              <label className="sr-only" htmlFor="lote-urls">
+                URLs de las ofertas, una por línea
+              </label>
+              <textarea
+                id="lote-urls"
+                className="ingest__textarea"
+                value={urls}
+                onChange={(e) => setUrls(e.target.value)}
+                placeholder={EXAMPLE}
+                rows={5}
+                spellCheck={false}
+              />
+              {overflow ? (
+                <p className="ingest__notice" role="status">
+                  Solo analizamos las primeras {MAX_URLS} ofertas de este lote.
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <p className="ingest__notice">
+                Para portales que piden login o no tienen página pública: pegá
+                el texto de la oferta tal como lo leste.
+              </p>
+              <label className="sr-only" htmlFor="lote-titulo">
+                Título de la oferta, opcional
+              </label>
+              <input
+                id="lote-titulo"
+                className="ingest__titulo"
+                type="text"
+                value={tituloTexto}
+                onChange={(e) => setTituloTexto(e.target.value)}
+                placeholder="Título de la oferta (opcional)"
+                spellCheck={false}
+              />
+              <label className="sr-only" htmlFor="lote-texto">
+                Texto de la oferta
+              </label>
+              <textarea
+                id="lote-texto"
+                className="ingest__textarea"
+                value={texto}
+                onChange={(e) => setTexto(e.target.value)}
+                placeholder={EXAMPLE_TEXTO}
+                rows={8}
+              />
+            </>
+          )}
+        </div>
+        <div className="ingest__foot">
+          <span className="ingest__gets">
+            <b>Vas a obtener:</b> el tipo de trabajo que comparten, los temas
+            que lo cubren y por cuál empezar.
+          </span>
           <button
-            type="button"
-            role="tab"
-            aria-selected={fuente === 'texto'}
-            className={`ingest__tab${fuente === 'texto' ? ' is-activo' : ''}`}
-            onClick={() => setFuente('texto')}
+            className="btn btn--ink btn--caustic"
+            type="submit"
+            disabled={enCurso}
           >
-            Pegar texto
+            {enCurso ? 'Leyendo…' : 'Ver mi plan'}
           </button>
         </div>
-
-        {fuente === 'urls' ? (
-          <>
-            <label className="sr-only" htmlFor="lote-urls">
-              URLs de las ofertas, una por línea
-            </label>
-            <textarea
-              id="lote-urls"
-              className="ingest__textarea"
-              value={urls}
-              onChange={(e) => setUrls(e.target.value)}
-              placeholder={EXAMPLE}
-              rows={5}
-              spellCheck={false}
-            />
-            {overflow ? (
-              <p className="ingest__notice" role="status">
-                Solo analizamos las primeras {MAX_URLS} ofertas de este lote.
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <>
-            <p className="ingest__notice">
-              Para portales que piden login o no tienen página pública: pegá el texto
-              de la oferta tal como lo leste.
-            </p>
-            <label className="sr-only" htmlFor="lote-titulo">
-              Título de la oferta, opcional
-            </label>
-            <input
-              id="lote-titulo"
-              className="ingest__titulo"
-              type="text"
-              value={tituloTexto}
-              onChange={(e) => setTituloTexto(e.target.value)}
-              placeholder="Título de la oferta (opcional)"
-              spellCheck={false}
-            />
-            <label className="sr-only" htmlFor="lote-texto">
-              Texto de la oferta
-            </label>
-            <textarea
-              id="lote-texto"
-              className="ingest__textarea"
-              value={texto}
-              onChange={(e) => setTexto(e.target.value)}
-              placeholder={EXAMPLE_TEXTO}
-              rows={8}
-            />
-          </>
-        )}
-      </div>
-      <div className="ingest__foot">
-        <span className="ingest__gets">
-          <b>Vas a obtener:</b> el tipo de trabajo que comparten, los temas que lo
-          cubren y por cuál empezar.
-        </span>
-        <button className="btn btn--ink btn--caustic" type="submit" disabled={enCurso}>
-          {enCurso ? 'Leyendo…' : 'Ver mi plan'}
-        </button>
-      </div>
-      {state.kind === 'working' ? (
-        <p className="ingest__notice" role="status">
-          {fuente === 'texto'
-            ? 'Leyendo la oferta…'
-            : `Analizando ${state.hechos} de ${state.total}…`}
-        </p>
-      ) : null}
-      {aviso ? (
-        <p className="ingest__notice" role="status">
-          {aviso}
-        </p>
-      ) : null}
-      {state.kind === 'error' ? (
-        <p className="ingest__error" role="alert">
-          {state.message}
-        </p>
-      ) : null}
-    </form>
-    <p className="hero__micro">
-      Tu lote queda guardado en tu cuenta: confirmás el correo y lo abrís desde
-      cualquier dispositivo
-    </p>
+        {state.kind === 'working' ? (
+          <p className="ingest__notice" role="status">
+            {fuente === 'texto'
+              ? 'Leyendo la oferta…'
+              : `Analizando ${state.hechos} de ${state.total}…`}
+          </p>
+        ) : null}
+        {aviso ? (
+          <p className="ingest__notice" role="status">
+            {aviso}
+          </p>
+        ) : null}
+        {state.kind === 'error' ? (
+          <p className="ingest__error" role="alert">
+            {state.message}
+          </p>
+        ) : null}
+      </form>
+      <p className="hero__micro">
+        Tu lote queda guardado en tu cuenta: confirmás el correo y lo abrís
+        desde cualquier dispositivo
+      </p>
     </>
   );
 }

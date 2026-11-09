@@ -41,9 +41,7 @@ export default function VerificarPage() {
         setEstado({
           kind: 'error',
           message:
-            e instanceof Error
-              ? e.message
-              : 'No pudimos confirmar tu correo.',
+            e instanceof Error ? e.message : 'No pudimos confirmar tu correo.',
         });
       });
 

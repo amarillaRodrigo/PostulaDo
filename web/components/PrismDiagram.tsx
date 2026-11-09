@@ -39,13 +39,27 @@ export function PrismDiagram({
           <defs>
             {/* gradientUnits userSpaceOnUse: sobre una <line> de altura cero el
                 gradiente no resuelve y el elemento no se pinta. */}
-            <linearGradient id="prism-in" gradientUnits="userSpaceOnUse" x1="0" y1="125" x2="300" y2="125">
+            <linearGradient
+              id="prism-in"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="125"
+              x2="300"
+              y2="125"
+            >
               <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
               <stop offset="1" stopColor="#ffffff" stopOpacity="0.5" />
             </linearGradient>
           </defs>
 
-          <rect x="0" y="120" width="300" height="10" rx="5" fill="url(#prism-in)" />
+          <rect
+            x="0"
+            y="120"
+            width="300"
+            height="10"
+            rx="5"
+            fill="url(#prism-in)"
+          />
           <text
             x="18"
             y="108"
@@ -113,7 +127,9 @@ export function PrismDiagram({
           })}
         </svg>
       </div>
-      <p className="prism__hint">Deslizá el diagrama para ver los cinco temas →</p>
+      <p className="prism__hint">
+        Deslizá el diagrama para ver los cinco temas →
+      </p>
     </div>
   );
 }

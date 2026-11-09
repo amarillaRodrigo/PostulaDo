@@ -16,11 +16,31 @@ import {
 import { TECNOLOGIAS } from '@/lib/vocab';
 
 const OFERTAS = [
-  { n: '01', titulo: 'Site Reliability Engineer', empresa: 'Norte fintech', temas: '4 temas' },
-  { n: '02', titulo: 'Platform Engineer', empresa: 'Pampa SaaS', temas: '4 temas' },
-  { n: '03', titulo: 'Cloud Infrastructure Engineer', empresa: 'Delta Sur', temas: '3 temas' },
+  {
+    n: '01',
+    titulo: 'Site Reliability Engineer',
+    empresa: 'Norte fintech',
+    temas: '4 temas',
+  },
+  {
+    n: '02',
+    titulo: 'Platform Engineer',
+    empresa: 'Pampa SaaS',
+    temas: '4 temas',
+  },
+  {
+    n: '03',
+    titulo: 'Cloud Infrastructure Engineer',
+    empresa: 'Delta Sur',
+    temas: '3 temas',
+  },
   { n: '04', titulo: 'DevOps Lead', empresa: 'Taller Norte', temas: '3 temas' },
-  { n: '05', titulo: 'Infrastructure Developer', empresa: 'Kobalto', temas: '2 temas' },
+  {
+    n: '05',
+    titulo: 'Infrastructure Developer',
+    empresa: 'Kobalto',
+    temas: '2 temas',
+  },
 ];
 
 const PASOS = [
@@ -111,10 +131,13 @@ export default function Page() {
             <span className="hero__word">qué estudiar</span>.
           </h1>
           <p className="hero__sub">
-            Las ofertas que estás mirando ya dicen qué tenés que saber. El problema
-            es que están separadas. Leídas juntas, te dicen por dónde empezar.
+            Las ofertas que estás mirando ya dicen qué tenés que saber. El
+            problema es que están separadas. Leídas juntas, te dicen por dónde
+            empezar.
           </p>
-          <p className="hero__aud">Para profesionales de IT en búsqueda activa</p>
+          <p className="hero__aud">
+            Para profesionales de IT en búsqueda activa
+          </p>
           <div id="lote">
             <LoteForm />
           </div>
@@ -157,7 +180,9 @@ export default function Page() {
                     <div key={row.key} className="cov">
                       <div>
                         <div className="cov__label">
-                          <span className="cov__num">{String(i + 1).padStart(2, '0')}</span>
+                          <span className="cov__num">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
                           {row.label}
                         </div>
                         <div className="bar">
@@ -191,8 +216,8 @@ export default function Page() {
       <div className="strip" id="ejemplo">
         <div className="wrap">
           <p>
-            Reconoce {TECNOLOGIAS.length} tecnologías y las agrupa en el oficio al
-            que apuntan — no solo en el nombre del producto:
+            Reconoce {TECNOLOGIAS.length} tecnologías y las agrupa en el oficio
+            al que apuntan — no solo en el nombre del producto:
           </p>
           <div className="strip__list">
             {TECNOLOGIAS.map((t) => (
@@ -219,7 +244,9 @@ export default function Page() {
             {PASOS.map((paso, i) => (
               <li key={paso.titulo} className="flow__step">
                 <span className="flow__node" aria-hidden="true" />
-                <span className="flow__n">{String(i + 1).padStart(2, '0')}</span>
+                <span className="flow__n">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 <h3>{paso.titulo}</h3>
                 <p>{paso.texto}</p>
               </li>
@@ -237,9 +264,9 @@ export default function Page() {
               Comparten ecosistema.
             </h2>
             <p>
-              Cinco ofertas de cinco empresas piden React, AWS, Docker y Kubernetes.
-              Leídas por separado son cuatro planes distintos. Leídas juntas, son un
-              solo tipo de trabajo.
+              Cinco ofertas de cinco empresas piden React, AWS, Docker y
+              Kubernetes. Leídas por separado son cuatro planes distintos.
+              Leídas juntas, son un solo tipo de trabajo.
             </p>
           </div>
           <div className="converge">
@@ -258,10 +285,13 @@ export default function Page() {
               <h3>{EXAMPLE_ECOSYSTEM}</h3>
               <div className="eco__lab">Tipo de trabajo detectado</div>
               <p>
-                El agrupamiento no se basa en coincidencias de stacks: se basa en{' '}
-                <span style={{ color: 'var(--sp-2)' }}>hacia dónde apuntan</span>. Las
-                cinco postings describen el mismo oficio, con cinco vocabularios
-                técnicos encima.
+                El agrupamiento no se basa en coincidencias de stacks: se basa
+                en{' '}
+                <span style={{ color: 'var(--sp-2)' }}>
+                  hacia dónde apuntan
+                </span>
+                . Las cinco postings describen el mismo oficio, con cinco
+                vocabularios técnicos encima.
               </p>
               <div className="eco__bars">
                 {EXAMPLE_THEMES.map((t) => (
@@ -284,9 +314,9 @@ export default function Page() {
           <div className="sechead">
             <h2>Una luz, cinco colores</h2>
             <p>
-              El lote entra como luz blanca y sale descompuesto en los temas que lo
-              cubren. Cada rayo es un tema; el largo del rayo es el porcentaje de
-              ofertas que lo piden.
+              El lote entra como luz blanca y sale descompuesto en los temas que
+              lo cubren. Cada rayo es un tema; el largo del rayo es el
+              porcentaje de ofertas que lo piden.
             </p>
           </div>
           <PrismDiagram
@@ -306,9 +336,9 @@ export default function Page() {
               ofertas tienen en común
             </h2>
             <p>
-              No tools sueltas. Los temas que el lote pide en común, ordenados por
-              la parte del oficio que cubren — con el porcentaje de ofertas que los
-              piden a la vista.
+              No tools sueltas. Los temas que el lote pide en común, ordenados
+              por la parte del oficio que cubren — con el porcentaje de ofertas
+              que los piden a la vista.
             </p>
           </div>
           <p className="ejemplo-tag ejemplo-tag--light">Ejemplo</p>
@@ -341,14 +371,15 @@ export default function Page() {
       <section className="stats">
         <div className="wrap prose-lead">
           <p className="prose-lead__big">
-            Ejemplo: de <b>{EXAMPLE_LOTE}</b> ofertas, <b>{PRINCIPALES.length}</b>{' '}
-            temas cubren el <b>{EXAMPLE_COBERTURA_CONJUNTA}%</b>.
+            Ejemplo: de <b>{EXAMPLE_LOTE}</b> ofertas,{' '}
+            <b>{PRINCIPALES.length}</b> temas cubren el{' '}
+            <b>{EXAMPLE_COBERTURA_CONJUNTA}%</b>.
           </p>
           <p className="prose-lead__sub">
             De esos cinco temas, {PRINCIPALES.length} cubren el{' '}
             {EXAMPLE_COBERTURA_CONJUNTA}% del lote. Y para cada uno, las
-            alternativas por las que podés entrar. El denominador —{EXAMPLE_LOTE}{' '}
-            ofertas— es siempre el lote que vos pegaste.
+            alternativas por las que podés entrar. El denominador —
+            {EXAMPLE_LOTE} ofertas— es siempre el lote que vos pegaste.
           </p>
         </div>
       </section>
@@ -361,8 +392,8 @@ export default function Page() {
             Salí con un plan.
           </h2>
           <p>
-            Cuando termine, el plan aparece en esta misma pantalla, con los temas
-            ordenados por la cobertura que tienen en tu lote.
+            Cuando termine, el plan aparece en esta misma pantalla, con los
+            temas ordenados por la cobertura que tienen en tu lote.
           </p>
           <a className="btn btn--ink btn--caustic" href="#lote">
             Ver mi plan
@@ -380,8 +411,8 @@ export default function Page() {
             </h2>
             <p className="faq__lead">
               Un plan sale de lo que el mercado pidió, no de lo que va a pedir.
-              PostulaDo te muestra de dónde viene cada porcentaje y deja las brechas
-              a la vista.
+              PostulaDo te muestra de dónde viene cada porcentaje y deja las
+              brechas a la vista.
             </p>
           </div>
           <div>

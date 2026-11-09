@@ -177,8 +177,7 @@ function FilaLote({
     <div className="cuenta__lote">
       <span className="cuenta__lote-nombre">{mostrado}</span>
       <span className="cuenta__lote-meta">
-        {lote.ids.length}{' '}
-        {lote.ids.length === 1 ? 'oferta' : 'ofertas'} ·{' '}
+        {lote.ids.length} {lote.ids.length === 1 ? 'oferta' : 'ofertas'} ·{' '}
         {fecha(lote.createdAt)}
       </span>
       {abierto ? (
@@ -530,15 +529,19 @@ export function CuentaPanel({
               onAbrir={(l) => {
                 // El que se abre deja de estar pendiente en esta lista: el
                 // cambio de nombre pudo estar editorialmente pendiente.
-                setLotes((prev) =>
-                  prev?.map((p) => (p.id === l.id ? { ...l } : p)) ?? null,
+                setLotes(
+                  (prev) =>
+                    prev?.map((p) => (p.id === l.id ? { ...l } : p)) ?? null,
                 );
                 onAbrir(l);
               }}
               onAgregar={onAgregar}
               onRenombrado={(r) =>
-                setLotes((prev) =>
-                  prev?.map((p) => (p.id === r.id ? { ...p, nombre: r.nombre } : p)) ?? null,
+                setLotes(
+                  (prev) =>
+                    prev?.map((p) =>
+                      p.id === r.id ? { ...p, nombre: r.nombre } : p,
+                    ) ?? null,
                 )
               }
               onLoteBorrado={(l) => {
@@ -640,9 +643,8 @@ export function CuentaPanel({
           ) : (
             <>
               <p className="cuenta__borrar-texto">
-                Se borran{' '}
-                <b>todas tus ofertas, todos tus lotes y sus planes</b>, y no
-                vuelven ni pidiendo el mismo correo. Para confirmar,
+                Se borran <b>todas tus ofertas, todos tus lotes y sus planes</b>
+                , y no vuelven ni pidiendo el mismo correo. Para confirmar,
                 escribí tu contraseña.
               </p>
               <form
@@ -709,7 +711,11 @@ export function CuentaPanel({
             </>
           ) : (
             <>
-              <button type="button" className="cuenta__action" onClick={onSalir}>
+              <button
+                type="button"
+                className="cuenta__action"
+                onClick={onSalir}
+              >
                 Cerrar sesión en este dispositivo
               </button>
               <button

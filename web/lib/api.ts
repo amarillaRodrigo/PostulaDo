@@ -7,7 +7,10 @@
  * dice que la API no esta conectada.
  */
 
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(
+  /\/$/,
+  '',
+);
 
 export const API_CONFIGURADA = API_URL.length > 0;
 
@@ -357,7 +360,10 @@ async function pedirConSesion<T>(
     throw new ErrorApi('Entrá de nuevo para continuar.', 401);
   }
 
-  if (sesion.expiraEn > 0 && sesion.expiraEn - Date.now() < MARGEN_REFRESCO_MS) {
+  if (
+    sesion.expiraEn > 0 &&
+    sesion.expiraEn - Date.now() < MARGEN_REFRESCO_MS
+  ) {
     sesion = (await refrescarSesion()) ?? sesion;
   }
 
@@ -566,9 +572,7 @@ export async function listarSesiones(): Promise<SesionAbierta[] | null> {
       await pedirConSesion<unknown>('/auth/sesiones', {
         method: 'POST',
         body: JSON.stringify(
-          sesion.refreshToken
-            ? { refresh_token: sesion.refreshToken }
-            : {},
+          sesion.refreshToken ? { refresh_token: sesion.refreshToken } : {},
         ),
       }),
     );
@@ -630,8 +634,7 @@ export async function borrarCuenta(
   } catch (e) {
     return {
       ok: false,
-      message:
-        e instanceof Error ? e.message : 'No pudimos borrar la cuenta.',
+      message: e instanceof Error ? e.message : 'No pudimos borrar la cuenta.',
     };
   }
 }
@@ -835,9 +838,9 @@ export async function recuperarPlan(): Promise<Resultado | null> {
 }
 
 /** Analiza una URL. Encola el trabajo y lo espera — el cliente hace el poll. */
-async function analizar(
-  url: string,
-): Promise<{ datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number } }> {
+async function analizar(url: string): Promise<{
+  datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number };
+}> {
   const encolado = await pedirConSesion<{ jobId: string }>(
     '/postulaciones/analizar',
     {
@@ -851,7 +854,9 @@ async function analizar(
 
     const estado = await pedirConSesion<{
       status?: string;
-      result?: { datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number } };
+      result?: {
+        datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number };
+      };
     }>(`/postulaciones/analizar/status/${encolado.jobId}`);
 
     if (estado.status === 'completed') return estado.result ?? {};

@@ -29,8 +29,8 @@ export default function Error({
         <h1 className="fallo__titulo">Se rompió algo en esta pantalla</h1>
         <p className="fallo__texto">
           Lo que estabas haciendo no llegó a completarse. Tus ofertas y tus
-          lotes siguen guardados en tu cuenta: podés probar de nuevo o volver
-          al plan y seguir desde ahí.
+          lotes siguen guardados en tu cuenta: podés probar de nuevo o volver al
+          plan y seguir desde ahí.
         </p>
         <div className="fallo__acciones">
           <button type="button" className="btn btn--ink" onClick={reset}>
