@@ -4,18 +4,14 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || 'dummy-secret';
 
 import { NestFactory } from '@nestjs/core';
 import { writeFileSync, mkdirSync } from 'fs';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from '../src/app.module';
+import { swaggerConfig } from '../src/common/swagger.config';
 
 async function generate() {
   const app = await NestFactory.create(AppModule, { logger: false });
 
-  const config = new DocumentBuilder()
-    .setTitle('Postulado API')
-    .setDescription('API para la gestión de usuarios y postulaciones')
-    .setVersion('1.0')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
-    .build();
+  const config = swaggerConfig();
 
   const document = SwaggerModule.createDocument(app, config);
 

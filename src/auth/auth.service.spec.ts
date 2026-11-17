@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import {
-  BadRequestException,
   ConflictException,
+  GoneException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { User, UserRole } from '@prisma/client';
 import { compare } from 'bcryptjs';
 import { createHash } from 'node:crypto';
+import { ReglaDeNegocioException } from '../common/exceptions/regla-de-negocio.exception';
 import { AuthService } from './auth.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { MailService } from '../mail/mail.service';
@@ -331,7 +332,7 @@ describe('AuthService', () => {
       mockUsuariosService.user.mockResolvedValueOnce(null);
 
       await expect(service.verificarEmail(token)).rejects.toThrow(
-        BadRequestException,
+        GoneException,
       );
     });
 
@@ -533,7 +534,7 @@ describe('AuthService', () => {
 
       await expect(
         service.resetPassword(token, 'NuevaClave123'),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(GoneException);
       expect(mockUsuariosService.updateUser).not.toHaveBeenCalled();
     });
 
@@ -756,7 +757,7 @@ describe('AuthService', () => {
 
     it('sin manera de identificar la actual, cerrar las otras se niega', async () => {
       await expect(service.cerrarOtrasSesiones('user-1')).rejects.toThrow(
-        BadRequestException,
+        ReglaDeNegocioException,
       );
       expect(mockPrisma.refreshToken.updateMany).not.toHaveBeenCalled();
     });
@@ -807,7 +808,7 @@ describe('AuthService', () => {
 
       await expect(
         service.borrarCuenta('user-1', 'otra-contra'),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ReglaDeNegocioException);
       expect(mockPrisma.user.delete).not.toHaveBeenCalled();
     });
 
@@ -815,7 +816,7 @@ describe('AuthService', () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce(null);
 
       await expect(service.borrarCuenta('user-1', 'la-contra')).rejects.toThrow(
-        BadRequestException,
+        ReglaDeNegocioException,
       );
       expect(compare).not.toHaveBeenCalled();
       expect(mockPrisma.user.delete).not.toHaveBeenCalled();

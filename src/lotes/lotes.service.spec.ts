@@ -1,9 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  BadRequestException,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ReglaDeNegocioException } from '../common/exceptions/regla-de-negocio.exception';
 import { PrismaService } from '../prisma.service';
 import { LotesService } from './lotes.service';
 
@@ -57,7 +54,7 @@ describe('LotesService', () => {
       mockPrisma.postulacion.findMany.mockResolvedValueOnce([]);
 
       await expect(service.crear('user-1', ['ajena'])).rejects.toThrow(
-        BadRequestException,
+        ReglaDeNegocioException,
       );
       expect(mockPrisma.lote.create).not.toHaveBeenCalled();
     });
@@ -193,7 +190,7 @@ describe('LotesService', () => {
 
       await expect(
         service.agregar('user-1', 'lote-1', ['ajena']),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ReglaDeNegocioException);
       expect(mockPrisma.lote.update).not.toHaveBeenCalled();
     });
 
@@ -221,7 +218,7 @@ describe('LotesService', () => {
 
       await expect(
         service.agregar('user-1', 'lote-1', ['x', 'y']),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ReglaDeNegocioException);
       expect(mockPrisma.lote.update).not.toHaveBeenCalled();
     });
   });

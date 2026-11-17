@@ -1,6 +1,6 @@
 import {
-  BadRequestException,
   ConflictException,
+  GoneException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { User } from '@prisma/client';
 import { compare } from 'bcryptjs';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { ReglaDeNegocioException } from '../common/exceptions/regla-de-negocio.exception';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma.service';
 import { CreateUsuarioDto } from '../usuarios/dto/create-usuario.dto';
@@ -371,7 +372,7 @@ export class AuthService {
     if (!hashLocal) {
       // Sin manera de saber cuál es la actual, cerrar "las otras" no se
       // puede hacer sin cerrar también ésta: se niega.
-      throw new BadRequestException(
+      throw new ReglaDeNegocioException(
         'Necesitamos el refresh token para saber qué sesión conservar.',
       );
     }
@@ -405,7 +406,9 @@ export class AuthService {
 
     if (!esValida) {
       // Mismo mensaje sin importar si la cuenta existe: no hay adivinación.
-      throw new BadRequestException('La contraseña no es correcta.');
+      // 422 y no 401: la sesión ya dijo quién es, el pedido está bien formado
+      // y lo que falla es la confirmación.
+      throw new ReglaDeNegocioException('La contraseña no es correcta.');
     }
 
     await this.prisma.user.delete({ where: { id: userId } });
@@ -441,7 +444,11 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException(
+      // 410 y no 422: el enlace existió y ya no sirve (se usó, o se pidió uno
+      // nuevo y este quedó viejo). El código no puede distinguir "nunca existió"
+      // de "ya se usó" — al verificar, el token se pone en null — y en los dos
+      // casos la respuesta para la persona es la misma: pedí uno nuevo.
+      throw new GoneException(
         'El enlace no es válido o ya se usó. Pedí uno nuevo desde tu cuenta.',
       );
     }
@@ -454,7 +461,7 @@ export class AuthService {
       !user.emailVerificationExpiresAt ||
       user.emailVerificationExpiresAt.getTime() < Date.now()
     ) {
-      throw new BadRequestException(
+      throw new GoneException(
         'El enlace venció. Pedí uno nuevo desde tu cuenta.',
       );
     }
@@ -568,7 +575,9 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException(
+      // 410 por la misma razón que en la verificación de email: el enlace
+      // existió y ya no sirve.
+      throw new GoneException(
         'El enlace no es válido o ya se usó. Pedí uno nuevo.',
       );
     }
@@ -577,7 +586,7 @@ export class AuthService {
       !user.passwordResetExpiresAt ||
       user.passwordResetExpiresAt.getTime() < Date.now()
     ) {
-      throw new BadRequestException(
+      throw new GoneException(
         'El enlace venció. Pedí uno nuevo desde "Olvidé mi contraseña".',
       );
     }

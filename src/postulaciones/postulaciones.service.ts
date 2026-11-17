@@ -1,9 +1,9 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { ReglaDeNegocioException } from '../common/exceptions/regla-de-negocio.exception';
 import { PrismaService } from '../prisma.service';
 import { CreatePostulacionDto } from './dto/create-postulacion.dto';
 import { UpdatePostulacionDto } from './dto/update-postulacion.dto';
@@ -124,7 +124,7 @@ export class PostulacionesService {
     // Sin URL hay que pegar el texto de la oferta: es el camino cuando el
     // portal no se puede abrir. Con nada de las dos, no hay nada que analizar.
     if (!dto.url && !dto.title && !dto.description) {
-      throw new BadRequestException(
+      throw new ReglaDeNegocioException(
         'La oferta necesita una URL o su texto pegado.',
       );
     }

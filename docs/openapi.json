@@ -8,6 +8,76 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -35,6 +105,76 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PublicUserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -82,6 +222,76 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -113,6 +323,76 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PublicUserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -163,6 +443,76 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -198,6 +548,76 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Create a new user",
@@ -221,6 +641,76 @@
           }
         },
         "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "default": {
             "description": "Queue job created successfully"
           }
@@ -250,6 +740,76 @@
           }
         ],
         "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "default": {
             "description": "Analysis job status and/or result"
           }
@@ -280,6 +840,76 @@
           }
         },
         "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "default": {
             "description": "Postulacion created"
           }
@@ -335,6 +965,76 @@
           }
         ],
         "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "default": {
             "description": "List of postulaciones"
           }
@@ -355,6 +1055,76 @@
         "operationId": "PostulacionesController_getLearningAnalysis",
         "parameters": [],
         "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "default": {
             "description": "Learning roadmap analysis"
           }
@@ -365,6 +1135,186 @@
           }
         ],
         "summary": "Analyze application patterns and suggest learning topics",
+        "tags": [
+          "postulaciones"
+        ]
+      }
+    },
+    "/postulaciones/analisis-lote": {
+      "get": {
+        "operationId": "PostulacionesController_getLoteAnalysis",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Batch analysis with themes, coverage and alternatives"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Analyze a specific batch of postulaciones (the denominator is the batch)",
+        "tags": [
+          "postulaciones"
+        ]
+      }
+    },
+    "/postulaciones/analisis-ruta": {
+      "get": {
+        "operationId": "PostulacionesController_getRutaAnalysis",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Route nodes topologically ordered, with sources and honest denominators"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Learning route for a batch (or the whole corpus): temas in study order with prerequisites",
         "tags": [
           "postulaciones"
         ]
@@ -384,6 +1334,76 @@
           }
         ],
         "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "default": {
             "description": "Postulacion returned"
           }
@@ -421,6 +1441,76 @@
           }
         },
         "responses": {
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "default": {
             "description": "Postulacion updated"
           }
@@ -433,6 +1523,608 @@
         "summary": "Update a postulacion",
         "tags": [
           "postulaciones"
+        ]
+      }
+    },
+    "/lotes": {
+      "post": {
+        "operationId": "LotesController_crear",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearLoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Batch saved"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Save a batch of postings as a named plan",
+        "tags": [
+          "lotes"
+        ]
+      },
+      "get": {
+        "operationId": "LotesController_listar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Batches, newest first"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List the batches of the authenticated user",
+        "tags": [
+          "lotes"
+        ]
+      }
+    },
+    "/lotes/{id}": {
+      "get": {
+        "operationId": "LotesController_obtener",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get one batch by id",
+        "tags": [
+          "lotes"
+        ]
+      },
+      "delete": {
+        "operationId": "LotesController_borrar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch deleted; postings are kept"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete a batch of the authenticated user",
+        "tags": [
+          "lotes"
+        ]
+      }
+    },
+    "/lotes/{id}/nombre": {
+      "put": {
+        "operationId": "LotesController_renombrar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenombrarLoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch renamed"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Rename a batch of the authenticated user",
+        "tags": [
+          "lotes"
+        ]
+      }
+    },
+    "/lotes/{id}/ofertas": {
+      "post": {
+        "operationId": "LotesController_agregar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgregarOfertasDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Batch with the added postings"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Add own postings to a saved batch",
+        "tags": [
+          "lotes"
         ]
       }
     },
@@ -457,6 +2149,76 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AuthResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -492,9 +2254,1138 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Login with email and password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/verificar": {
+      "post": {
+        "operationId": "AuthController_verificar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerificarEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email confirmed"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Confirm an email address with the token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/reenviar-verificacion": {
+      "post": {
+        "operationId": "AuthController_reenviar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Confirmation email sent again"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Resend the confirmation email",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/yo": {
+      "get": {
+        "operationId": "AuthController_yo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Current user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicUserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get the authenticated user profile",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/olvide-password": {
+      "post": {
+        "operationId": "AuthController_olvidePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OlvidePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The same answer whether or not the email has an account. `enviado` is false only when the mail provider could not send it."
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send a password reset link",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Set a new password with the reset token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New access and refresh tokens (the old one is revoked)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Exchange a refresh token for a new token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CerrarSesionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session closed (idempotent)"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Revoke a refresh token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout-todos": {
+      "post": {
+        "operationId": "AuthController_logoutTodos",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All sessions closed (including this one)"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Revoke every refresh token of the account",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/sesiones": {
+      "post": {
+        "operationId": "AuthController_listarSesiones",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CerrarSesionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Open sessions, newest first"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List open sessions; the current device is marked",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout-otros": {
+      "post": {
+        "operationId": "AuthController_logoutOtros",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CerrarSesionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessions closed, this device stays open"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Close every session except the caller's device",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/borrar-cuenta": {
+      "post": {
+        "operationId": "AuthController_borrarCuenta",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BorrarCuentaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account and all its data deleted"
+          },
+          "400": {
+            "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No sabemos quién sos: credenciales inválidas o token vencido/revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El registro no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El pedido es válido pero choca con el estado actual del mundo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete the account permanently (needs password)",
         "tags": [
           "auth"
         ]
@@ -518,6 +3409,41 @@
       }
     },
     "schemas": {
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 422
+          },
+          "message": {
+            "oneOf": [
+              {
+                "type": "string",
+                "example": "La oferta necesita una URL o su texto pegado."
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "email must be an email"
+                ]
+              }
+            ]
+          },
+          "error": {
+            "type": "string",
+            "example": "Unprocessable Entity"
+          }
+        },
+        "required": [
+          "statusCode",
+          "message",
+          "error"
+        ]
+      },
       "PublicUserDto": {
         "type": "object",
         "properties": {
@@ -556,6 +3482,12 @@
           "updatedAt": {
             "type": "string",
             "example": "2024-01-01T00:00:00.000Z"
+          },
+          "emailVerifiedAt": {
+            "type": "object",
+            "nullable": true,
+            "example": "2024-01-02T00:00:00.000Z",
+            "description": "null mientras el correo no esté confirmado"
           }
         },
         "required": [
@@ -656,10 +3588,7 @@
             "type": "string",
             "example": "Profesional y dinámico"
           }
-        },
-        "required": [
-          "url"
-        ]
+        }
       },
       "UpdatePostulacionDto": {
         "type": "object",
@@ -714,6 +3643,58 @@
           }
         }
       },
+      "CrearLoteDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "Ids de las postulaciones que forman el lote",
+            "example": [
+              "9a1b2c3d-0000-4000-8000-000000000000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Backend Engineering"
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "RenombrarLoteDto": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "example": "Backend Engineering"
+          }
+        },
+        "required": [
+          "nombre"
+        ]
+      },
+      "AgregarOfertasDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "Ids de las postulaciones que entran al lote",
+            "example": [
+              "9a1b2c3d-0000-4000-8000-000000000000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
       "AuthResultDto": {
         "type": "object",
         "properties": {
@@ -721,12 +3702,23 @@
             "type": "string",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           },
+          "refresh_token": {
+            "type": "string",
+            "example": "9f2c...96 caracteres hexadecimales"
+          },
+          "expires_in": {
+            "type": "number",
+            "example": 900,
+            "description": "Segundos de vida del access token"
+          },
           "user": {
             "$ref": "#/components/schemas/PublicUserDto"
           }
         },
         "required": [
           "access_token",
+          "refresh_token",
+          "expires_in",
           "user"
         ]
       },
@@ -744,6 +3736,84 @@
         },
         "required": [
           "email",
+          "password"
+        ]
+      },
+      "VerificarEmailDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token que viaja en el enlace del correo",
+            "example": "a3f1...64 caracteres hexadecimales"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "OlvidePasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@example.com",
+            "description": "Correo de la cuenta. La respuesta es la misma exista o no, para no revelar qué correos están registrados."
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token que viaja en el enlace del correo",
+            "example": "a3f1...64 caracteres hexadecimales"
+          },
+          "password": {
+            "type": "string",
+            "example": "NuevaClave123",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "token",
+          "password"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "description": "Refresh token emitido en el login o en un refresh anterior"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ]
+      },
+      "CerrarSesionDto": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "description": "Refresh token de la sesión que se quiere cerrar. Sin token la respuesta es la misma, para no revelar si existía."
+          }
+        }
+      },
+      "BorrarCuentaDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Contraseña actual: borrar la cuenta es irreversible"
+          }
+        },
+        "required": [
           "password"
         ]
       }

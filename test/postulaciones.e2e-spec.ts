@@ -1,12 +1,10 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EstadoPostulacion } from '@prisma/client';
 import request from 'supertest';
 
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma.service';
-import { LoggingInterceptor } from '../src/common/interceptors/logging.interceptor';
-import { StripPasswordInterceptor } from '../src/common/interceptors/strip-password.interceptor';
 
 jest.setTimeout(30000);
 
@@ -54,20 +52,9 @@ describe('Integracion postulaciones', () => {
 
     app = moduleFixture.createNestApplication();
 
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-      }),
-    );
-
-    app.useGlobalInterceptors(
-      new LoggingInterceptor(),
-      new StripPasswordInterceptor(),
-    );
-
+    // El `ValidationPipe` y los interceptores están en `AppModule`
+    // (`APP_PIPE` / `APP_INTERCEPTOR`): los tests usan la misma configuración
+    // que producción, sin replicarla a mano.
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -233,7 +220,7 @@ describe('Integracion postulaciones', () => {
       .send({
         url: 'no-es-una-url',
       })
-      .expect(400);
+      .expect(422);
 
     expect(response.body.message).toBeDefined();
   });
@@ -695,6 +682,6 @@ describe('Integracion postulaciones', () => {
       .post('/postulaciones')
       .set('Authorization', `Bearer ${owner.token}`)
       .send({})
-      .expect(400);
+      .expect(422);
   });
 });

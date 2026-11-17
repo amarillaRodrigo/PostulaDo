@@ -1,10 +1,8 @@
-import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { PrismaService } from './prisma.service';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { StripPasswordInterceptor } from './common/interceptors/strip-password.interceptor';
+import { swaggerConfig } from './common/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,29 +26,11 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  // El `ValidationPipe` y los interceptores están registrados en `AppModule`
+  // (`APP_PIPE` y `APP_INTERCEPTOR`), no acá: así los tests e2e usan la misma
+  // configuración que producción, sin replicarla a mano.
 
-  app.useGlobalInterceptors(
-    new LoggingInterceptor(),
-    new StripPasswordInterceptor(),
-  );
-
-  const config = new DocumentBuilder()
-    .setTitle('Postulado API')
-    .setDescription('API para la gestión de usuarios y postulaciones')
-    .setVersion('1.0')
-    .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-      'access-token',
-    )
-    .build();
+  const config = swaggerConfig();
 
   if (process.env.NODE_ENV !== 'production') {
     const document = SwaggerModule.createDocument(app, config);

@@ -1,11 +1,9 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma.service';
-import { LoggingInterceptor } from '../src/common/interceptors/logging.interceptor';
-import { StripPasswordInterceptor } from '../src/common/interceptors/strip-password.interceptor';
 
 jest.setTimeout(30000);
 
@@ -64,12 +62,9 @@ describe('Integracion lotes', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalInterceptors(new LoggingInterceptor());
-    app.useGlobalInterceptors(new StripPasswordInterceptor());
-    app.useGlobalPipes(
-      new ValidationPipe({ transform: true, whitelist: true }),
-    );
-
+    // El `ValidationPipe` y los interceptores están en `AppModule`
+    // (`APP_PIPE` / `APP_INTERCEPTOR`): los tests usan la misma configuración
+    // que producción, sin replicarla a mano.
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -161,7 +156,7 @@ describe('Integracion lotes', () => {
       .post(`/lotes/${loteId}/ofertas`)
       .set('Authorization', `Bearer ${owner.token}`)
       .send({ ids: [ajena] })
-      .expect(400);
+      .expect(422);
 
     const ampliada = await request(app.getHttpServer())
       .post(`/lotes/${loteId}/ofertas`)

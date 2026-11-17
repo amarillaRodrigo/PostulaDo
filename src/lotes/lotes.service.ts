@@ -1,9 +1,9 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ReglaDeNegocioException } from '../common/exceptions/regla-de-negocio.exception';
 import { PrismaService } from '../prisma.service';
 
 /** Tope igual al del DTO de creación: un lote no crece sin control. */
@@ -26,7 +26,7 @@ export class LotesService {
     });
 
     if (propias.length === 0) {
-      throw new BadRequestException(
+      throw new ReglaDeNegocioException(
         'El lote no tiene ofertas guardadas tuyas.',
       );
     }
@@ -98,7 +98,7 @@ export class LotesService {
     });
 
     if (propias.length === 0) {
-      throw new BadRequestException(
+      throw new ReglaDeNegocioException(
         'Esas ofertas no están guardadas en tu cuenta.',
       );
     }
@@ -111,7 +111,7 @@ export class LotesService {
     }
 
     if (lote.ids.length + nuevas.length > MAX_IDS) {
-      throw new BadRequestException(
+      throw new ReglaDeNegocioException(
         `El lote puede tener hasta ${MAX_IDS} ofertas; este paso lo llevaría a ${lote.ids.length + nuevas.length}.`,
       );
     }

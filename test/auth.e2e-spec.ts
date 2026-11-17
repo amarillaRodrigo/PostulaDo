@@ -1,10 +1,8 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma.service';
-import { LoggingInterceptor } from '../src/common/interceptors/logging.interceptor';
-import { StripPasswordInterceptor } from '../src/common/interceptors/strip-password.interceptor';
 
 describe('Integracion autenticacion y usuarios', () => {
   let app: INestApplication;
@@ -27,20 +25,9 @@ describe('Integracion autenticacion y usuarios', () => {
 
     app = moduleFixture.createNestApplication();
 
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-      }),
-    );
-
-    app.useGlobalInterceptors(
-      new LoggingInterceptor(),
-      new StripPasswordInterceptor(),
-    );
-
+    // El `ValidationPipe` y los interceptores están en `AppModule`
+    // (`APP_PIPE` / `APP_INTERCEPTOR`): los tests usan la misma configuración
+    // que producción, sin replicarla a mano.
     await app.init();
 
     prisma = app.get(PrismaService);
@@ -231,7 +218,7 @@ describe('Integracion autenticacion y usuarios', () => {
       .post('/auth/logout-otros')
       .set('Authorization', `Bearer ${token}`)
       .send({})
-      .expect(400);
+      .expect(422);
 
     const cerradas = await request(app.getHttpServer())
       .post('/auth/logout-otros')
@@ -292,7 +279,7 @@ describe('Integracion autenticacion y usuarios', () => {
       .post('/auth/borrar-cuenta')
       .set('Authorization', `Bearer ${token}`)
       .send({ password: 'not-the-password' })
-      .expect(400);
+      .expect(422);
 
     const queda = await request(app.getHttpServer())
       .get('/auth/yo')
@@ -305,7 +292,7 @@ describe('Integracion autenticacion y usuarios', () => {
       .post('/auth/borrar-cuenta')
       .set('Authorization', `Bearer ${token}`)
       .send({})
-      .expect(400);
+      .expect(422);
 
     // La contraseña correcta borra la cuenta para siempre.
     await request(app.getHttpServer())
