@@ -33,11 +33,16 @@ export function swaggerConfig() {
       //   409  el pedido es válido pero choca con el estado actual (ese correo
       //        ya está registrado).
       //   410  algo existió y ya no (el enlace de verificación venció o se
-      //        usó).
+      //        usó; el trabajo de análisis se purgó de la cola).
       //   422  el pedido se entendió y está bien formado, pero su contenido no
       //        cumple las reglas: el mail no tiene forma de mail, el lote
       //        apunta a ofertas ajenas, la contraseña de confirmación no
       //        coincide.
+      //   503  una dependencia no está disponible ahora. Es transitorio y se
+      //        reintenta con backoff. El `Retry-After` solo aparece cuando el
+      //        motivo es la cola de análisis: el plazo lo trae la excepción
+      //        (`ColaLlenaException`), no el status, porque un 503 genérico
+      //        ("Redis no responde") no se reintenta igual.
       .addGlobalResponse(
         {
           status: 400,
@@ -70,13 +75,19 @@ export function swaggerConfig() {
         {
           status: 410,
           description:
-            'Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.',
+            'Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.',
           type: ErrorResponseDto,
         },
         {
           status: 422,
           description:
             'El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.',
+          type: ErrorResponseDto,
+        },
+        {
+          status: 503,
+          description:
+            'Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.',
           type: ErrorResponseDto,
         },
       )

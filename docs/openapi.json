@@ -60,7 +60,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -71,6 +71,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -160,7 +170,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -171,6 +181,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -274,7 +294,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -285,6 +305,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -378,7 +408,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -389,6 +419,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -495,7 +535,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -506,6 +546,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -600,7 +650,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -611,6 +661,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -628,6 +688,7 @@
     },
     "/postulaciones/analizar": {
       "post": {
+        "description": "Encola el análisis de la oferta y devuelve `202 Accepted`: el trabajo todavía no corrió.\n\nLa respuesta trae lo que el cliente necesita y antes tenía que adivinar:\n- `jobId`: el identificador del trabajo (un UUID).\n- `Location`: la URL donde consultar el estado (`GET /postulaciones/analizar/status/:jobId`).\n- `pollAfterMs`: cuántos milisegundos esperar entre consultas.\n\nEl intervalo de polling va en el body y no en el header `Retry-After`:\n`Retry-After` significa \"reintentá **esta** request\" y acá no hay nada que\nreintentar — el trabajo ya está encolado. Un cliente con lógica genérica que\nreintenta lo mismo en cada `Retry-After` duplicaría jobs.\n\nEl análisis se hace contra el `profileText` del usuario. Si no tiene, se usa un\nperfil genérico por defecto: por eso la respuesta devuelve `profileText` y\n`perfilPorDefecto`, y dos personas con el mismo body pueden recibir análisis distintos.",
         "operationId": "PostulacionesController_analyze",
         "parameters": [],
         "requestBody": {
@@ -641,6 +702,16 @@
           }
         },
         "responses": {
+          "202": {
+            "description": "Trabajo encolado. Trae `jobId` y `pollAfterMs` en el body, y `Location` (dónde consultar) en los headers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalizarResponseDto"
+                }
+              }
+            }
+          },
           "400": {
             "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
             "content": {
@@ -692,7 +763,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -711,8 +782,8 @@
               }
             }
           },
-          "default": {
-            "description": "Queue job created successfully"
+          "503": {
+            "description": "La cola de análisis está llena (Redis cerca del tope de memoria del plan) y no se pudo encolar. Es transitorio: reintentá con backoff. El header `Retry-After` dice cada cuántos segundos."
           }
         },
         "security": [
@@ -728,6 +799,7 @@
     },
     "/postulaciones/analizar/status/{jobId}": {
       "get": {
+        "description": "Devuelve el estado del trabajo: `waiting`, `active`, `completed` o `failed`.\n\nSolo el dueño del trabajo puede consultarlo. Los `jobId` son UUID, así que no\nhay nada que enumerar y un `403` no filtra la existencia de ningún trabajo.\n\nLa ventana de consulta es finita: los trabajos terminados se borran de Redis a las\n24 h de terminar, o antes si se supera el tope de 200 trabajos completados.\nDespués de eso, `410` dice que el trabajo existió pero expiró y hay que encolarlo\nde nuevo.",
         "operationId": "PostulacionesController_getStatus",
         "parameters": [
           {
@@ -740,6 +812,16 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Estado del trabajo y, si terminó bien, el resultado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadoAnalisisResponseDto"
+                }
+              }
+            }
+          },
           "400": {
             "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
             "content": {
@@ -761,24 +843,10 @@
             }
           },
           "403": {
-            "description": "Sabemos quién sos pero no tenés acceso a ese recurso.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
+            "description": "El trabajo existe (o existió) pero es de otro usuario. Su `result` incluye el CV optimizado y la carta de presentación de esa persona, así que no se entrega a nadie más."
           },
           "404": {
-            "description": "El registro no existe.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
+            "description": "No existe ningún trabajo con ese `jobId`: nunca se encoló, o su marca de vida ya venció."
           },
           "409": {
             "description": "El pedido es válido pero choca con el estado actual del mundo.",
@@ -791,14 +859,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
+            "description": "El trabajo existió pero expiró: los resultados se purgan de la cola a las 24 h de terminar (o antes, al superar el tope de 200 completados). Hay que encolar el análisis de nuevo. Solo lo ve el dueño del trabajo."
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
@@ -810,8 +871,15 @@
               }
             }
           },
-          "default": {
-            "description": "Analysis job status and/or result"
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -840,6 +908,9 @@
           }
         },
         "responses": {
+          "201": {
+            "description": "Postulacion created"
+          },
           "400": {
             "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
             "content": {
@@ -891,7 +962,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -910,8 +981,15 @@
               }
             }
           },
-          "default": {
-            "description": "Postulacion created"
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -950,6 +1028,7 @@
             "required": false,
             "in": "query",
             "schema": {
+              "minimum": 1,
               "example": 1,
               "type": "number"
             }
@@ -959,12 +1038,50 @@
             "required": false,
             "in": "query",
             "schema": {
+              "minimum": 1,
+              "maximum": 100,
               "example": 10,
               "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor de la posición. Cuando viene, `page` se ignora: la página siguiente son las filas que están después de esta. El servidor lo devuelve en el header `X-Next-Cursor`.",
+            "schema": {
+              "example": "2026-11-18T12:00:00.000Z|9f2c1d84-3b6a-4f1e-9c2b-7a5e0d3f8b11",
+              "type": "string"
             }
           }
         ],
         "responses": {
+          "200": {
+            "description": "List of postulaciones",
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total de postulaciones que matchean el filtro, no las de esta página. Con este número el cliente sabe cuántas páginas hay y no tiene que adivinar por el tamaño de la respuesta.",
+                "schema": {
+                  "type": "integer",
+                  "example": 347
+                }
+              },
+              "X-Next-Cursor": {
+                "description": "Cursor de la página siguiente. Viene solo si hay más: el cliente lo devuelve tal cual en el query param `cursor`. Con cursor el listado no se duplica ni se saltea aunque se agreguen ofertas en el medio.",
+                "schema": {
+                  "type": "string",
+                  "example": "2026-11-18T12:00:00.000Z|9f2c1d84-3b6a-4f1e-9c2b-7a5e0d3f8b11"
+                }
+              },
+              "Cache-Control": {
+                "description": "La lista es de un recurso por usuario y cambia cuando el usuario la edita: no se cachea. Se declara explícitamente porque hoy no cachearse es un efecto del default de HTTP ante un `Authorization`, no una decisión.",
+                "schema": {
+                  "type": "string",
+                  "example": "private, no-store"
+                }
+              }
+            }
+          },
           "400": {
             "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
             "content": {
@@ -1016,7 +1133,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1035,8 +1152,15 @@
               }
             }
           },
-          "default": {
-            "description": "List of postulaciones"
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1055,6 +1179,9 @@
         "operationId": "PostulacionesController_getLearningAnalysis",
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Learning roadmap analysis"
+          },
           "400": {
             "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
             "content": {
@@ -1106,7 +1233,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1125,8 +1252,15 @@
               }
             }
           },
-          "default": {
-            "description": "Learning roadmap analysis"
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1196,7 +1330,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1207,6 +1341,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1286,7 +1430,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1297,6 +1441,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1334,6 +1488,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Postulacion returned"
+          },
           "400": {
             "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
             "content": {
@@ -1385,7 +1542,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1404,8 +1561,15 @@
               }
             }
           },
-          "default": {
-            "description": "Postulacion returned"
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1441,6 +1605,9 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "Postulacion updated"
+          },
           "400": {
             "description": "El pedido no se pudo parsear: el body no es JSON válido. Lo emite el body-parser, antes de que la app lo vea.",
             "content": {
@@ -1492,7 +1659,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1511,8 +1678,15 @@
               }
             }
           },
-          "default": {
-            "description": "Postulacion updated"
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1595,7 +1769,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1606,6 +1780,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1683,7 +1867,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1694,6 +1878,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1782,7 +1976,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1793,6 +1987,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1825,7 +2029,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Batch deleted; postings are kept"
           },
           "400": {
@@ -1879,7 +2083,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1890,6 +2094,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1988,7 +2202,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1999,6 +2213,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2097,7 +2321,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2108,6 +2332,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2204,7 +2438,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2215,6 +2449,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2306,7 +2550,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2317,6 +2561,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2401,7 +2655,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2412,6 +2666,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2486,7 +2750,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2497,6 +2761,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2583,7 +2857,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2594,6 +2868,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2683,7 +2967,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2694,6 +2978,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2778,7 +3072,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2789,6 +3083,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2880,7 +3184,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2891,6 +3195,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2975,7 +3289,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2986,6 +3300,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3060,7 +3384,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3071,6 +3395,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3160,7 +3494,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3171,6 +3505,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3260,7 +3604,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3271,6 +3615,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3360,7 +3714,7 @@
             }
           },
           "410": {
-            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó.",
+            "description": "Algo existió y ya no: el enlace de verificación o de recuperación venció o se usó; el trabajo de análisis se purgó de la cola.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3371,6 +3725,16 @@
           },
           "422": {
             "description": "El pedido se entendió y está bien formado, pero su contenido no cumple las reglas del dominio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Una dependencia que este endpoint necesita no está disponible ahora. Es transitorio: reintentá con backoff. En `POST /postulaciones/analizar` es la cola de análisis: cuando Redis se acerca al tope de memoria del plan, la API deja de encolar. Ese caso puntual trae el header `Retry-After` con cada cuántos segundos reintentar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3416,6 +3780,11 @@
             "type": "number",
             "example": 422
           },
+          "code": {
+            "type": "string",
+            "example": "validacion",
+            "description": "Qué significa el error, más allá del status. Un 422 puede ser `validacion` o `regla_de_negocio`; un 503 puede ser `cola_llena` o `servicio_no_disponible`."
+          },
           "message": {
             "oneOf": [
               {
@@ -3433,15 +3802,26 @@
               }
             ]
           },
-          "error": {
+          "details": {
+            "type": "object",
+            "description": "Datos que el cliente puede accionar, como el campo que chocó con un índice único.",
+            "example": {
+              "campos": [
+                "email"
+              ]
+            }
+          },
+          "correlationId": {
             "type": "string",
-            "example": "Unprocessable Entity"
+            "description": "Identificador del pedido, igual al header `x-correlation-id`. Sirve para cruzar el reporte con el log.",
+            "example": "9f2c1d84-3b6a-4f1e-9c2b-7a5e0d3f8b11"
           }
         },
         "required": [
           "statusCode",
+          "code",
           "message",
-          "error"
+          "correlationId"
         ]
       },
       "PublicUserDto": {
@@ -3540,6 +3920,77 @@
       "AnalyzePostulacionDto": {
         "type": "object",
         "properties": {}
+      },
+      "AnalizarResponseDto": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "example": "9f2c1d84-3b6a-4f1e-9c2b-7a5e0d3f8b11",
+            "description": "ID del trabajo en la cola. Es un UUID: opaco, no enumerable."
+          },
+          "status": {
+            "type": "string",
+            "example": "queued",
+            "description": "El trabajo fue encolado; todavía no corrió"
+          },
+          "profileText": {
+            "type": "string",
+            "example": "Desarrollador backend con 3 años de TypeScript y NestJS.",
+            "description": "El perfil con el que se va a analizar la oferta. Si el usuario no tiene `profileText`, es el perfil genérico por defecto: por eso el resultado depende de un dato que no viene en el request."
+          },
+          "perfilPorDefecto": {
+            "type": "boolean",
+            "example": false,
+            "description": "`true` si se usó el perfil genérico por defecto porque el usuario no tiene `profileText`. El cliente puede avisarle que el análisis se hizo sin su perfil."
+          },
+          "pollAfterMs": {
+            "type": "number",
+            "example": 2000,
+            "description": "Cuántos milisegundos esperar entre consultas de estado. Va en el body y no en un header `Retry-After` a propósito: `Retry-After` significa \"reintentá esta request\" y acá la request ya fue aceptada."
+          }
+        },
+        "required": [
+          "jobId",
+          "status",
+          "profileText",
+          "perfilPorDefecto",
+          "pollAfterMs"
+        ]
+      },
+      "EstadoAnalisisResponseDto": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "example": "1"
+          },
+          "status": {
+            "type": "string",
+            "example": "waiting",
+            "enum": [
+              "waiting",
+              "active",
+              "completed",
+              "failed"
+            ],
+            "description": "`waiting`: en la cola, todavía sin empezar. `active`: corriendo. `completed`: terminado con resultado. `failed`: terminó con error."
+          },
+          "result": {
+            "type": "object",
+            "description": "Solo cuando `status` es `completed`: el informe estructurado de la oferta.",
+            "additionalProperties": true
+          },
+          "error": {
+            "type": "string",
+            "description": "Solo cuando `status` es `failed`: por qué falló.",
+            "example": "No pudimos acceder a la oferta."
+          }
+        },
+        "required": [
+          "jobId",
+          "status"
+        ]
       },
       "CreatePostulacionDto": {
         "type": "object",
