@@ -133,10 +133,7 @@ describe('LotesService', () => {
       });
       mockPrisma.lote.delete.mockResolvedValueOnce({ id: 'lote-1' });
 
-      await expect(service.borrar('user-1', 'lote-1')).resolves.toEqual({
-        borrado: true,
-        id: 'lote-1',
-      });
+      await expect(service.borrar('user-1', 'lote-1')).resolves.toBeUndefined();
 
       expect(mockPrisma.lote.delete).toHaveBeenCalledWith({
         where: { id: 'lote-1' },

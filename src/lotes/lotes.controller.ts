@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -13,6 +15,7 @@ import {
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -67,11 +70,12 @@ export class LotesController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a batch of the authenticated user' })
-  @ApiOkResponse({ description: 'Batch deleted; postings are kept' })
+  @ApiNoContentResponse({ description: 'Batch deleted; postings are kept' })
   async borrar(@Param('id', new ParseUUIDPipe()) id: string, @Req() req: any) {
     const userId = req.user?.sub ?? req.user?.id;
-    return this.lotesService.borrar(userId, id);
+    await this.lotesService.borrar(userId, id);
   }
 
   @Post(':id/ofertas')

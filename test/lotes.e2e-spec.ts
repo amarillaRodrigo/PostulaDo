@@ -117,12 +117,12 @@ describe('Integracion lotes', () => {
       .expect(200);
     expect(sinNombre.body.nombre).toBeNull();
 
-    // Borrar el lote no borra las ofertas.
+    // Borrar el lote no borra las ofertas. Y no devuelve cuerpo: 204.
     const borrado = await request(app.getHttpServer())
       .delete(`/lotes/${loteId}`)
       .set('Authorization', `Bearer ${owner.token}`)
-      .expect(200);
-    expect(borrado.body).toMatchObject({ borrado: true, id: loteId });
+      .expect(204);
+    expect(borrado.text).toBe('');
 
     await request(app.getHttpServer())
       .get(`/lotes/${loteId}`)
@@ -173,5 +173,71 @@ describe('Integracion lotes', () => {
       .set('Authorization', `Bearer ${owner.token}`)
       .expect(200);
     expect(plan.body.totalOfertasAnalizadas).toBe(2);
+  });
+
+  /**
+   * El contrato del DELETE, verificado por HTTP y no por el service: 204 sin
+   * cuerpo cuando borra, y el envelope de error cuando no puede. El 403 y el
+   * 404 los tira el service, pero el cuerpo lo arma `ApiExceptionFilter`; este
+   * test es el que cruza las dos capas.
+   */
+  it('el DELETE responde 204 sin cuerpo, y 403/404 con el envelope', async () => {
+    const owner = await registerAndLogin(`del-owner-${unique()}@test.com`);
+    const other = await registerAndLogin(`del-other-${unique()}@test.com`);
+
+    const oferta = await crearOferta(owner.token, `del-${unique()}`);
+    const loteId = (
+      await request(app.getHttpServer())
+        .post('/lotes')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .send({ ids: [oferta] })
+        .expect(201)
+    ).body.id as string;
+
+    // Otro usuario: 403 con envelope, no con el body de Nest.
+    const ajeno = await request(app.getHttpServer())
+      .delete(`/lotes/${loteId}`)
+      .set('Authorization', `Bearer ${other.token}`)
+      .expect(403);
+
+    expect(ajeno.body).toMatchObject({
+      statusCode: 403,
+      code: 'prohibido',
+      message: 'No autorizado',
+      correlationId: expect.any(String),
+    });
+    expect(ajeno.body).not.toHaveProperty('error');
+    expect(ajeno.headers['x-correlation-id']).toBe(ajeno.body.correlationId);
+
+    // Un lote que no existe: 404 con envelope.
+    const inexistente = await request(app.getHttpServer())
+      .delete('/lotes/00000000-0000-4000-8000-000000000000')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(404);
+
+    expect(inexistente.body).toMatchObject({
+      statusCode: 404,
+      code: 'no_encontrado',
+      message: 'Lote no encontrado',
+      correlationId: expect.any(String),
+    });
+
+    // El dueño borra: 204 y ningún cuerpo. Si viajara `{ borrado, id }`, acá
+    // se vería el texto.
+    const borrado = await request(app.getHttpServer())
+      .delete(`/lotes/${loteId}`)
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(204);
+    expect(borrado.text).toBe('');
+
+    // Borrar de nuevo es 404: el lote ya no existe. Fija la idempotencia.
+    const otraVez = await request(app.getHttpServer())
+      .delete(`/lotes/${loteId}`)
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(404);
+    expect(otraVez.body).toMatchObject({
+      statusCode: 404,
+      code: 'no_encontrado',
+    });
   });
 });

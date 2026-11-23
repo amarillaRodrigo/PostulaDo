@@ -75,13 +75,16 @@ export class LotesService {
     });
   }
 
-  /** Borra el lote: las ofertas guardadas no se tocan, solo el plan. */
-  async borrar(userId: string, id: string) {
+  /**
+   * Borra el lote: las ofertas guardadas no se tocan, solo el plan.
+   *
+   * No devuelve nada porque el DELETE responde 204: si el cuerpo no viaja, un
+   * objeto de resultado sería una promesa que nadie puede cumplir.
+   */
+  async borrar(userId: string, id: string): Promise<void> {
     const lote = await this.obtener(userId, id);
 
     await this.prisma.lote.delete({ where: { id: lote.id } });
-
-    return { borrado: true, id: lote.id };
   }
 
   /**
