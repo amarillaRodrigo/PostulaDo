@@ -1,5 +1,5 @@
 import { HttpStatus, Module, ValidationPipe } from '@nestjs/common';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsuariosModule } from './usuarios/usuarios.module';
@@ -13,6 +13,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { redisConnection } from './common/redis.config';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { StripPasswordInterceptor } from './common/interceptors/strip-password.interceptor';
+import { ApiExceptionFilter } from './common/filters/api-exception.filter';
 
 @Module({
   imports: [
@@ -67,6 +68,16 @@ import { StripPasswordInterceptor } from './common/interceptors/strip-password.i
     {
       provide: APP_INTERCEPTOR,
       useClass: StripPasswordInterceptor,
+    },
+    // El cuerpo de error de toda la API (status + `code` + `correlationId`) y
+    // el `Retry-After` del 503 salen del mismo filtro: Nest usa el primer
+    // filtro cuyo `@Catch` matchea, así que dos filtros que atrapen
+    // `HttpException` harían que el envelope nunca se aplique. Va en
+    // `AppModule` y no en `main.ts` por lo mismo que los pipes: los tests e2e
+    // tienen que ver el mismo contrato que producción.
+    {
+      provide: APP_FILTER,
+      useClass: ApiExceptionFilter,
     },
   ],
 })
