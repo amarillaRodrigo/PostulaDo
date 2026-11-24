@@ -34,6 +34,11 @@ describe('Integracion postulaciones', () => {
       .send(createUserPayload(email, password))
       .expect(201);
 
+    await prisma.user.update({
+      where: { id: registerResponse.body.user.id },
+      data: { emailVerifiedAt: new Date() },
+    });
+
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email, password })
@@ -118,6 +123,13 @@ describe('Integracion postulaciones', () => {
       ),
     ).toBe(true);
 
+    // El total de registros que matchean el filtro: es lo que le dice al
+    // cliente cuántas páginas hay, sin tener que deducirlo del tamaño.
+    expect(listResponse.headers['x-total-count']).toBe('2');
+
+    // La lista es de una sesión: no se cachea.
+    expect(listResponse.headers['cache-control']).toBe('private, no-store');
+
     const filteredResponse = await request(app.getHttpServer())
       .get('/postulaciones')
       .query({
@@ -135,6 +147,9 @@ describe('Integracion postulaciones', () => {
       userId: owner.user.id,
     });
 
+    // El total cuenta lo mismo que la página: un registro, no dos.
+    expect(filteredResponse.headers['x-total-count']).toBe('1');
+
     // "isArchived=false" llega como el texto "false": Boolean("false") es
     // true, así que el filtro correcto exige comparar el texto.
     const noArchivadas = await request(app.getHttpServer())
@@ -148,6 +163,92 @@ describe('Integracion postulaciones', () => {
       id: firstPostulacion.body.id,
       isArchived: false,
     });
+  });
+
+  it('responde 200 con lista vacía cuando la cuenta no tiene postulaciones', async () => {
+    const user = await registerAndLogin(`vacia-${unique()}@test.com`);
+
+    const respuesta = await request(app.getHttpServer())
+      .get('/postulaciones')
+      .set('Authorization', `Bearer ${user.token}`)
+      .expect(200);
+
+    // La lista vacía no es un error: es un 200 con array vacío.
+    expect(respuesta.body).toEqual([]);
+    // Y el total dice 0, explícitamente.
+    expect(respuesta.headers['x-total-count']).toBe('0');
+    // Sin filas, no hay página siguiente.
+    expect(respuesta.headers['x-next-cursor']).toBeUndefined();
+  });
+
+  it('rechaza un límite de página por encima del tope', async () => {
+    const owner = await registerAndLogin(`limite-${unique()}@test.com`);
+
+    // 422: el pedido se entiende pero su contenido no cumple las reglas.
+    await request(app.getHttpServer())
+      .get('/postulaciones')
+      .query({ limit: 1000 })
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(422);
+
+    await request(app.getHttpServer())
+      .get('/postulaciones')
+      .query({ page: 0 })
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(422);
+  });
+
+  it('pagina con cursor sin duplicar ni saltar ofertas', async () => {
+    const owner = await registerAndLogin(`cursor-${unique()}@test.com`);
+
+    const creadas: string[] = [];
+    for (const url of ['a', 'b', 'c']) {
+      const res = await request(app.getHttpServer())
+        .post('/postulaciones')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .send({ url: `https://example.com/jobs/${url}-${unique()}` })
+        .expect(201);
+      creadas.push(res.body.id);
+    }
+
+    // Se recorre con el cursor hasta que el servidor deje de mandar uno.
+    const vistas: string[] = [];
+    let cursor: string | undefined;
+    let paginas = 0;
+
+    for (;;) {
+      const res = await request(app.getHttpServer())
+        .get('/postulaciones')
+        .query({ limit: 1, ...(cursor ? { cursor } : {}) })
+        .set('Authorization', `Bearer ${owner.token}`)
+        .expect(200);
+
+      expect(res.body).toHaveLength(1);
+      vistas.push(res.body[0].id);
+
+      cursor = res.headers['x-next-cursor'];
+      paginas += 1;
+
+      if (!cursor) break;
+      expect(paginas).toBeLessThan(10);
+    }
+
+    // Tres ofertas, tres páginas, cada una una vez: ni se duplica ni se
+    // saltea ninguna.
+    expect(paginas).toBe(3);
+    expect(vistas).toHaveLength(3);
+    expect(new Set(vistas).size).toBe(3);
+    expect([...vistas].sort()).toEqual([...creadas].sort());
+  });
+
+  it('rechaza un cursor roto', async () => {
+    const owner = await registerAndLogin(`cursor-roto-${unique()}@test.com`);
+
+    await request(app.getHttpServer())
+      .get('/postulaciones')
+      .query({ cursor: 'no-es-un-cursor' })
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(422);
   });
 
   it('permite leer y actualizar solo las postulaciones propias', async () => {
@@ -384,16 +485,38 @@ describe('Integracion postulaciones', () => {
       .post('/postulaciones/analizar')
       .set('Authorization', `Bearer ${owner.token}`)
       .send({ url: 'https://example.com/jobs/nestjs-dev' })
-      .expect(201);
+      .expect(202);
 
     expect(response.body).toMatchObject({
       jobId: expect.any(String),
       status: 'queued',
+      // El perfil con el que se va a analizar viaja en la respuesta: el
+      // resultado depende de él y el cliente tiene que poder decirlo.
+      profileText:
+        'Desarrollador Full Stack con 3 años de experiencia en TypeScript y NestJS.',
+      perfilPorDefecto: false,
+      // El intervalo de polling va en el body, no en un `Retry-After`.
+      pollAfterMs: 2000,
     });
+
+    // El 202 le dice al cliente dónde preguntar por el resultado.
+    expect(response.headers['location']).toBe(
+      `/postulaciones/analizar/status/${response.body.jobId}`,
+    );
+
+    // Y NO lleva `Retry-After`: ese header significa "reintentá esta request".
+    // Un cliente genérico que reintenta lo mismo duplicaría jobs.
+    expect(response.headers['retry-after']).toBeUndefined();
+
+    // El jobId es un UUID: opaco, no enumerable.
+    expect(response.body.jobId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    );
 
     const jobId = response.body.jobId;
 
-    // Verificar que otro usuario no puede acceder al estado del trabajo
+    // Otro usuario no puede ver el trabajo: 403. Los `jobId` son UUID, así
+    // que no hay nada que enumerar y el 403 no filtra la existencia de nada.
     await request(app.getHttpServer())
       .get(`/postulaciones/analizar/status/${jobId}`)
       .set('Authorization', `Bearer ${other.token}`)
@@ -432,6 +555,83 @@ describe('Integracion postulaciones', () => {
       coverLetter: expect.any(String),
       cvOptimizado: expect.any(String),
     });
+  });
+
+  it('rechaza una URL que no es una URL', async () => {
+    const user = await registerAndLogin(`url-invalida-${unique()}@test.com`);
+
+    // 422: el pedido se entiende pero su contenido no cumple las reglas.
+    // Es un test de regresión para que nadie baje el 422 a 400.
+    await request(app.getHttpServer())
+      .post('/postulaciones/analizar')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({ url: 'no-es-una-url' })
+      .expect(422);
+
+    // Y tampoco encola nada.
+    const respuesta = await request(app.getHttpServer())
+      .post('/postulaciones/analizar')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({ url: 'no-es-una-url' })
+      .expect(422);
+
+    expect(respuesta.body).not.toHaveProperty('jobId');
+  });
+
+  it('avisa que usó el perfil por defecto cuando el usuario no tiene', async () => {
+    const user = await registerAndLogin(`sin-perfil-${unique()}@test.com`);
+
+    const response = await request(app.getHttpServer())
+      .post('/postulaciones/analizar')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({ url: 'https://example.com/jobs/sin-perfil' })
+      .expect(202);
+
+    expect(response.body.perfilPorDefecto).toBe(true);
+    expect(response.body.profileText).toBe(
+      'Desarrollador de software interesado en nuevas tecnologías.',
+    );
+  });
+
+  it('no deja que otro usuario consulte el trabajo de otro', async () => {
+    const owner = await registerAndLogin(`dueno-${unique()}@test.com`);
+    const other = await registerAndLogin(`intruso-${unique()}@test.com`);
+
+    const encolado = await request(app.getHttpServer())
+      .post('/postulaciones/analizar')
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({ url: 'https://example.com/jobs/privada' })
+      .expect(202);
+
+    // El trabajo ajeno da 403, no 404: los `jobId` son UUID, así que no hay
+    // nada que enumerar y el 403 no filtra la existencia de ningún trabajo.
+    await request(app.getHttpServer())
+      .get(`/postulaciones/analizar/status/${encolado.body.jobId}`)
+      .set('Authorization', `Bearer ${other.token}`)
+      .expect(403);
+
+    // El dueño sí lo ve.
+    await request(app.getHttpServer())
+      .get(`/postulaciones/analizar/status/${encolado.body.jobId}`)
+      .set('Authorization', `Bearer ${owner.token}`)
+      .expect(200);
+  });
+
+  it('responde 404 cuando el jobId nunca existió', async () => {
+    const user = await registerAndLogin(`inexistente-${unique()}@test.com`);
+
+    await request(app.getHttpServer())
+      .get(
+        '/postulaciones/analizar/status/9f2c1d84-3b6a-4f1e-9c2b-7a5e0d3f8b11',
+      )
+      .set('Authorization', `Bearer ${user.token}`)
+      .expect(404);
+  });
+
+  it('responde 404 al consultar un job inexistente sin token', async () => {
+    await request(app.getHttpServer())
+      .get('/postulaciones/analizar/status/1')
+      .expect(404);
   });
 
   it('analiza un lote con el denominador del lote, no del historial', async () => {

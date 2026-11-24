@@ -47,10 +47,10 @@ Confirmed API surface the UI is built on:
 | Log out | `POST /auth/logout` | Revokes the refresh token immediately; idempotent |
 | Log out everywhere | `POST /auth/logout-todos` | JWT required; revokes every refresh token of the account |
 | List / read / update users | `GET/PUT /usuarios`, `GET /usuarios/:id` | Role-gated (`ADMIN`) and ownership-gated |
-| Queue analysis | `POST /postulaciones/analizar` | One URL; returns `{ jobId, status: 'queued' }` immediately |
-| Poll analysis | `GET /postulaciones/analizar/status/:jobId` | `waiting \| active \| completed \| failed`; `result` on completion |
+| Queue analysis | `POST /postulaciones/analizar` | One URL; `202` with `{ jobId, status: 'queued', profileText, perfilPorDefecto, pollAfterMs }`; `Location` header points to the status endpoint |
+| Poll analysis | `GET /postulaciones/analizar/status/:jobId` | `waiting \| active \| completed \| failed`; `result` on completion; `410` if it expired, `403` if it belongs to someone else |
 | Create application | `POST /postulaciones` | Synchronous; accepts `url` + `title`/`description`; auto-extracts technologies by regex when none are supplied |
-| List applications | `GET /postulaciones` | Filters: `status`, `isArchived`; paginated; bare array, no pagination metadata |
+| List applications | `GET /postulaciones` | Filters: `status`, `isArchived`; paginated (`page`, `limit` ≤ 100, or `cursor`); bare array in the body, total in `X-Total-Count`, next page in `X-Next-Cursor` |
 | **Corpus analysis** | `GET /postulaciones/analisis-aprendizaje` | **The MVP's core.** Returns `totalApplicationsAnalizadas`, `tecnologiasMasDemandadas: [{ name, count, percentage }]`, `sugerenciaAprendizaje` |
 
 Hard constraints the UI must design around:

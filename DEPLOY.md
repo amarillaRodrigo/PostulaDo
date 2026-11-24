@@ -10,11 +10,11 @@ presentacion y el CV optimizado, que la landing no muestra.
 
 ## Que se despliega
 
-| Pieza | Proveedor | Plan | Para que |
-| --- | --- | --- | --- |
-| API NestJS | Render (Docker) | free | Atiende el navegador |
-| PostgreSQL | Neon | free | Usuarios, postulaciones y las migraciones |
-| Redis | Redis Cloud | free 30 MB | La cola de BullMQ que analiza en segundo plano |
+| Pieza      | Proveedor       | Plan       | Para que                                       |
+| ---------- | --------------- | ---------- | ---------------------------------------------- |
+| API NestJS | Render (Docker) | free       | Atiende el navegador                           |
+| PostgreSQL | Neon            | free       | Usuarios, postulaciones y las migraciones      |
+| Redis      | Redis Cloud     | free 30 MB | La cola de BullMQ que analiza en segundo plano |
 
 Los tres tienen plan gratuito sin fecha de vencimiento. Render duerme el
 servicio a los ~15 minutos sin trafico: el primer request despues de eso
@@ -49,13 +49,13 @@ esquema es `rediss://`.
    servicio `postulado-api` con Docker y plan free.
 3. Completar las variables que el blueprint deja vacias (`sync: false`):
 
-| Variable | Valor |
-| --- | --- |
-| `DATABASE_URL` | La URL con `-pooler` de Neon |
-| `DIRECT_URL` | La URL directa de Neon |
-| `REDIS_URL` | La URL de Redis Cloud o Upstash |
-| `JWT_SECRET` | Lo genera Render solo |
-| `CORS_ORIGINS` | Ya viene con `https://rodrigoamarilla.tech` |
+| Variable         | Valor                                                   |
+| ---------------- | ------------------------------------------------------- |
+| `DATABASE_URL`   | La URL con `-pooler` de Neon                            |
+| `DIRECT_URL`     | La URL directa de Neon                                  |
+| `REDIS_URL`      | La URL de Redis Cloud o Upstash                         |
+| `JWT_SECRET`     | Lo genera Render solo                                   |
+| `CORS_ORIGINS`   | Ya viene con `https://rodrigoamarilla.tech`             |
 | `RESEND_API_KEY` | La clave de Resend, para mandar el mail de confirmacion |
 
 4. Deploy. El contenedor corre `prisma migrate deploy` antes de levantar
@@ -71,18 +71,18 @@ la landing avisa que no pudo enviarlo. Para que llegue de verdad:
    registros DNS (SPF, DKIM y, opcional, DMARC). Cargarlos en Cloudflare tal
    cual los muestra; **no** los proxies (nube gris, no naranja).
 3. Esperar la verificacion del dominio (minutos, a veces una hora).
-4. **API Keys -> Create**, permiso *Sending access*, y copiar la clave.
+4. **API Keys -> Create**, permiso _Sending access_, y copiar la clave.
 5. En Render: **Environment -> Add Environment Variable**
    `RESEND_API_KEY = re_...` y despues **Manual Deploy -> Deploy latest commit**
    (cambiar una variable no reinicia el servicio).
 
 Variables que ya trae `render.yaml`:
 
-| Variable | Valor |
-| --- | --- |
+| Variable         | Valor                                                     |
+| ---------------- | --------------------------------------------------------- |
 | `APP_PUBLIC_URL` | `https://rodrigoamarilla.tech/postulado` (arma el enlace) |
-| `MAIL_FROM` | `PostulaDo <no-reply@rodrigoamarilla.tech>` |
-| `RESEND_API_KEY` | `sync: false`, se carga a mano |
+| `MAIL_FROM`      | `PostulaDo <no-reply@rodrigoamarilla.tech>`               |
+| `RESEND_API_KEY` | `sync: false`, se carga a mano                            |
 
 Sin dominio verificado, Resend rechaza el envio con `403` y la API lo registra
 como `Resend rechazo el envio`. La cuenta sigue funcionando; solo falta el
@@ -100,28 +100,37 @@ dice en vez de fingir que lo mando.
 El access token dura **15 minutos** (`JWT_EXPIRES_IN=15m`). Al lado hay un
 refresh token de 30 dias que **rota en cada uso**: el que se usa queda revocado
 y nace otro. Se guarda solo su SHA-256 en la tabla `RefreshToken`, junto a un
-`familyId` que agrupa la cadena de rotaciones.
+`familyId` que agrupa la cadena de rotaciones. El JWT incluye esa familia (`sid`)
+y cada request comprueba que siga activa; cerrar una sesión invalida sus access
+tokens en el acto.
 
-| Endpoint | Que hace |
-| --- | --- |
-| `POST /auth/login` | Devuelve `access_token`, `refresh_token` y `expires_in` (segundos) |
-| `POST /auth/refresh` | Cambia el refresh token por un par nuevo; el usado se revoca |
-| `POST /auth/logout` | Revoca el refresh token presentado; idempotente |
-| `POST /auth/logout-todos` | Requiere access token: revoca **todos** los refresh de la cuenta |
+| Endpoint                  | Que hace                                                                                 |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| `POST /auth/login`        | Devuelve `access_token`, `refresh_token` y `expires_in` (segundos)                       |
+| `POST /auth/refresh`      | Cambia el refresh token por un par nuevo; el usado se revoca                             |
+| `POST /auth/logout`       | Revoca la familia del refresh token presentado, incluidos sus access tokens; idempotente |
+| `POST /auth/logout-todos` | Requiere access token: revoca **todos** los refresh y access tokens de la cuenta         |
 
 Reglas que importan al operar:
 
-- Si un token **ya rotado** reaparece dentro de los **30 s** siguientes, se
-  trata como dos pestanas que renovaron a la vez: se emite otro par y no se
-  corta nada. Pasada esa ventana se asume robo y se revoca **toda la familia**.
-- Un token cerrado por `logout` o por cambio de contrasena **no** entra en esa
-  gracia: deja de servir en el acto (la ventana es solo para rotaciones).
-- `POST /auth/reset-password` revoca todos los refresh tokens de la cuenta: si
-  alguien tenia uno robado, deja de servir.
+- La rotación es atómica: si dos requests usan el mismo refresh token, solo
+  una revoca la fila activa y crea el siguiente par. La perdedora recibe `401`;
+  dentro de los primeros 30 s no corta la sesión ganadora. Pasada esa ventana,
+  el reuso de un token rotado revoca **toda la familia**.
+- `logout` revoca la familia completa; el refresh y todos sus access tokens
+  dejan de servir en el acto.
+- `POST /auth/reset-password` revoca todos los refresh tokens de la cuenta y,
+  por la comprobación de familia, invalida también todos sus access tokens.
 - `POST /auth/logout-todos` (con access token) hace lo mismo desde la landing:
-  es el boton "Cerrar sesion en todos los dispositivos".
-- Los access tokens emitidos antes de este cambio (30 dias) siguen siendo
-  validos hasta vencer: no hay que forzar a nadie a entrar de nuevo.
+  es el botón "Cerrar sesión en todos los dispositivos".
+- Al desplegar este cambio, los access tokens previos no incluyen `sid` y se
+  rechazan. El frontend nuevo puede renovarlos con el refresh token persistido;
+  las sesiones sin refresh token deberán iniciar sesión de nuevo.
+
+La verificación del correo es obligatoria para persistir ofertas y roadmaps
+(`POST /postulaciones` y escrituras de `/lotes`). El análisis de preview no
+persiste datos y se puede probar sin cuenta; confirmar el correo habilita el
+guardado.
 
 > Cambiar `JWT_EXPIRES_IN` en Render **no reinicia** el servicio: hace falta
 > **Manual Deploy -> Deploy latest commit**. Y no bajar el access token a 15m
@@ -242,11 +251,11 @@ falla con un error opaco.
 La limpieza vive en `src/postulaciones/cola-mantenimiento.service.ts` y tiene
 tres capas:
 
-| Capa | Cuándo | Qué hace |
-| --- | --- | --- |
-| Retención al encolar | Siempre | Un trabajo terminado se guarda 24 h y como máximo 200 completados / 100 fallidos |
-| Barrido | Al arrancar y cada 30 min | Borra terminados de más de 24 h; si Redis pasa el 85%, baja la gracia a 10 min |
-| Guardia | Antes de encolar | Al 85% limpia; si sigue al 95%, responde **503** con "la cola está llena, probá en unos minutos" |
+| Capa                 | Cuándo                    | Qué hace                                                                                         |
+| -------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| Retención al encolar | Siempre                   | Un trabajo terminado se guarda 24 h y como máximo 200 completados / 100 fallidos                 |
+| Barrido              | Al arrancar y cada 30 min | Borra terminados de más de 24 h; si Redis pasa el 85%, baja la gracia a 10 min                   |
+| Guardia              | Antes de encolar          | Al 85% limpia; si sigue al 95%, responde **503** con "la cola está llena, probá en unos minutos" |
 
 La gracia de 10 minutos en las limpiezas de emergencia existe porque la landing
 consulta el resultado del trabajo después de que termina: borrarlo en el acto

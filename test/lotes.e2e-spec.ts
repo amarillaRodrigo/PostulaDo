@@ -33,6 +33,11 @@ describe('Integracion lotes', () => {
       .send(createUserPayload(email, password))
       .expect(201);
 
+    await prisma.user.update({
+      where: { id: registerResponse.body.user.id },
+      data: { emailVerifiedAt: new Date() },
+    });
+
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email, password })

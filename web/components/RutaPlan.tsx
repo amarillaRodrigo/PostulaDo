@@ -188,8 +188,14 @@ function Check() {
  * `ids === null` pregunta la ruta del corpus entero; con ids, la del lote
  * abierto. Es la convención exacta del plan.
  */
-export function RutaPlan({ ids }: { ids: string[] | null }) {
-  const [ruta, setRuta] = useState<Ruta | null>(null);
+export function RutaPlan({
+  ids,
+  rutaInicial,
+}: {
+  ids: string[] | null;
+  rutaInicial?: Ruta;
+}) {
+  const [ruta, setRuta] = useState<Ruta | null>(rutaInicial ?? null);
   const [falla, setFalla] = useState(false);
   const [progreso, setProgreso] = useState<Progreso>({});
   const [pasos, setPasos] = useState<PasosHechos>({});
@@ -203,9 +209,9 @@ export function RutaPlan({ ids }: { ids: string[] | null }) {
   useEffect(() => {
     setProgreso(leerProgreso());
     setPasos(leerPasosHechos());
-    // El panel abre con la ruta adentro: se pide sola y queda viva hasta que
-    // se recargue la pestaña.
-    cargandoRuta(true);
+    // Un preview ya trae su ruta en la respuesta; los planes guardados la
+    // piden por ids al abrir el panel.
+    if (!rutaInicial) cargandoRuta(true);
   }, []);
 
   /** Completar es binario: un click marca lista, otro click lo deshace. */
@@ -271,7 +277,7 @@ export function RutaPlan({ ids }: { ids: string[] | null }) {
   const enVuelo = useRef(false);
 
   function cargandoRuta(siSeAbre: boolean, forzar = false) {
-    if (!siSeAbre || enVuelo.current) return;
+    if (rutaInicial || !siSeAbre || enVuelo.current) return;
 
     // Ya traida: reabrir el panel no es un reintento. El boton que aparece con
     // la falla si fuerza el pedido, asi el mensaje no es terminal.

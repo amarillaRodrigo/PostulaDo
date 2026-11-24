@@ -95,6 +95,38 @@ describe('Integracion autenticacion y usuarios', () => {
       .expect(403);
   });
 
+  it('no persiste ofertas hasta confirmar el correo', async () => {
+    const email = `unverified-${unique()}@test.com`;
+    const password = 'Password123!';
+    const register = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(createUserPayload(email, password))
+      .expect(201);
+    const token = register.body.access_token as string;
+    const payload = {
+      url: 'https://example.com/jobs/unverified',
+      title: 'Oferta de prueba',
+      description: 'Texto de prueba',
+    };
+
+    await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${token}`)
+      .send(payload)
+      .expect(403);
+
+    await prisma.user.update({
+      where: { id: register.body.user.id },
+      data: { emailVerifiedAt: new Date() },
+    });
+
+    await request(app.getHttpServer())
+      .post('/postulaciones')
+      .set('Authorization', `Bearer ${token}`)
+      .send(payload)
+      .expect(201);
+  });
+
   it('permite acceso admin a listado y eliminacion de usuarios', async () => {
     const adminEmail = `admin-${unique()}@test.com`;
     const userEmail = `user-${unique()}@test.com`;
@@ -172,6 +204,52 @@ describe('Integracion autenticacion y usuarios', () => {
       .expect(401);
 
     expect(response.body.message).toBeDefined();
+  });
+
+  it('solo una request gana la rotación concurrente del refresh token', async () => {
+    const email = `refresh-race-${unique()}@test.com`;
+    const register = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(createUserPayload(email, 'Password123!'))
+      .expect(201);
+    const refreshToken = register.body.refresh_token as string;
+
+    const respuestas = await Promise.all([
+      request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refresh_token: refreshToken }),
+      request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refresh_token: refreshToken }),
+    ]);
+
+    expect(respuestas.map((respuesta) => respuesta.status).sort()).toEqual([
+      201, 401,
+    ]);
+    const ganadora = respuestas.find((respuesta) => respuesta.status === 201);
+    expect(ganadora?.body.refresh_token).toBeDefined();
+
+    await request(app.getHttpServer())
+      .get('/auth/yo')
+      .set('Authorization', `Bearer ${ganadora?.body.access_token}`)
+      .expect(200);
+  });
+
+  it('logout invalida también el access token de esa familia', async () => {
+    const register = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(createUserPayload(`logout-${unique()}@test.com`, 'Password123!'))
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/auth/logout')
+      .send({ refresh_token: register.body.refresh_token })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/auth/yo')
+      .set('Authorization', `Bearer ${register.body.access_token}`)
+      .expect(401);
   });
 
   it('lista las sesiones abiertas y cierra las otras sin cerrar la actual', async () => {
@@ -257,6 +335,10 @@ describe('Integracion autenticacion y usuarios', () => {
       .expect(201);
     const token = register.body.access_token as string;
     const userId = register.body.user.id as string;
+    await prisma.user.update({
+      where: { id: userId },
+      data: { emailVerifiedAt: new Date() },
+    });
 
     const postulacion = await request(app.getHttpServer())
       .post('/postulaciones')

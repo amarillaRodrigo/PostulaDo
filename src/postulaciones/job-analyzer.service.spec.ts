@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JobAnalyzerService } from './job-analyzer.service';
+import { JobAnalyzerService, resolverPublico } from './job-analyzer.service';
 import axios from 'axios';
 
-// Mock del cliente OpenAI a nivel de módulo
+// Mock del cliente OpenAI a nivel de módulo.
 const mockCompletionsCreate = jest.fn();
 
 jest.mock('openai', () => {
@@ -71,7 +71,7 @@ describe('JobAnalyzerService', () => {
 
       jest.spyOn(axios, 'get').mockResolvedValueOnce({ data: mockHtml });
 
-      const result = await service.scrapeUrl('https://example.com/job/1');
+      const result = await service.scrapeUrl('https://93.184.216.34/job/1');
 
       // Verificamos que se removieron las etiquetas de script, style, nav, footer, etc.
       expect(result).not.toContain('console.log');
@@ -86,14 +86,23 @@ describe('JobAnalyzerService', () => {
       );
     });
 
+    it('rechaza un hostname que resuelve a una dirección privada', async () => {
+      const resolver: NonNullable<Parameters<typeof resolverPublico>[1]> = () =>
+        Promise.resolve([{ address: '127.0.0.1', family: 4 }]);
+
+      await expect(resolverPublico('example.com', resolver)).rejects.toThrow(
+        'La URL debe apuntar a un host público.',
+      );
+    });
+
     it('debería lanzar un InternalServerErrorException si la petición HTTP falla', async () => {
       jest
         .spyOn(axios, 'get')
         .mockRejectedValueOnce(new Error('Conexión fallida'));
 
       await expect(
-        service.scrapeUrl('https://example.com/job/1'),
-      ).rejects.toThrow('Error al obtener o parsear la URL: Conexión fallida');
+        service.scrapeUrl('https://93.184.216.34/job/1'),
+      ).rejects.toThrow('Error al obtener o parsear la URL de la oferta.');
     });
   });
 
@@ -104,7 +113,7 @@ describe('JobAnalyzerService', () => {
       const spyScrape = jest.spyOn(service, 'scrapeUrl');
 
       const result = await service.analyzeJob(
-        'https://example.com/job/1',
+        'https://93.184.216.34/job/1',
         'Mi perfil profesional',
       );
 

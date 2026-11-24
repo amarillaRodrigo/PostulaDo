@@ -6,9 +6,15 @@ import {
   abrirLote,
   analizarLote,
   API_CONFIGURADA,
+  ErrorApi,
   cerrarSesion,
   crearCuenta,
   crearDesdeTexto,
+  guardarPreviewLote,
+  previsualizarLote,
+  previsualizarTexto,
+  miPerfil,
+  reenviarVerificacion,
   entrarCuenta,
   guardarSesion,
   leerSesion,
@@ -24,6 +30,7 @@ import {
   type OfertaResumen,
   type LoteGuardado,
   type Resultado,
+  type Ruta,
   type SesionGuardada,
 } from '@/lib/api';
 import { CuentaPanel } from '@/components/CuentaPanel';
@@ -87,6 +94,17 @@ function tituloDe(oferta: OfertaResumen): string {
 /** Cómo pegan la oferta: por URL, o el texto directo cuando no hay URL. */
 type Fuente = 'urls' | 'texto';
 
+type PreviewPendiente = {
+  result: Resultado;
+  ruta: Ruta;
+  urls: string[];
+  tecnologiasPorOferta: string[][];
+  aniosExperienciaPorOferta: Array<number | undefined>;
+  texto?: string;
+  tituloTexto?: string;
+  fallidas: number;
+};
+
 type Estado =
   | { kind: 'idle' }
   | { kind: 'restoring'; texto: string }
@@ -99,6 +117,15 @@ type Estado =
       modo: Modo;
       fuente: Fuente;
       message: string;
+    }
+  | {
+      kind: 'preview-done';
+      preview: PreviewPendiente;
+      cuenta: Cuenta;
+      modo: Modo;
+      sesion?: SesionGuardada;
+      emailEnviado?: boolean;
+      message?: string;
     }
   | {
       kind: 'done';
@@ -172,6 +199,7 @@ export function LoteForm() {
   const [texto, setTexto] = useState('');
   const [tituloTexto, setTituloTexto] = useState('');
   const [state, setState] = useState<Estado>({ kind: 'idle' });
+  const previewRef = useRef<PreviewPendiente | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const estadoRef = useRef<Estado>(state);
@@ -321,6 +349,144 @@ export function LoteForm() {
     return () => window.removeEventListener('postulado:entrar', alEntrar);
   }, []);
 
+  async function analizarPreviewSinGuardar(list: string[]) {
+    setAviso(null);
+    setState({ kind: 'working', hechos: 0, total: list.length });
+    guardarUrlsPegadas(list);
+
+    try {
+      const preview = await previsualizarLote(list, (hechos, total) =>
+        setState({ kind: 'working', hechos, total }),
+      );
+      const pendiente: PreviewPendiente = {
+        result: preview.resultado,
+        ruta: preview.ruta,
+        urls: preview.urls,
+        tecnologiasPorOferta: preview.tecnologiasPorOferta,
+        aniosExperienciaPorOferta: preview.aniosExperienciaPorOferta,
+        fallidas: preview.fallidas,
+      };
+      previewRef.current = pendiente;
+      setState({
+        kind: 'preview-done',
+        preview: pendiente,
+        cuenta: CUENTA_VACIA,
+        modo: 'crear',
+        sesion: leerSesion() ?? undefined,
+      });
+    } catch (e) {
+      setState({
+        kind: 'error',
+        message:
+          e instanceof Error ? e.message : 'No pudimos analizar tus ofertas.',
+      });
+    }
+  }
+
+  async function analizarTextoPreviewSinGuardar() {
+    setAviso(null);
+    setState({ kind: 'working', hechos: 0, total: 1 });
+
+    try {
+      const preview = await previsualizarTexto(texto.trim());
+      const pendiente: PreviewPendiente = {
+        result: preview.resultado,
+        ruta: preview.ruta,
+        urls: [],
+        tecnologiasPorOferta: [],
+        aniosExperienciaPorOferta: [],
+        texto: texto.trim(),
+        tituloTexto: tituloTexto.trim() || undefined,
+        fallidas: 0,
+      };
+      previewRef.current = pendiente;
+      setState({
+        kind: 'preview-done',
+        preview: pendiente,
+        cuenta: CUENTA_VACIA,
+        modo: 'crear',
+        sesion: leerSesion() ?? undefined,
+      });
+    } catch (e) {
+      setState({
+        kind: 'error',
+        message:
+          e instanceof Error ? e.message : 'No pudimos analizar el texto.',
+      });
+    }
+  }
+
+  async function guardarPreviewAnalizado(emailEnviado?: boolean) {
+    const preview = previewRef.current;
+    if (!preview) return;
+
+    setState({ kind: 'working', hechos: 0, total: 1 });
+    try {
+      const guardado = preview.texto
+        ? await crearDesdeTexto(preview.texto, preview.tituloTexto)
+        : await guardarPreviewLote(
+            preview.urls,
+            preview.tecnologiasPorOferta,
+            preview.aniosExperienciaPorOferta,
+          );
+      previewRef.current = null;
+      setState({
+        kind: 'done',
+        result: guardado.resultado,
+        sesion: guardado.sesion,
+        fallidas: preview.fallidas,
+        emailEnviado,
+      });
+    } catch (e) {
+      if (e instanceof ErrorApi && e.status === 403) {
+        const actual = leerSesion();
+        if (actual) guardarSesion({ ...actual, emailVerificado: false });
+        setState({
+          kind: 'preview-done',
+          preview,
+          cuenta: CUENTA_VACIA,
+          modo: 'entrar',
+          sesion: actual ? { ...actual, emailVerificado: false } : undefined,
+          emailEnviado,
+          message: e.message,
+        });
+        return;
+      }
+      setState({
+        kind: 'preview-done',
+        preview,
+        cuenta: CUENTA_VACIA,
+        modo: 'entrar',
+        sesion: leerSesion() ?? undefined,
+        emailEnviado,
+        message:
+          e instanceof Error ? e.message : 'No pudimos guardar el roadmap.',
+      });
+    }
+  }
+
+  async function confirmarCorreoYGuardar(emailEnviado?: boolean) {
+    const perfil = await miPerfil();
+    if (!perfil?.emailVerifiedAt) {
+      setState((actual) =>
+        actual.kind === 'preview-done'
+          ? {
+              ...actual,
+              message:
+                'Todavía no vemos el correo confirmado. Revisá el enlace y probá de nuevo.',
+            }
+          : actual,
+      );
+      return;
+    }
+
+    const guardada = leerSesion();
+    if (guardada) {
+      guardarSesion({ ...guardada, emailVerificado: true });
+    }
+    await guardarPreviewAnalizado(emailEnviado);
+  }
+
   /** Analiza el lote con la sesión ya guardada (sin volver a pedir cuenta). */
   async function analizarConSesion(list: string[], emailEnviado?: boolean) {
     setAviso(null);
@@ -370,6 +536,49 @@ export function LoteForm() {
   }
 
   async function correr(cuenta: Cuenta, modo: Modo, fuenteStep: Fuente) {
+    if (previewRef.current) {
+      setState({ kind: 'working', hechos: 0, total: 1 });
+      try {
+        const entrada =
+          modo === 'entrar'
+            ? await entrarCuenta(cuenta.email.trim(), cuenta.password)
+            : await crearCuenta(cuenta);
+
+        if (!entrada.usuario.emailVerifiedAt) {
+          setState({
+            kind: 'preview-done',
+            preview: previewRef.current,
+            cuenta: CUENTA_VACIA,
+            modo: 'entrar',
+            sesion: leerSesion() ?? undefined,
+            emailEnviado: entrada.emailEnviado,
+            message:
+              entrada.emailEnviado === false
+                ? 'La cuenta está creada, pero el correo de confirmación no salió. Reenviá el enlace desde Mi cuenta.'
+                : 'Confirmá tu correo desde el enlace que te enviamos para poder guardar el roadmap.',
+          });
+          return;
+        }
+
+        await guardarPreviewAnalizado(entrada.emailEnviado);
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : 'No pudimos entrar a tu cuenta.';
+        const yaRegistrado =
+          modo === 'crear' && /ya est. registrado/i.test(message);
+        setState({
+          kind: 'preview-done',
+          preview: previewRef.current,
+          cuenta,
+          modo: yaRegistrado ? 'entrar' : modo,
+          message: yaRegistrado
+            ? 'Ese correo ya tiene cuenta. Entrá con tu contraseña.'
+            : message,
+        });
+      }
+      return;
+    }
+
     if (fuenteStep === 'texto') {
       setAviso(null);
       setState({ kind: 'working', hechos: 0, total: 1 });
@@ -1036,6 +1245,84 @@ export function LoteForm() {
     );
   }
 
+  if (state.kind === 'preview-done') {
+    const { preview, sesion, emailEnviado } = state;
+    const guardando = Boolean(sesion && !sesion.emailVerificado);
+
+    return (
+      <div className="ingest ingest--done">
+        <div className="ingest__head">
+          <span>Vista previa</span>
+          <span>
+            {preview.result.totalOfertasAnalizadas}{' '}
+            {preview.result.totalOfertasAnalizadas === 1 ? 'oferta' : 'ofertas'}
+            {' · '}
+            {preview.result.ecosistema ?? 'sin ecosistema'}
+          </span>
+        </div>
+        <div className="ingest__done-body">
+          {preview.fallidas > 0 ? (
+            <p className="ingest__notice" role="status">
+              No pudimos leer {preview.fallidas}{' '}
+              {preview.fallidas === 1 ? 'oferta' : 'ofertas'}; el preview usa
+              las que sí se analizaron.
+            </p>
+          ) : null}
+          <p className="ingest__notice" role="status">
+            Este roadmap todavía no está guardado. Creá una cuenta y confirmá el
+            correo para conservarlo.
+          </p>
+          <p className="ingest__done-suggestion">
+            {preview.result.sugerenciaAprendizaje}
+          </p>
+          <RutaPlan ids={null} rutaInicial={preview.ruta} />
+          {state.message ? (
+            <p className="ingest__notice" role="status">
+              {state.message}
+            </p>
+          ) : null}
+          {guardando ? (
+            <div className="ingest__account">
+              <button
+                className="cuenta__action"
+                type="button"
+                onClick={() => void reenviarVerificacion()}
+              >
+                {emailEnviado === false
+                  ? 'Reenviar correo de confirmación'
+                  : 'No llegó el correo? Reenviar'}
+              </button>
+              <button
+                className="btn btn--ink btn--caustic"
+                type="button"
+                onClick={() => void confirmarCorreoYGuardar(emailEnviado)}
+              >
+                Ya confirmé mi correo
+              </button>
+            </div>
+          ) : (
+            <button
+              className="btn btn--ink btn--caustic"
+              type="button"
+              onClick={() =>
+                setState({
+                  kind: 'needs-account',
+                  cuenta: state.cuenta,
+                  modo: state.modo,
+                  fuente: preview.texto ? 'texto' : 'urls',
+                })
+              }
+            >
+              {state.modo === 'entrar'
+                ? 'Entrar para guardar'
+                : 'Crear cuenta para guardar'}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   /* ---------------------------------------------------------------- */
   /* Paso de cuenta                                                    */
   /* ---------------------------------------------------------------- */
@@ -1309,18 +1596,13 @@ export function LoteForm() {
               return;
             }
 
-            // Si ya hay sesión, no se vuelve a pedir cuenta: se analiza directo.
-            if (leerSesion()) {
-              void guardarTextoEnSesion();
+            // Sin correo confirmado se puede previsualizar, pero no persistir.
+            if (!leerSesion()?.emailVerificado) {
+              void analizarTextoPreviewSinGuardar();
               return;
             }
 
-            setState({
-              kind: 'needs-account',
-              cuenta: CUENTA_VACIA,
-              modo: 'crear',
-              fuente: 'texto',
-            });
+            void guardarTextoEnSesion();
             return;
           }
 
@@ -1333,18 +1615,13 @@ export function LoteForm() {
           }
           guardarUrlsPegadas(lista);
 
-          // Si ya hay sesión, no se vuelve a pedir cuenta: se analiza directo.
-          if (leerSesion()) {
-            void analizarConSesion(lista);
+          // Cualquiera puede probar; solo cuentas verificadas persisten el plan.
+          if (!leerSesion()?.emailVerificado) {
+            void analizarPreviewSinGuardar(lista);
             return;
           }
 
-          setState({
-            kind: 'needs-account',
-            cuenta: CUENTA_VACIA,
-            modo: 'crear',
-            fuente: 'urls',
-          });
+          void analizarConSesion(lista);
         }}
       >
         <div className="ingest__head">

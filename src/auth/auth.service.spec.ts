@@ -79,6 +79,15 @@ describe('AuthService', () => {
       updateMany: jest.fn(),
       deleteMany: jest.fn(),
     },
+    $transaction: jest.fn(async (callback: (tx: any) => Promise<unknown>) =>
+      callback({
+        refreshToken: {
+          create: (...args: any[]) => mockPrisma.refreshToken.create(...args),
+          updateMany: (...args: any[]) =>
+            mockPrisma.refreshToken.updateMany(...args),
+        },
+      }),
+    ),
   };
 
   beforeEach(async () => {
@@ -130,11 +139,14 @@ describe('AuthService', () => {
         email: registerDto.email,
       });
       expect(mockUsuariosService.createUser).toHaveBeenCalledWith(registerDto);
-      expect(mockJwtService.signAsync).toHaveBeenCalledWith({
-        sub: mockUser.id,
-        email: mockUser.email,
-        role: mockUser.role,
-      });
+      expect(mockJwtService.signAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sub: mockUser.id,
+          email: mockUser.email,
+          role: mockUser.role,
+          sid: expect.any(String),
+        }),
+      );
 
       // Debe retornar token y el usuario sin contraseña
       expect(result).toMatchObject({
@@ -257,11 +269,14 @@ describe('AuthService', () => {
     it('debería generar el token y retornar el usuario sin contraseña', async () => {
       const result = await service.login(mockUser);
 
-      expect(mockJwtService.signAsync).toHaveBeenCalledWith({
-        sub: mockUser.id,
-        email: mockUser.email,
-        role: mockUser.role,
-      });
+      expect(mockJwtService.signAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sub: mockUser.id,
+          email: mockUser.email,
+          role: mockUser.role,
+          sid: expect.any(String),
+        }),
+      );
       expect(result).toMatchObject({
         access_token: TOKEN_ACCESO,
         expires_in: 900,
@@ -564,11 +579,14 @@ describe('AuthService', () => {
 
       const result = await service.loginWithCredentials(loginDto);
 
-      expect(mockJwtService.signAsync).toHaveBeenCalledWith({
-        sub: mockUser.id,
-        email: mockUser.email,
-        role: mockUser.role,
-      });
+      expect(mockJwtService.signAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sub: mockUser.id,
+          email: mockUser.email,
+          role: mockUser.role,
+          sid: expect.any(String),
+        }),
+      );
       expect(result.access_token).toBe(TOKEN_ACCESO);
       expect(result.refresh_token).toMatch(/^[a-f0-9]{96}$/);
       expect(result.user.id).toBe(mockUser.id);
@@ -591,8 +609,9 @@ describe('AuthService', () => {
       user: mockUser,
     };
 
-    it('rota el token: emite un par nuevo y revoca el usado', async () => {
+    it('rota el token de forma atómica: revoca el usado y crea uno nuevo', async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValueOnce(guardado);
+      mockPrisma.refreshToken.updateMany.mockResolvedValueOnce({ count: 1 });
 
       const result = await service.refrescar(refreshToken);
 
@@ -610,10 +629,26 @@ describe('AuthService', () => {
         createHash('sha256').update(result.refresh_token).digest('hex'),
       );
 
-      expect(mockPrisma.refreshToken.update).toHaveBeenCalledWith({
-        where: { id: 'rt-1' },
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'rt-1',
+          revokedAt: null,
+          expiresAt: { gt: expect.any(Date) },
+        },
         data: { revokedAt: expect.any(Date), rotated: true },
       });
+    });
+
+    it('si otra request ganó el compare-and-swap, no emite otro par', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce(guardado);
+      mockPrisma.refreshToken.updateMany.mockResolvedValueOnce({ count: 0 });
+
+      await expect(service.refrescar(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.refreshToken.create).not.toHaveBeenCalled();
     });
 
     it('rechaza un token que no existe', async () => {
@@ -667,35 +702,36 @@ describe('AuthService', () => {
       expect(mockPrisma.refreshToken.updateMany).not.toHaveBeenCalled();
     });
 
-    it('tolera dos pestañas que rotan casi a la vez', async () => {
+    it('rechaza la segunda rotación dentro de la ventana concurrente', async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
         ...guardado,
         rotated: true,
         revokedAt: new Date(Date.now() - 2_000),
       });
 
-      const result = await service.refrescar(refreshToken);
-
-      expect(result.refresh_token).toMatch(/^[a-f0-9]{96}$/);
+      await expect(service.refrescar(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(mockPrisma.refreshToken.create).not.toHaveBeenCalled();
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+      // La ganadora conserva su nueva sesión durante la ventana concurrente.
       expect(mockPrisma.refreshToken.updateMany).not.toHaveBeenCalled();
-      // No se extiende la ventana de gracia.
-      expect(mockPrisma.refreshToken.update).not.toHaveBeenCalled();
     });
   });
 
   describe('cerrarSesion', () => {
-    it('revoca el refresh token presentado', async () => {
+    it('revoca la familia del refresh token y sus access tokens', async () => {
       const refreshToken = 'e'.repeat(96);
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        familyId: 'fam-logout',
+      });
 
       const result = await service.cerrarSesion(refreshToken);
 
       expect(result).toEqual({ cerrada: true });
       expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith({
-        where: {
-          tokenHash: createHash('sha256').update(refreshToken).digest('hex'),
-          revokedAt: null,
-        },
-        data: { revokedAt: expect.any(Date) },
+        where: { familyId: 'fam-logout', revokedAt: null },
+        data: { revokedAt: expect.any(Date), rotated: false },
       });
     });
 

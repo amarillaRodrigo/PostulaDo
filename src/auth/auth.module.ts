@@ -7,6 +7,7 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { getJwtSecret } from './jwt-secret';
 
 type JwtExpiresIn = NonNullable<JwtModuleOptions['signOptions']>['expiresIn'];
 
@@ -19,11 +20,11 @@ type JwtExpiresIn = NonNullable<JwtModuleOptions['signOptions']>['expiresIn'];
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService): JwtModuleOptions => ({
-        secret:
-          configService.get<string>('JWT_SECRET') || 'fallback-test-secret',
+        secret: getJwtSecret(configService),
         signOptions: {
+          algorithm: 'HS256',
           expiresIn: (configService.get<string>('JWT_EXPIRES_IN') ??
-            '60m') as JwtExpiresIn,
+            '15m') as JwtExpiresIn,
         },
       }),
     }),

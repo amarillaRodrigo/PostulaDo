@@ -45,10 +45,7 @@ const VIGENCIA_RESET_MS = 60 * 60 * 1000;
 const ESPERA_REENVIO_MS = 60 * 1000;
 /** Un refresh token dura 30 días; cada uso lo rota. */
 const VIGENCIA_REFRESCO_MS = 30 * 24 * 60 * 60 * 1000;
-/**
- * Ventana para rotaciones simultáneas (dos pestañas que renuevan a la vez).
- * Pasado ese margen, un token ya rotado se considera robado.
- */
+/** Pasada esta ventana, el reuso de un refresh rotado revoca su familia. */
 const GRACIA_ROTACION_MS = 30 * 1000;
 
 @Injectable()
@@ -154,26 +151,43 @@ export class AuthService {
    * Emite un par de tokens.
    *
    * El access token es corto (15 min en producción). El refresh token es
-   * largo, se guarda hasheado y pertenece a una familia: cada refresh lo rota
-   * y, si un token ya rotado reaparece fuera de la ventana de gracia, se corta
-   * toda la familia.
+   * largo, se guarda hasheado y pertenece a una familia. Una request que reusa
+   * un token rotado pierde; pasado el margen de concurrencia se revoca la familia.
    */
+  private async generarParDeTokens(user: User, familyId: string) {
+    const access_token = await this.jwtService.signAsync({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      sid: familyId,
+    });
+    const refresh_token = randomBytes(48).toString('hex');
+    const ahora = new Date();
+
+    return {
+      respuesta: {
+        access_token,
+        refresh_token,
+        expires_in: this.segundosDeVida(access_token),
+        user: this.toPublicUser(user),
+      } satisfies AuthResult,
+      refreshTokenData: {
+        userId: user.id,
+        tokenHash: this.hashToken(refresh_token),
+        familyId,
+        expiresAt: new Date(ahora.getTime() + VIGENCIA_REFRESCO_MS),
+      },
+    };
+  }
+
   private async emitirSesion(
     user: User,
     familiaId?: string,
   ): Promise<AuthResult> {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
-
-    const access_token = await this.jwtService.signAsync(payload);
-    const refresh_token = randomBytes(48).toString('hex');
+    const familyId = familiaId ?? randomUUID();
     const ahora = new Date();
 
-    // Limpieza oportunista: al abrir una sesión nueva se borran los tokens
-    // vencidos o revocados hace más de 30 días de esa persona.
+    // Limpieza oportunista al abrir una familia de sesión nueva.
     if (!familiaId) {
       await this.prisma.refreshToken.deleteMany({
         where: {
@@ -190,21 +204,9 @@ export class AuthService {
       });
     }
 
-    await this.prisma.refreshToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: this.hashToken(refresh_token),
-        familyId: familiaId ?? randomUUID(),
-        expiresAt: new Date(ahora.getTime() + VIGENCIA_REFRESCO_MS),
-      },
-    });
-
-    return {
-      access_token,
-      refresh_token,
-      expires_in: this.segundosDeVida(access_token),
-      user: this.toPublicUser(user),
-    };
+    const par = await this.generarParDeTokens(user, familyId);
+    await this.prisma.refreshToken.create({ data: par.refreshTokenData });
+    return par.respuesta;
   }
 
   /** Lee `exp - iat` del JWT para informar cuánto dura el access token. */
@@ -239,9 +241,9 @@ export class AuthService {
   /**
    * Cambia un refresh token por un par nuevo.
    *
-   * Rotación: el token usado se revoca y nace otro de la misma familia. Si
-   * alguien presenta un token revocado hace más de 30 s, se asume que fue
-   * robado y se revoca la familia completa.
+   * Un compare-and-swap dentro de una transacción revoca el token anterior y
+   * crea el nuevo como una sola operación. Si dos requests compiten, solo una
+   * puede actualizar la fila activa; la otra recibe 401 y no crea otra sesión.
    */
   async refrescar(refreshToken: string): Promise<AuthResult> {
     const guardado = await this.prisma.refreshToken.findUnique({
@@ -256,52 +258,70 @@ export class AuthService {
     }
 
     if (guardado.revokedAt) {
-      // Un token cerrado por logout o por cambio de contraseña no se toca:
-      // tiene que dejar de servir en el acto.
-      if (!guardado.rotated) {
-        throw new UnauthorizedException(
-          'La sesión ya no es válida. Entrá de nuevo.',
-        );
+      if (guardado.rotated) {
+        const desdeRevocacion = Date.now() - guardado.revokedAt.getTime();
+
+        if (desdeRevocacion > GRACIA_ROTACION_MS) {
+          await this.revocarFamilia(guardado.familyId);
+        }
       }
 
-      const desdeRevocacion = Date.now() - guardado.revokedAt.getTime();
-
-      if (desdeRevocacion > GRACIA_ROTACION_MS) {
-        await this.revocarFamilia(guardado.familyId);
-        throw new UnauthorizedException(
-          'La sesión ya no es válida. Entrá de nuevo.',
-        );
-      }
-
-      // Rotación simultánea: se emite otro par, pero no se extiende la
-      // ventana de gracia (no se vuelve a tocar `revokedAt`).
-      return this.emitirSesion(guardado.user, guardado.familyId);
+      // Dentro de la ventana concurrente también pierde: nunca se emite un
+      // segundo par para el mismo refresh token.
+      throw new UnauthorizedException(
+        'La sesión ya fue renovada o cerrada. Entrá de nuevo.',
+      );
     }
 
-    if (guardado.expiresAt.getTime() < Date.now()) {
+    if (guardado.expiresAt.getTime() <= Date.now()) {
       throw new UnauthorizedException('La sesión venció. Entrá de nuevo.');
     }
 
-    const nueva = await this.emitirSesion(guardado.user, guardado.familyId);
+    const ahora = new Date();
+    const nueva = await this.generarParDeTokens(
+      guardado.user,
+      guardado.familyId,
+    );
 
-    await this.prisma.refreshToken.update({
-      where: { id: guardado.id },
-      data: { revokedAt: new Date(), rotated: true },
+    const ganoLaRotacion = await this.prisma.$transaction(async (tx) => {
+      const revocado = await tx.refreshToken.updateMany({
+        where: {
+          id: guardado.id,
+          revokedAt: null,
+          expiresAt: { gt: ahora },
+        },
+        data: { revokedAt: ahora, rotated: true },
+      });
+
+      if (revocado.count !== 1) return false;
+
+      await tx.refreshToken.create({ data: nueva.refreshTokenData });
+      return true;
     });
 
-    return nueva;
+    if (!ganoLaRotacion) {
+      throw new UnauthorizedException(
+        'La sesión ya fue renovada o cerrada. Entrá de nuevo.',
+      );
+    }
+
+    return nueva.respuesta;
   }
 
-  /** Cierra la sesión de ese token. Idempotente y sin revelar si existía. */
+  /** Cierra la familia de sesión completa, incluidos sus access tokens. */
   async cerrarSesion(refreshToken?: string): Promise<{ cerrada: true }> {
     if (refreshToken) {
-      await this.prisma.refreshToken.updateMany({
-        where: {
-          tokenHash: this.hashToken(refreshToken),
-          revokedAt: null,
-        },
-        data: { revokedAt: new Date() },
+      const guardado = await this.prisma.refreshToken.findUnique({
+        where: { tokenHash: this.hashToken(refreshToken) },
+        select: { familyId: true },
       });
+
+      if (guardado) {
+        await this.prisma.refreshToken.updateMany({
+          where: { familyId: guardado.familyId, revokedAt: null },
+          data: { revokedAt: new Date(), rotated: false },
+        });
+      }
     }
 
     return { cerrada: true };
@@ -311,8 +331,8 @@ export class AuthService {
    * Cierra todas las sesiones de la cuenta.
    *
    * Sirve para "cerrar sesión en todos los dispositivos": revoca cada refresh
-   * token vivo, incluido el de este dispositivo. Los access tokens siguen
-   * siendo válidos hasta que vencen (15 min), pero ya no pueden renovarse.
+   * token vivo, incluido el de este dispositivo. La estrategia JWT comprueba
+   * la familia en la base, así que los access tokens también caen en el acto.
    */
   async cerrarTodasLasSesiones(userId: string): Promise<{ cerradas: number }> {
     const { count } = await this.prisma.refreshToken.updateMany({

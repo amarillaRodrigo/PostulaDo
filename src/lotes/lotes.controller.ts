@@ -21,6 +21,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { VerifiedEmailGuard } from '../auth/guards/verified-email.guard';
 import { AgregarOfertasDto } from './dto/agregar-ofertas.dto';
 import { CrearLoteDto } from './dto/crear-lote.dto';
 import { RenombrarLoteDto } from './dto/renombrar-lote.dto';
@@ -34,6 +35,7 @@ export class LotesController {
   constructor(private readonly lotesService: LotesService) {}
 
   @Post()
+  @UseGuards(VerifiedEmailGuard)
   @ApiOperation({ summary: 'Save a batch of postings as a named plan' })
   @ApiCreatedResponse({ description: 'Batch saved' })
   async crear(@Body() dto: CrearLoteDto, @Req() req: any) {
@@ -58,6 +60,7 @@ export class LotesController {
   }
 
   @Put(':id/nombre')
+  @UseGuards(VerifiedEmailGuard)
   @ApiOperation({ summary: 'Rename a batch of the authenticated user' })
   @ApiOkResponse({ description: 'Batch renamed' })
   async renombrar(
@@ -79,6 +82,7 @@ export class LotesController {
   }
 
   @Post(':id/ofertas')
+  @UseGuards(VerifiedEmailGuard)
   @ApiOperation({ summary: 'Add own postings to a saved batch' })
   @ApiCreatedResponse({ description: 'Batch with the added postings' })
   async agregar(

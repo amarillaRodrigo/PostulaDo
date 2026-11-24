@@ -81,7 +81,8 @@ Crear un archivo `.env` dentro de `postulado/` con, al menos, estas variables:
 
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB"
-JWT_SECRET="una_clave_segura"
+# Generar una clave aleatoria: node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+JWT_SECRET="reemplazar-por-una-clave-aleatoria-de-48-bytes-o-mas"
 JWT_EXPIRES_IN="15m"
 PORT=3000
 
@@ -93,6 +94,9 @@ SGLANG_API_KEY="EMPTY"
 REDIS_HOST="localhost"
 REDIS_PORT=6379
 ```
+
+`JWT_SECRET` es obligatorio y debe tener al menos 32 bytes. La API se niega a
+iniciar si falta o es demasiado corto; no hay una clave de fallback en el código.
 
 ## Instalacion
 
@@ -145,9 +149,13 @@ en cada uso. El flujo habitual es:
 5. Al cerrar sesion, revocar el refresh token con `POST /auth/logout`.
 
 El refresh token se guarda hasheado (SHA-256) en la tabla `RefreshToken`, junto
-a un `familyId`: si un token ya rotado reaparece fuera de la ventana de gracia
-de 30 segundos, se revoca toda la familia. `POST /auth/reset-password` revoca
-todas las sesiones de la cuenta.
+a un `familyId`. La rotación es atómica: si dos requests usan el mismo token,
+solo una crea el siguiente par; la otra recibe `401`. El access token incluye esa
+familia y deja de servir en cuanto se cierra la sesión. `POST /auth/logout` y
+`POST /auth/reset-password` invalidan también los access tokens afectados.
+
+El análisis de prueba no requiere cuenta y no guarda datos. Para persistir ofertas
+y roadmaps hace falta registrarse y confirmar el correo.
 
 Los endpoints protegidos rechazan solicitudes sin token valido.
 
@@ -159,9 +167,9 @@ Body:
 
 ```json
 {
-	"email": "test@example.com",
-	"password": "Password123",
-	"birthDate": "1990-01-01"
+  "email": "test@example.com",
+  "password": "Password123",
+  "birthDate": "1990-01-01"
 }
 ```
 
@@ -173,8 +181,8 @@ Body:
 
 ```json
 {
-	"email": "test@example.com",
-	"password": "Password123"
+  "email": "test@example.com",
+  "password": "Password123"
 }
 ```
 
@@ -182,13 +190,13 @@ Respuesta esperada:
 
 ```json
 {
-	"access_token": "...",
-	"refresh_token": "...",
-	"expires_in": 900,
-	"user": {
-		"id": "...",
-		"email": "..."
-	}
+  "access_token": "...",
+  "refresh_token": "...",
+  "expires_in": 900,
+  "user": {
+    "id": "...",
+    "email": "..."
+  }
 }
 ```
 
@@ -267,15 +275,90 @@ alternativas de cada uno y una sugerencia de por dónde empezar.
 `POST /postulaciones/analizar`
 
 - Recibe una URL de oferta.
-- Encola de forma asíncrona un trabajo en la cola de Redis y retorna inmediatamente un `jobId` junto con el estado `queued`.
-- Requiere JWT.
+- Encola de forma asíncrona un trabajo en la cola de Redis y responde **`202 Accepted`** con un `jobId` y el estado `queued`.
+- JWT opcional: sin sesión usa un perfil genérico y solo arma un preview.
+- Para guardar las ofertas y el roadmap hace falta registrarse y confirmar el correo.
+
+**Contrato de la respuesta `202`:**
+
+| Qué                | Dónde  | Para qué                                                                                          |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------------- |
+| `jobId`            | body   | Identificador del trabajo. Es un UUID.                                                            |
+| `profileText`      | body   | El perfil con el que se va a analizar. Si el usuario no tiene, es el perfil genérico por defecto. |
+| `perfilPorDefecto` | body   | `true` si se usó ese perfil genérico: el análisis se hizo sin el perfil real del usuario.         |
+| `pollAfterMs`      | body   | Milisegundos a esperar entre consultas de estado.                                                 |
+| `Location`         | header | `/postulaciones/analizar/status/:jobId`. Dónde consultar el resultado.                            |
+
+El `profileText` y el `perfilPorDefecto` viajan en la respuesta a propósito: el
+resultado depende del perfil del usuario, que no viene en el request. Sin
+ellos, dos personas con el mismo body reciben análisis distintos y ninguna
+puede explicar por qué.
+
+**Por qué el intervalo no es un `Retry-After`:** `Retry-After` significa
+"reintentá **esta** request". En el 202 no hay nada que reintentar: el
+trabajo ya está encolado y hay que ir a buscar el resultado a otra URL. Un
+cliente con lógica genérica ("si viene `Retry-After`, espero y reintento lo
+mismo") reencolaría el análisis cada dos segundos y duplicaría jobs. Por eso
+el intervalo viaja en el body (`pollAfterMs`) y el `Retry-After` queda
+reservado para el 503, que es donde de verdad significa "reintentá".
+
+**Errores de este endpoint:**
+
+- `401` — se envió un JWT inválido o vencido. Sin JWT, el preview sigue disponible.
+- `422` — la URL no es una URL.
+- `503` — la cola está llena (Redis cerca del tope de memoria del plan). Es
+  transitorio: reintentá con backoff. Trae `Retry-After` con cada cuántos
+  segundos. El plazo es un valor elegido, no una medición: `asegurarEspacio()`
+  no sabe cuándo va a haber lugar, sabe que hay que limpiar antes de volver
+  a medir.
 
 `GET /postulaciones/analizar/status/:jobId`
 
 - Consulta el estado de un trabajo de análisis por su `jobId`.
 - Devuelve el estado actual (`waiting`, `active`, `completed`, `failed`).
 - Si el estado es `completed`, incluye en el campo `result` la información estructurada por XGrammar generada por SGLang (tecnologías, responsabilidades, años de experiencia, tono cultural) y el informe personalizado (análisis de enfoque, cover letter y CV optimizado) utilizando RadixAttention.
-- Requiere JWT y validación de propiedad (ownership) del trabajo.
+- JWT opcional: los trabajos autenticados solo los consulta su dueño; para un preview anónimo, el `jobId` es la credencial de consulta.
+
+**Errores de este endpoint:**
+
+- `401` — se envió un JWT inválido o vencido.
+- `403` — el trabajo existe (o existió) pero es de otro usuario. Su `result`
+  incluye el CV optimizado y la carta de presentación de esa persona, así que
+  no se entrega a nadie más.
+- `404` — ese `jobId` nunca existió.
+- `410` — el trabajo era tuyo pero expiró. Los resultados se purgan de la cola a
+  las 24 h de terminar, o antes si se supera el tope de 200 trabajos
+  completados. Hay que encolar el análisis de nuevo.
+
+La ventana de consulta es finita y por eso `404` y `410` son cosas distintas:
+`404` es un `jobId` que el cliente se inventó, `410` es un trabajo que existió
+y se fue. La API lo distingue con una marca en Redis que sobrevive 7 días al
+trabajo, que dura 24.
+
+#### Identificadores opacos
+
+Los `jobId` son UUID, no los enteros correlativos que pone BullMQ por
+defecto. La diferencia no es estética: con un `INCR`, un `GET
+.../status/1`, `/2`, `/3` recorre la cola entera, y un `403` confirmaría que
+ese trabajo existe. Un identificador opaco es un requisito de seguridad: sin
+él, "no autorizado" y "existe" son la misma respuesta y no se pueden
+separar.
+
+Es el mismo patrón que aplica a los endpoints con UUID en la URL
+(`/postulaciones/:id`, `/lotes/:id`): ahí el `403` es seguro justamente
+porque el id no se adivina.
+
+#### La marca de vigencia tiene tope
+
+La marca ("este trabajo existió") vive en **una sola clave** de Redis, un
+hash con un campo por trabajo, y tiene dos límites: 7 días de vigencia y un
+tope de 2000 entradas. Cuando se supera el tope se borran las marcas más
+viejas, y esos trabajos pasan a dar `404` en vez de `410`.
+
+Sin ese tope, la marca sería la única estructura del proyecto que crece sin
+límite: la cola tiene tope por edad y por cantidad, y Redis está en un plan
+de 30 MB. El recorte corre en el mismo barrido de 30 minutos que ya limpia
+los trabajos terminados.
 
 `POST /postulaciones`
 
@@ -285,8 +368,41 @@ alternativas de cada uno y una sugerencia de por dónde empezar.
 `GET /postulaciones`
 
 - Lista las postulaciones del usuario autenticado.
-- Soporta filtros por query.
+- Soporta filtros por query: `status`, `isArchived`, `page`, `limit` y `cursor`.
 - Requiere JWT.
+
+**Paginación:**
+
+| Qué             | Dónde  | Para qué                                                                  |
+| --------------- | ------ | ------------------------------------------------------------------------- |
+| `X-Total-Count` | header | Total de postulaciones que matchean el filtro, **no** las de esta página. |
+| `X-Next-Cursor` | header | Cursor de la página siguiente. Solo viene si hay más.                     |
+| `Cache-Control` | header | `private, no-store`. La lista es de una sesión y caduca con ella.         |
+
+El body sigue siendo un array pelado: el total y el cursor van en los headers
+para no romper a los que ya consumen esta respuesta.
+
+**Dos formas de paginar, que conviven:**
+
+- `?page=2&limit=50` — desplazamiento clásico. Simple, pero **deriva**: si
+  entre la página 1 y la 2 se inserta una postulación, todos los offsets se
+  corren un lugar y un registro se duplica o se salta.
+- `?cursor=<X-Next-Cursor>&limit=50` — la posición exacta de la última fila de
+  la página anterior. No deriva. Cuando viene `cursor`, `page` se ignora.
+
+El cursor es opaco: el servidor lo manda en `X-Next-Cursor` y el cliente lo
+devuelve tal cual. Un cursor mal formado es `422`.
+
+- `page` empieza en 1.
+- `limit` va de 1 a **100**. Pedir más es `422`: el pedido se entiende pero no
+  cumple las reglas. Sin este tope, `?limit=100000` hacía que la base
+  devolviera cien mil filas en una request.
+
+El listado devuelve solo los campos que la UI necesita (id, url, title,
+company, status, tecnologias, aniosExperiencia, isArchived, createdAt y
+userId). El texto íntegro de la oferta (`description`) y el JSON de requisitos
+(`rawRequirements`) están en `GET /postulaciones/:id`: en un listado son
+miles de caracteres por fila que nadie mira.
 
 `GET /postulaciones/:id`
 
@@ -337,8 +453,8 @@ alternativas de cada uno y una sugerencia de por dónde empezar.
 El flujo implementado en la API es el siguiente:
 
 1. El usuario pega la URL de la oferta.
-2. `POST /postulaciones/analizar` encola el trabajo y responde con un `jobId`.
-3. El frontend realiza sondeo (*polling*) haciendo peticiones periódicas a `GET /postulaciones/analizar/status/:jobId` hasta que el estatus sea `completed`.
+2. `POST /postulaciones/analizar` encola el trabajo y responde `202` con un `jobId`, el `Location` de dónde consultar y el `pollAfterMs` con el intervalo de sondeo.
+3. El frontend realiza sondeo (_polling_) haciendo peticiones periódicas a `GET /postulaciones/analizar/status/:jobId` hasta que el estatus sea `completed`. El intervalo lo fija el servidor en el `pollAfterMs`.
 4. El frontend muestra el resultado estructurado de la inferencia y los reportes al usuario.
 5. Si confirma la postulación, `POST /postulaciones` la persiste en base de datos.
 6. Luego puede consultar o actualizar su listado desde los endpoints protegidos.
@@ -369,6 +485,7 @@ npm run test:integration
 ```
 
 Este comando:
+
 1. Levanta los contenedores de PostgreSQL y Redis en Docker Compose.
 2. Aplica migraciones Prisma en la base de datos de test temporal.
 3. Genera el cliente Prisma.

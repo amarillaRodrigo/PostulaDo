@@ -63,8 +63,8 @@ model RefreshToken {
   familyId  String
   expiresAt DateTime
   revokedAt DateTime?
-  /// `true` si se revocó por rotación (no por logout ni reset). Solo esos
-  /// toleran la ventana de gracia de dos pestañas.
+  /// `true` si se revocó por rotación (no por logout ni reset). El reuso
+  /// concurrente pierde; pasado el margen se revoca la familia por replay.
   rotated   Boolean  @default(false)
   createdAt DateTime @default(now())
 
@@ -117,5 +117,14 @@ model Postulacion {
   updatedAt DateTime @updatedAt
 
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // El listado de postulaciones filtra por `userId` y ordena por `createdAt`.
+  // Sin este índice, cada request es un seq scan + sort sobre toda la tabla
+  // (no solo sobre las postulaciones de la cuenta), y el `count` del
+  // `X-Total-Count` es otro scan más.
+  //
+  // Un índice compuesto ascendente sirve para el `DESC` también: Postgres
+  // recorre el índice al revés.
+  @@index([userId, createdAt])
 }
 

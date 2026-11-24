@@ -3,13 +3,14 @@ import {
   Logger,
   OnModuleDestroy,
   OnModuleInit,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { ColaLlenaException } from '../common/exceptions/cola-llena.exception';
+import { COLA_ANALISIS } from './cola.constants';
+import { MarcaTrabajoService } from './marca-trabajo.service';
 
-/** Nombre de la cola de análisis. BullMQ lo usa para las claves en Redis. */
-export const COLA_ANALISIS = 'analisis-trabajo';
+export { COLA_ANALISIS };
 
 /** Un trabajo terminado se guarda un día: alcanza para que el navegador lo lea. */
 export const RETENCION_SEGUNDOS = 24 * 3600;
@@ -86,7 +87,10 @@ export class ColaMantenimientoService implements OnModuleInit, OnModuleDestroy {
   private temporizador?: NodeJS.Timeout;
   private ultimaMedicion?: { at: number; valor: MemoriaRedis | null };
 
-  constructor(@InjectQueue(COLA_ANALISIS) private readonly queue: Queue) {}
+  constructor(
+    @InjectQueue(COLA_ANALISIS) private readonly queue: Queue,
+    private readonly marcas: MarcaTrabajoService,
+  ) {}
 
   onModuleInit(): void {
     // Un barrido al arrancar: si el servicio se reinicia con Redis lleno,
@@ -152,9 +156,7 @@ export class ColaMantenimientoService implements OnModuleInit, OnModuleDestroy {
           (despues.usada / despues.limite) * 100,
         )}%: no se encola más.`,
       );
-      throw new ServiceUnavailableException(
-        'La cola de análisis está llena en este momento. Probá de nuevo en unos minutos.',
-      );
+      throw new ColaLlenaException();
     }
   }
 
@@ -175,6 +177,16 @@ export class ColaMantenimientoService implements OnModuleInit, OnModuleDestroy {
       await this.limpiar(
         uso >= UMBRAL_LIMPIEZA ? GRACIA_EMERGENCIA_MS : RETENCION_MS,
       );
+
+      // Las marcas de "este trabajo existió" también son memoria de Redis y
+      // también tienen tope. Se recortan en el mismo barrido: no hace falta
+      // un segundo timer, y así ninguna estructura queda sin techo.
+      const recorte = await this.marcas.recortar();
+      if (recorte.vencidas > 0 || recorte.sobrantes > 0) {
+        this.logger.log(
+          `Marcas recortadas: ${recorte.vencidas} vencidas, ${recorte.sobrantes} por el tope.`,
+        );
+      }
     } catch (error) {
       this.logger.warn(`Barrido de la cola falló: ${(error as Error).message}`);
     }

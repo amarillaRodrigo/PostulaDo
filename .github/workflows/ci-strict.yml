@@ -86,19 +86,19 @@ jobs:
         run: npm run test:e2e --silent
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public"
-          JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+          JWT_SECRET: "ci-only-secret-do-not-use-outside-tests-1234567890"
 
       - name: Run integration tests
         run: npm run test:integration --silent
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public"
-          JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+          JWT_SECRET: "ci-only-secret-do-not-use-outside-tests-1234567890"
 
       - name: Generate OpenAPI spec
         run: npm run generate:swagger
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postulado_test?schema=public"
-          JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+          JWT_SECRET: "ci-only-secret-do-not-use-outside-tests-1234567890"
 
       - name: Upload OpenAPI artifact
         uses: actions/upload-artifact@v4

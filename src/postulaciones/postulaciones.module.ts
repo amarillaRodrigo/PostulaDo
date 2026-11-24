@@ -9,6 +9,8 @@ import {
   COLA_ANALISIS,
   ColaMantenimientoService,
 } from './cola-mantenimiento.service';
+import { MarcaTrabajoService } from './marca-trabajo.service';
+import { VerifiedEmailGuard } from '../auth/guards/verified-email.guard';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import {
     JobAnalyzerService,
     JobAnalyzerProcessor,
     ColaMantenimientoService,
+    MarcaTrabajoService,
+    VerifiedEmailGuard,
   ],
   exports: [PostulacionesService, JobAnalyzerService],
 })

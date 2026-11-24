@@ -217,7 +217,13 @@ export function leerSesion(): SesionGuardada | null {
   }
 }
 
-async function pedir<T>(path: string, init: RequestInit = {}): Promise<T> {
+/** La respuesta cruda: el body y los headers. */
+type RespuestaApi<T> = { datos: T; cabeceras: Headers };
+
+async function pedirCruda<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<RespuestaApi<T>> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: { 'Content-Type': 'application/json', ...(init.headers ?? {}) },
@@ -230,7 +236,11 @@ async function pedir<T>(path: string, init: RequestInit = {}): Promise<T> {
         : 'No pudimos completar la operacion.';
     throw new ErrorApi(message, res.status);
   }
-  return body as T;
+  return { datos: body as T, cabeceras: res.headers };
+}
+
+async function pedir<T>(path: string, init: RequestInit = {}): Promise<T> {
+  return (await pedirCruda<T>(path, init)).datos;
 }
 
 function autorizacion(token: string): HeadersInit {
@@ -293,9 +303,8 @@ function guardarDesdeSesion(
 /**
  * Cambia el refresh token por un par nuevo.
  *
- * Una sola promesa compartida: si dos partes de la app se quedan sin token a
- * la vez, se hace un único refresh. Dos refresh en paralelo con el mismo
- * token serían una carrera (la API tolera 30 s, pero no hace falta probarla).
+ * Una sola promesa compartida evita carreras dentro de esta pestaña. Otra
+ * pestaña puede competir; la API hace compare-and-swap y solo una gana.
  */
 let refrescoEnCurso: Promise<SesionGuardada | null> | null = null;
 
@@ -328,9 +337,16 @@ export async function refrescarSesion(): Promise<SesionGuardada | null> {
       guardarSesion(actualizada);
       return actualizada;
     } catch (e) {
-      // Solo se borra si la API rechazó el token. Sin red o con la API
-      // dormida, lo guardado sigue sirviendo para el próximo intento.
-      if (e instanceof ErrorApi && e.status === 401) borrarSesion();
+      // Otra pestaña pudo ganar la rotación y ya guardar el refresh nuevo.
+      // En ese caso se conserva y se reutiliza en vez de borrar la sesión.
+      if (e instanceof ErrorApi && e.status === 401) {
+        const actual = leerSesion();
+        if (actual && actual.refreshToken !== guardada.refreshToken) {
+          return actual;
+        }
+        borrarSesion();
+      }
+      // Sin red o con la API dormida, lo guardado sigue sirviendo para reintentar.
       return null;
     }
   })();
@@ -354,6 +370,14 @@ async function pedirConSesion<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
+  return (await pedirConSesionCruda<T>(path, init)).datos;
+}
+
+/** Igual que `pedirConSesion`, pero además devuelve los headers. */
+async function pedirConSesionCruda<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<RespuestaApi<T>> {
   let sesion = leerSesion();
 
   if (!sesion) {
@@ -368,7 +392,7 @@ async function pedirConSesion<T>(
   }
 
   try {
-    return await pedir<T>(path, {
+    return await pedirCruda<T>(path, {
       ...init,
       headers: { ...(init.headers ?? {}), ...autorizacion(sesion.token) },
     });
@@ -378,7 +402,7 @@ async function pedirConSesion<T>(
     const renovada = await refrescarSesion();
     if (!renovada) throw e;
 
-    return pedir<T>(path, {
+    return pedirCruda<T>(path, {
       ...init,
       headers: { ...(init.headers ?? {}), ...autorizacion(renovada.token) },
     });
@@ -689,7 +713,7 @@ export type OfertaResumen = {
  * Lee las ofertas del lote, en el orden del lote.
  *
  * El listado de la API es paginado y no acepta varios ids, así que se recorre
- * por páginas hasta completar el lote (o quedarse sin páginas).
+ * por páginas hasta completar el lote.
  */
 export async function listarPostulaciones(
   ids: string[],
@@ -697,21 +721,18 @@ export async function listarPostulaciones(
   const faltan = new Set(ids);
   const mapa = new Map<string, OfertaResumen>();
 
-  for (let page = 1; page <= 10 && faltan.size > 0; page += 1) {
-    const pagina = esperandoArray<OfertaResumen>(
-      await pedirConSesion<unknown>(`/postulaciones?limit=100&page=${page}`),
-    );
-
-    // Una pagina con otra forma no se puede leer: mejor vacio que romper el
-    // render de quien consume el lote.
-    if (!pagina) return [];
-
-    for (const oferta of pagina) {
-      if (faltan.delete(oferta.id)) mapa.set(oferta.id, oferta);
-    }
-
-    if (pagina.length < 100) break;
-  }
+  // Sin filtro de archivadas: un lote puede contener ofertas archivadas, y
+  // filtrarlas acá dejaría el lote incompleto.
+  //
+  // El recorrido se detiene apenas se reunió todo lo que se pidió.
+  const todas = await traerPaginas({
+    alTerminar: (acumuladas) => {
+      for (const oferta of acumuladas) {
+        if (faltan.delete(oferta.id)) mapa.set(oferta.id, oferta);
+      }
+      return faltan.size === 0;
+    },
+  });
 
   return ids
     .map((id) => mapa.get(id))
@@ -737,28 +758,70 @@ export async function actualizarOferta(
   }
 }
 
-/**
- * Las ofertas no archivadas de la cuenta, para el plan completo: ahí el
- * denominador es todo lo que quedó en pie, no solo un lote. El filtro va en
- * el cliente: la API castea `isArchived=false` con Boolean() y ese string se
- * vuelve `true`.
- */
-export async function listarTodas(): Promise<OfertaResumen[]> {
-  const todas: OfertaResumen[] = [];
+/** Cuántas ofertas se piden por página. Es también el tope del servidor. */
+const CANTIDAD_POR_PAGINA = 100;
 
-  for (let page = 1; page <= 10; page += 1) {
-    const pagina = esperandoArray<OfertaResumen>(
-      await pedirConSesion<unknown>(`/postulaciones?limit=100&page=${page}`),
+/**
+ * Las postulaciones de la cuenta, en páginas.
+ *
+ * El recorrido se hace con **cursor**, no con `page`: el servidor devuelve
+ * `X-Next-Cursor` con la posición de la página siguiente y el cliente lo
+ * devuelve tal cual. Con cursor el listado no se duplica ni se saltea aunque
+ * se agreguen ofertas entre página y página.
+ *
+ * Termina cuando el servidor deja de mandar `X-Next-Cursor`, o antes si
+ * `alTerminar` dice que ya está.
+ */
+async function traerPaginas(
+  opciones: {
+    /** Filtro de archivadas. Va en la API: así el total cuenta lo mismo que se ve. */
+    isArchived?: boolean;
+    alTerminar?: (acumuladas: OfertaResumen[]) => boolean;
+  } = {},
+): Promise<OfertaResumen[]> {
+  const todas: OfertaResumen[] = [];
+  let cursor: string | null = null;
+
+  for (;;) {
+    const params = new URLSearchParams({
+      limit: String(CANTIDAD_POR_PAGINA),
+    });
+    if (typeof opciones.isArchived === 'boolean') {
+      params.set('isArchived', String(opciones.isArchived));
+    }
+    if (cursor) params.set('cursor', cursor);
+
+    const { datos, cabeceras } = await pedirConSesionCruda<unknown>(
+      `/postulaciones?${params.toString()}`,
     );
 
-    if (!pagina) break;
+    const ofertas = esperandoArray<OfertaResumen>(datos);
 
-    todas.push(...pagina);
+    // Una pagina con otra forma no se puede leer: mejor vacio que romper el
+    // render de quien consume el lote.
+    if (!ofertas) break;
 
-    if (pagina.length < 100) break;
+    todas.push(...ofertas);
+    if (ofertas.length === 0) break;
+
+    if (opciones.alTerminar?.(todas)) break;
+
+    cursor = cabeceras.get('x-next-cursor');
+    if (!cursor) break;
   }
 
-  return todas.filter((o) => !o.isArchived);
+  return todas;
+}
+
+/**
+ * Las ofertas no archivadas de la cuenta, para el plan completo: ahí el
+ * denominador es todo lo que quedó en pie, no solo un lote.
+ *
+ * El filtro de archivadas va en la API, no acá: el DTO castea bien el texto
+ * `"false"` y así el `X-Total-Count` cuenta lo mismo que la persona ve.
+ */
+export async function listarTodas(): Promise<OfertaResumen[]> {
+  return traerPaginas({ isArchived: false });
 }
 
 /**
@@ -837,22 +900,40 @@ export async function recuperarPlan(): Promise<Resultado | null> {
   }
 }
 
+/**
+ * Cada cuánto consultamos el estado si el servidor no dice.
+ *
+ * El 202 manda `pollAfterMs` en el body. Va ahí y no en un header
+ * `Retry-After` porque ese header significa "reintentá esta request": con
+ * lógica genérica, el cliente reintentaría el POST y duplicaría jobs.
+ *
+ * Este es solo el plan B para cuando no viene.
+ */
+const INTERVALO_POLLING_MS = 1500;
+
 /** Analiza una URL. Encola el trabajo y lo espera — el cliente hace el poll. */
 async function analizar(url: string): Promise<{
   datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number };
 }> {
-  const encolado = await pedirConSesion<{ jobId: string }>(
-    '/postulaciones/analizar',
-    {
-      method: 'POST',
-      body: JSON.stringify({ url }),
-    },
-  );
+  const request = <T>(path: string, init?: RequestInit) =>
+    leerSesion() ? pedirConSesion<T>(path, init) : pedir<T>(path, init);
+
+  const encolado = await request<{
+    jobId: string;
+    pollAfterMs?: number;
+  }>('/postulaciones/analizar', {
+    method: 'POST',
+    body: JSON.stringify({ url }),
+  });
+
+  // El servidor dice cada cuánto consultar. Si lo说的是, se obedece: el
+  // intervalo es parte del contrato, no una preferencia del cliente.
+  const espera = encolado.pollAfterMs ?? INTERVALO_POLLING_MS;
 
   for (let intento = 0; intento < 60; intento += 1) {
-    await new Promise((r) => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, espera));
 
-    const estado = await pedirConSesion<{
+    const estado = await request<{
       status?: string;
       result?: {
         datosOferta?: { tecnologias?: string[]; aniosExperiencia?: number };
@@ -866,6 +947,127 @@ async function analizar(url: string): Promise<{
   }
 
   throw new Error('El análisis tardó demasiado. Probá con menos ofertas.');
+}
+
+export type ResultadoPreview = {
+  resultado: Resultado;
+  ruta: Ruta;
+  urls: string[];
+  tecnologiasPorOferta: string[][];
+  aniosExperienciaPorOferta: Array<number | undefined>;
+  fallidas: number;
+};
+
+/** Analiza URLs y arma un roadmap efímero, sin crear registros de cuenta. */
+export async function previsualizarLote(
+  urls: string[],
+  alProgresar?: (hechos: number, total: number) => void,
+): Promise<ResultadoPreview> {
+  let hechos = 0;
+  const analisis = await Promise.all(
+    urls.map(async (url) => {
+      try {
+        const resultado = await analizar(url);
+        return {
+          url,
+          tecnologias: resultado.datosOferta?.tecnologias ?? [],
+          aniosExperiencia: resultado.datosOferta?.aniosExperiencia,
+        };
+      } catch {
+        return null;
+      } finally {
+        hechos += 1;
+        alProgresar?.(hechos, urls.length);
+      }
+    }),
+  );
+  const correctas = analisis.filter(
+    (oferta): oferta is NonNullable<typeof oferta> => oferta !== null,
+  );
+
+  if (correctas.length === 0) {
+    throw new Error('No pudimos analizar ninguna de las ofertas.');
+  }
+
+  const preview = await pedir<{
+    analisis: Resultado;
+    ruta: Ruta;
+  }>('/postulaciones/preview-roadmap', {
+    method: 'POST',
+    body: JSON.stringify({
+      ofertas: correctas.map(({ tecnologias }) => ({ tecnologias })),
+    }),
+  });
+
+  return {
+    resultado: preview.analisis,
+    ruta: preview.ruta,
+    urls: correctas.map(({ url }) => url),
+    tecnologiasPorOferta: correctas.map(({ tecnologias }) => tecnologias),
+    aniosExperienciaPorOferta: correctas.map(
+      ({ aniosExperiencia }) => aniosExperiencia,
+    ),
+    fallidas: urls.length - correctas.length,
+  };
+}
+
+/** Roadmap local del texto pegado; tampoco persiste datos. */
+export async function previsualizarTexto(texto: string): Promise<{
+  resultado: Resultado;
+  ruta: Ruta;
+}> {
+  const preview = await pedir<{ analisis: Resultado; ruta: Ruta }>(
+    '/postulaciones/preview-texto',
+    { method: 'POST', body: JSON.stringify({ texto }) },
+  );
+  return { resultado: preview.analisis, ruta: preview.ruta };
+}
+
+/** Persiste el resultado del preview luego de verificar la cuenta. */
+export async function guardarPreviewLote(
+  urls: string[],
+  tecnologiasPorOferta: string[][],
+  aniosExperienciaPorOferta: Array<number | undefined>,
+): Promise<ResultadoLote> {
+  const sesion = leerSesion();
+  if (!sesion) throw new ErrorApi('Entrá para guardar el roadmap.', 401);
+
+  const guardadas = await Promise.all(
+    urls.map(async (url, index) =>
+      pedirConSesion<{ id: string }>('/postulaciones', {
+        method: 'POST',
+        body: JSON.stringify({
+          url,
+          tecnologias: tecnologiasPorOferta[index] ?? [],
+          aniosExperiencia: aniosExperienciaPorOferta[index],
+        }),
+      }),
+    ),
+  );
+  const ids = guardadas.map(({ id }) => id);
+  const resultado = await pedirConSesion<Resultado>(
+    `/postulaciones/analisis-lote?ids=${encodeURIComponent(ids.join(','))}`,
+  );
+  const lote = await pedirConSesion<LoteGuardado>('/lotes', {
+    method: 'POST',
+    body: JSON.stringify({ ids, nombre: resultado.ecosistema ?? undefined }),
+  });
+  const actual = leerSesion() ?? sesion;
+  const actualizada: SesionGuardada = {
+    ...actual,
+    ids,
+    loteId: lote.id,
+    planCompleto: false,
+  };
+  guardarSesion(actualizada);
+
+  return {
+    resultado,
+    ids,
+    loteId: lote.id,
+    fallidas: 0,
+    sesion: actualizada,
+  };
 }
 
 /**
@@ -965,6 +1167,9 @@ export async function analizarLote(
 
   let hechos = 0;
   let rechazada = false;
+  // En un array y no en una variable: TypeScript no puede narrowear una
+  // variable que se asigna dentro de un closure (la ve siempre como `null`).
+  const errores: ErrorApi[] = [];
 
   const ids = await Promise.all(
     urls.map(async (url) => {
@@ -988,6 +1193,7 @@ export async function analizarLote(
         // Si el refresh tampoco sirvió, no es "la oferta no se pudo leer":
         // es la sesión. Se avisa eso en vez de culpar a las URLs.
         if (e instanceof ErrorApi && e.status === 401) rechazada = true;
+        if (e instanceof ErrorApi) errores.push(e);
         return null;
       }
     }),
@@ -995,6 +1201,15 @@ export async function analizarLote(
 
   const guardados = ids.filter((id): id is string => typeof id === 'string');
   if (guardados.length === 0) {
+    // Un 503 (cola llena) y un 410 (el trabajo expiró) tienen mensajes que el
+    // servidor escribió para la persona: "probá de nuevo en unos minutos",
+    // "volvé a encolarlo". Tirárselos encima de un "no pudimos analizar
+    // ninguna oferta" hides la causa y la persona reintenta al instante, que
+    // es justo lo que agota la cola.
+    if (errores[0] && [410, 503].includes(errores[0].status)) {
+      throw new Error(errores[0].message);
+    }
+
     throw new Error(
       rechazada
         ? 'Tu sesión venció. Entrá de nuevo y volvé a pegar las ofertas.'
