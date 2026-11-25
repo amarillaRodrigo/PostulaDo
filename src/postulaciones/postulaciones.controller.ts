@@ -68,7 +68,7 @@ export class PostulacionesController {
       'La respuesta trae lo que el cliente necesita y antes tenía que adivinar:',
       '- `jobId`: el identificador del trabajo (un UUID).',
       '- `Location`: la URL donde consultar el estado (`GET /postulaciones/analizar/status/:jobId`).',
-      '- `pollAfterMs`: cuántos milisegundos esperar entre consultas.',
+      '- `pollAfterMs`: espera mínima en milisegundos entre consultas.',
       '',
       'El intervalo de polling va en el body y no en el header `Retry-After`:',
       '`Retry-After` significa "reintentá **esta** request" y acá no hay nada que',
@@ -100,7 +100,7 @@ export class PostulacionesController {
     const encolado = await this.service.analyze(dto.url, userId);
 
     // 202: el trabajo no terminó, se encoló. Le decimos al cliente dónde
-    // preguntar. Cada cuánto está en el body (`pollAfterMs`), no en un
+    // preguntar. La espera mínima está en el body (`pollAfterMs`), no en un
     // `Retry-After`: ese header pide reintentar esta misma request, y acá
     // la request ya fue aceptada.
     res.setHeader(
@@ -121,15 +121,22 @@ export class PostulacionesController {
       'Los trabajos autenticados solo los consulta su dueño. Para previews anónimos, el UUID funciona como credencial de consulta:',
       'compartilo solo con quien deba ver el resultado. Un `403` no revela datos del trabajo ajeno.',
       '',
-      'La ventana de consulta es finita: los trabajos terminados se borran de Redis a las',
-      '24 h de terminar, o antes si se supera el tope de 200 trabajos completados.',
-      'Después de eso, `410` dice que el trabajo existió pero expiró y hay que encolarlo',
+      'La ventana de consulta es corta: los resultados se conservan hasta 30 s después de terminar,',
+      'o menos si se supera el tope de 200 trabajos completados. Después, `410` indica que el',
+      'trabajo existió pero expiró y hay que encolarlo',
       'de nuevo.',
     ].join('\n'),
   })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Estado del trabajo y, si terminó bien, el resultado.',
+    headers: {
+      'Cache-Control': {
+        description:
+          'El resultado es personalizado y no debe almacenarse en cachés HTTP.',
+        schema: { type: 'string', example: 'private, no-store' },
+      },
+    },
     type: EstadoAnalisisResponseDto,
   })
   @ApiResponse({
@@ -145,9 +152,16 @@ export class PostulacionesController {
   @ApiResponse({
     status: HttpStatus.GONE,
     description:
-      'El trabajo existió pero expiró: los resultados se purgan de la cola a las 24 h de terminar (o antes, al superar el tope de 200 completados). Hay que encolar el análisis de nuevo.',
+      'El trabajo existió pero expiró: los resultados se conservan hasta 30 s después de terminar (o menos si se supera el tope de 200 completados). Hay que encolar el análisis de nuevo.',
   })
-  async getStatus(@Req() req: any, @Param('jobId') jobId: string) {
+  async getStatus(
+    @Req() req: any,
+    @Param('jobId') jobId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // El resultado contiene datos personalizados y no debe quedar en cachés HTTP.
+    res.setHeader('Cache-Control', 'private, no-store');
+
     const userId =
       req.user?.sub ?? req.user?.id ?? identidadAnonimaAnalisis(jobId);
     return this.service.getJobStatus(userId, jobId);

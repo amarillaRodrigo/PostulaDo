@@ -910,6 +910,7 @@ export async function recuperarPlan(): Promise<Resultado | null> {
  * Este es solo el plan B para cuando no viene.
  */
 const INTERVALO_POLLING_MS = 1500;
+const JITTER_POLLING_MAX_MS = 500;
 
 /** Analiza una URL. Encola el trabajo y lo espera — el cliente hace el poll. */
 async function analizar(url: string): Promise<{
@@ -926,12 +927,14 @@ async function analizar(url: string): Promise<{
     body: JSON.stringify({ url }),
   });
 
-  // El servidor dice cada cuánto consultar. Si lo说的是, se obedece: el
-  // intervalo es parte del contrato, no una preferencia del cliente.
+  // `pollAfterMs` es el mínimo entre consultas. Sumamos jitter positivo para
+  // que los jobs de un lote no consulten todos a Redis en el mismo instante.
   const espera = encolado.pollAfterMs ?? INTERVALO_POLLING_MS;
 
   for (let intento = 0; intento < 60; intento += 1) {
-    await new Promise((r) => setTimeout(r, espera));
+    const jitter =
+      Math.random() * Math.min(JITTER_POLLING_MAX_MS, espera * 0.25);
+    await new Promise((r) => setTimeout(r, espera + jitter));
 
     const estado = await request<{
       status?: string;

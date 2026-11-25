@@ -253,13 +253,15 @@ tres capas:
 
 | Capa                 | Cuándo                    | Qué hace                                                                                         |
 | -------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
-| Retención al encolar | Siempre                   | Un trabajo terminado se guarda 24 h y como máximo 200 completados / 100 fallidos                 |
-| Barrido              | Al arrancar y cada 30 min | Borra terminados de más de 24 h; si Redis pasa el 85%, baja la gracia a 10 min                   |
+| Retención al encolar | Siempre                   | Los trabajos terminados se conservan hasta 30 s; como máximo 200 completados / 100 fallidos     |
+| Limpieza de TTL      | Cada 10 s                 | Borra trabajos terminados con más de 30 s; BullMQ también puede limpiarlos al completar otros jobs |
+| Barrido              | Al arrancar y cada 30 min | Revisa memoria y marcas; si Redis pasa el 85%, limpia trabajos terminados de más de 30 s          |
 | Guardia              | Antes de encolar          | Al 85% limpia; si sigue al 95%, responde **503** con "la cola está llena, probá en unos minutos" |
 
-La gracia de 10 minutos en las limpiezas de emergencia existe porque la landing
-consulta el resultado del trabajo después de que termina: borrarlo en el acto
-rompería ese poll.
+La ventana de 30 s deja margen para que la landing consulte el resultado en su
+siguiente poll; el limpiador corre cada 10 s, así que el borrado físico puede
+ocurrir unos segundos después del umbral. Bajo presión, la limpieza respeta esa
+misma ventana en vez de conservar resultados durante 10 minutos.
 
 `REDIS_MEMORY_LIMIT_MB` ajusta el límite cuando `maxmemory` viene en 0. Por
 defecto son 30 MB, que es el plan free.

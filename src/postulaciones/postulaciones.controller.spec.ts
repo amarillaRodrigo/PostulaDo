@@ -186,6 +186,7 @@ describe('PostulacionesController', () => {
         .expect(200);
 
       expect(respuesta.body.status).toBe('completed');
+      expect(respuesta.headers['cache-control']).toBe('private, no-store');
       expect(mockService.getJobStatus).toHaveBeenCalledWith('user-1', '42');
     });
 

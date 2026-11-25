@@ -78,12 +78,12 @@ describe('ColaMantenimientoService', () => {
     await service.asegurarEspacio();
 
     expect(queue.clean).toHaveBeenCalledWith(
-      10 * 60 * 1000,
+      30 * 1000,
       expect.any(Number),
       'completed',
     );
     expect(queue.clean).toHaveBeenCalledWith(
-      10 * 60 * 1000,
+      30 * 1000,
       expect.any(Number),
       'failed',
     );
@@ -121,7 +121,7 @@ describe('ColaMantenimientoService', () => {
     expect(resultado).toEqual({ completados: 2, fallidos: 1 });
     expect(queue.clean).toHaveBeenNthCalledWith(
       1,
-      24 * 3600 * 1000,
+      30 * 1000,
       expect.any(Number),
       'completed',
     );

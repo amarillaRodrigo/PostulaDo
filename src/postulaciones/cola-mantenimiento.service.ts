@@ -12,16 +12,17 @@ import { MarcaTrabajoService } from './marca-trabajo.service';
 
 export { COLA_ANALISIS };
 
-/** Un trabajo terminado se guarda un día: alcanza para que el navegador lo lea. */
-export const RETENCION_SEGUNDOS = 24 * 3600;
+/** Un trabajo terminado se conserva 30 s para que el cliente alcance a leerlo. */
+export const RETENCION_SEGUNDOS = 30;
 const RETENCION_MS = RETENCION_SEGUNDOS * 1000;
 
 /** Tope duro de trabajos guardados, por si el tráfico crece dentro de la hora. */
 export const MAX_COMPLETADOS = 200;
 export const MAX_FALLIDOS = 100;
 
-/** Barrido periódico y ventana de caché de la medición de memoria. */
+/** Barrido de memoria/marcas y limpieza frecuente de trabajos expirados. */
 const BARRIDO_MS = 30 * 60 * 1000;
+const LIMPIEZA_RETENCION_MS = 10 * 1000;
 const MEDICION_MS = 30 * 1000;
 
 /**
@@ -34,8 +35,8 @@ const MEDICION_MS = 30 * 1000;
 const UMBRAL_LIMPIEZA = 0.85;
 const UMBRAL_RECHAZO = 0.95;
 
-/** En una limpieza de emergencia no se borran trabajos recién terminados. */
-const GRACIA_EMERGENCIA_MS = 10 * 60 * 1000;
+/** La limpieza de emergencia respeta la misma ventana de lectura del cliente. */
+const GRACIA_EMERGENCIA_MS = RETENCION_MS;
 
 /** Tope de trabajos que se borran por barrido. */
 const LOTE_LIMPIEZA = 1000;
@@ -75,8 +76,8 @@ export function limitePorEntorno(): number {
  * Mantiene la cola dentro de la memoria del plan free.
  *
  * Tres capas:
- *  1. Retención acotada al encolar (edad + cantidad, en `analyze`).
- *  2. Barrido cada 30 minutos de trabajos terminados.
+ *  1. Retención acotada al encolar (30 s + tope por cantidad, en `analyze`).
+ *  2. Limpieza de expirados cada 10 s y barrido de memoria/marcas cada 30 min.
  *  3. Guardia antes de encolar: si Redis está por llenarse, limpia; si igual
  *     queda arriba del 95%, responde 503 con un mensaje entendible en vez de
  *     dejar que Redis rechace la escritura con un error opaco.
@@ -85,6 +86,7 @@ export function limitePorEntorno(): number {
 export class ColaMantenimientoService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ColaMantenimientoService.name);
   private temporizador?: NodeJS.Timeout;
+  private temporizadorRetencion?: NodeJS.Timeout;
   private ultimaMedicion?: { at: number; valor: MemoriaRedis | null };
 
   constructor(
@@ -99,10 +101,30 @@ export class ColaMantenimientoService implements OnModuleInit, OnModuleDestroy {
 
     this.temporizador = setInterval(() => void this.barrer(), BARRIDO_MS);
     this.temporizador.unref?.();
+
+    // BullMQ elimina por edad de forma diferida al completar otros trabajos.
+    // Este barrido hace que la retención de 30 s también se aplique si no hay
+    // más trabajos nuevos que disparen esa limpieza diferida.
+    this.temporizadorRetencion = setInterval(
+      () => void this.limpiarExpirados(),
+      LIMPIEZA_RETENCION_MS,
+    );
+    this.temporizadorRetencion.unref?.();
   }
 
   onModuleDestroy(): void {
     if (this.temporizador) clearInterval(this.temporizador);
+    if (this.temporizadorRetencion) clearInterval(this.temporizadorRetencion);
+  }
+
+  private async limpiarExpirados(): Promise<void> {
+    try {
+      await this.limpiar(RETENCION_MS);
+    } catch (error) {
+      this.logger.warn(
+        `No se pudieron limpiar trabajos expirados: ${(error as Error).message}`,
+      );
+    }
   }
 
   /** Borra trabajos terminados que ya nadie va a consultar. */
@@ -120,8 +142,10 @@ export class ColaMantenimientoService implements OnModuleInit, OnModuleDestroy {
       );
     }
 
-    // La memoria cambió: la próxima guardia vuelve a medir.
-    this.ultimaMedicion = undefined;
+    // Si borramos datos, la próxima guardia vuelve a medir la memoria.
+    if (completados.length > 0 || fallidos.length > 0) {
+      this.ultimaMedicion = undefined;
+    }
 
     return { completados: completados.length, fallidos: fallidos.length };
   }

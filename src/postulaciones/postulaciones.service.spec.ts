@@ -332,8 +332,8 @@ describe('PostulacionesService', () => {
         'analizar-url',
         { url, userId, profileText: 'My Profile' },
         expect.objectContaining({
-          removeOnComplete: { age: 24 * 3600, count: 200 },
-          removeOnFail: { age: 24 * 3600, count: 100 },
+          removeOnComplete: { age: 30, count: 200 },
+          removeOnFail: { age: 30, count: 100 },
         }),
       );
 

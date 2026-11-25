@@ -37,7 +37,7 @@ export class AnalizarResponseDto {
   @ApiProperty({
     example: 2000,
     description:
-      'Cuántos milisegundos esperar entre consultas de estado. Va en el body y no en un header `Retry-After` a propósito: `Retry-After` significa "reintentá esta request" y acá la request ya fue aceptada.',
+      'Espera mínima en milisegundos entre consultas de estado. El cliente puede sumar jitter. Va en el body y no en un header `Retry-After` a propósito: `Retry-After` significa "reintentá esta request" y acá la request ya fue aceptada.',
   })
   pollAfterMs!: number;
 }

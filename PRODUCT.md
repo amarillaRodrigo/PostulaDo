@@ -57,7 +57,7 @@ Hard constraints the UI must design around:
 
 - **No bulk endpoint exists.** A batch of N postings must be ingested as N concurrent `POST /postulaciones` calls. A dedicated bulk endpoint is the obvious backend addition; until it exists, the UI owns the concurrency, the partial-failure handling and the progress reporting.
 - **The per-posting analysis is asynchronous and slow** (scrape + 4 LLM generations). The aggregate can be computed from `POST /postulaciones` alone, without the LLM path — the technology extractor is a deterministic regex vocabulary, not a model call. That distinction is a product decision, not an implementation detail: a fast corpus scan and a deep single-posting analysis are different products.
-- **Analysis results live in Redis for 24h and are not persisted.** The user must explicitly confirm to save them.
+- **Analysis results live in Redis for up to 30 seconds and are not persisted there long-term.** The user must explicitly confirm to save them.
 - **The technology vocabulary is fixed and finite.** `technology-extractor.helper.ts` holds 35 entries with their regex aliases — the complete universe of what `tecnologias` can ever contain. Any UI affordance that implies open-ended skill discovery would overstate the backend.
 - **Access token lives 60 minutes.** No refresh tokens, no logout endpoint.
 - **Scraping cap:** 10s timeout, 6000 characters of extracted text.

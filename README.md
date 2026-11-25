@@ -286,7 +286,7 @@ alternativas de cada uno y una sugerencia de por dónde empezar.
 | `jobId`            | body   | Identificador del trabajo. Es un UUID.                                                            |
 | `profileText`      | body   | El perfil con el que se va a analizar. Si el usuario no tiene, es el perfil genérico por defecto. |
 | `perfilPorDefecto` | body   | `true` si se usó ese perfil genérico: el análisis se hizo sin el perfil real del usuario.         |
-| `pollAfterMs`      | body   | Milisegundos a esperar entre consultas de estado.                                                 |
+| `pollAfterMs`      | body   | Espera mínima en milisegundos entre consultas de estado. El cliente suma jitter positivo.         |
 | `Location`         | header | `/postulaciones/analizar/status/:jobId`. Dónde consultar el resultado.                            |
 
 El `profileText` y el `perfilPorDefecto` viajan en la respuesta a propósito: el
@@ -326,9 +326,9 @@ reservado para el 503, que es donde de verdad significa "reintentá".
   incluye el CV optimizado y la carta de presentación de esa persona, así que
   no se entrega a nadie más.
 - `404` — ese `jobId` nunca existió.
-- `410` — el trabajo era tuyo pero expiró. Los resultados se purgan de la cola a
-  las 24 h de terminar, o antes si se supera el tope de 200 trabajos
-  completados. Hay que encolar el análisis de nuevo.
+- `410` — el trabajo era tuyo pero expiró. El resultado se conserva hasta 30 s
+  después de terminar, o menos si se supera el tope de 200 trabajos completados.
+  Hay que encolar el análisis de nuevo.
 
 La ventana de consulta es finita y por eso `404` y `410` son cosas distintas:
 `404` es un `jobId` que el cliente se inventó, `410` es un trabajo que existió
@@ -454,7 +454,7 @@ El flujo implementado en la API es el siguiente:
 
 1. El usuario pega la URL de la oferta.
 2. `POST /postulaciones/analizar` encola el trabajo y responde `202` con un `jobId`, el `Location` de dónde consultar y el `pollAfterMs` con el intervalo de sondeo.
-3. El frontend realiza sondeo (_polling_) haciendo peticiones periódicas a `GET /postulaciones/analizar/status/:jobId` hasta que el estatus sea `completed`. El intervalo lo fija el servidor en el `pollAfterMs`.
+3. El frontend realiza sondeo (_polling_) a `GET /postulaciones/analizar/status/:jobId` hasta que el estado sea `completed`. `pollAfterMs` define la espera mínima y el cliente suma jitter pequeño para repartir las consultas.
 4. El frontend muestra el resultado estructurado de la inferencia y los reportes al usuario.
 5. Si confirma la postulación, `POST /postulaciones` la persiste en base de datos.
 6. Luego puede consultar o actualizar su listado desde los endpoints protegidos.

@@ -6,8 +6,8 @@ import { COLA_ANALISIS } from './cola.constants';
 /**
  * Cuánto vive la marca de "este trabajo existió".
  *
- * Tiene que sobrevivir al trabajo: el trabajo se borra de Redis a las 24 h de
- * terminar (o antes, al llegar al tope de 200 completados), y la marca es lo
+ * Tiene que sobrevivir al trabajo: el resultado se borra de Redis a los 30 s
+ * de terminar (o antes, al llegar al tope de 200 completados), y la marca es lo
  * único que permite decir "existió pero expiró" (410) en vez de "nunca
  * existió" (404).
  */

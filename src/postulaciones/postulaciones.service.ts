@@ -42,7 +42,7 @@ export function identidadAnonimaAnalisis(jobId: string): string {
 }
 
 /**
- * Cada cuánto consultar el estado de un trabajo.
+ * Espera mínima entre consultas del estado de un trabajo.
  *
  * Viaja en el body de la respuesta 202 (`pollAfterMs`), no en un header
  * `Retry-After`: ese header significa "reintentá **esta** request" y el 202
@@ -51,10 +51,10 @@ export function identidadAnonimaAnalisis(jobId: string): string {
  * `Retry-After`, espero y reintento lo mismo") reencolaría el análisis cada
  * dos segundos y duplicaría jobs.
  *
- * Dos segundos es un compromise entre la latencia que ve la persona y la
- * carga que le ponemos a la API: el trabajo tarda decenas de segundos en
- * correr, así que preguntar cada 2 s no cambia nada para quien espera y
- * multiplica las consultas de todas las personas que esperan a la vez.
+ * Dos segundos es un compromiso entre la latencia que ve la persona y la
+ * carga que le ponemos a la API. El cliente puede sumar un jitter pequeño para
+ * repartir las consultas cuando varios trabajos se encolan juntos, sin bajar
+ * de este intervalo mínimo.
  */
 export const INTERVALO_POLLING_MS = 2000;
 
@@ -206,7 +206,7 @@ export class PostulacionesService {
     const job = await this.queue.getJob(jobId);
     if (!job) {
       // El trabajo ya no está en Redis. Puede que nunca existiera, o que se
-      // haya purgado (24 h, o al llegar al tope de 200 terminados). La marca
+      // haya purgado (30 s, o antes al llegar al tope de 200 terminados). La marca
       // dice cuál de los dos es.
       const marca = await this.marca.buscar(jobId);
 
@@ -223,7 +223,7 @@ export class PostulacionesService {
       // hay que reencolarlo.
       if (marca.vigente) {
         throw new GoneException(
-          'Este trabajo de análisis expiró: los resultados se borran de la cola a las 24 h de terminar. Volvé a encolarlo.',
+          'Este trabajo de análisis expiró: los resultados se conservan hasta 30 segundos después de terminar. Volvé a encolarlo.',
         );
       }
 
